@@ -1154,6 +1154,25 @@ document.addEventListener('pointerdown', event => {
         $('filtersToggle').setAttribute('aria-expanded', 'false');
     }
 });
+async function applyMapConfiguration() {
+    try {
+        const [globalResponse, localResponse] = await Promise.all([
+            fetch('/modules/map_loader/public/map-defaults.json', { cache: 'no-store' }),
+            fetch('map.config.json', { cache: 'no-store' })
+        ]);
+        const globalConfig = globalResponse.ok ? await globalResponse.json() : {};
+        const localConfig = localResponse.ok ? await localResponse.json() : {};
+        const visibility = { ...(globalConfig.visibility || {}), ...(localConfig.visibility || {}) };
+        const groups = Array.isArray(visibility.defaultGroups) ? visibility.defaultGroups : [3, 12];
+        ON = CATS.map(category => groups.includes(Number(category.g)) ? 1 : 0);
+        buildCats('');
+        draw();
+    } catch (error) {
+        console.warn('Configuration de carte non chargée :', error);
+    }
+}
+applyMapConfiguration();
+
 
 
 // ------------------------------------------------------
