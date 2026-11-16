@@ -3438,7 +3438,8 @@ $('cl').onclick=()=>{
 // RACCOURCIS CLAVIER
 // ======================================================
 
-addEventListener('keydown',event=>{\n    return; // Les raccourcis d'édition sont réservés au chargeur de cartes.
+addEventListener('keydown',event=>{
+    return; // Les raccourcis d'édition sont réservés au chargeur de cartes.
     if (
         event.target instanceof HTMLInputElement ||
         event.target instanceof HTMLTextAreaElement ||
@@ -3577,6 +3578,11 @@ function restoreEmbeddedView() {
 addEventListener('resize',()=>{
     fit();
 });
+if (typeof ResizeObserver !== 'undefined') {
+    const mapResizeObserver = new ResizeObserver(() => fit());
+    mapResizeObserver.observe(document.getElementById('w'));
+}
+
 
 fit();
 
