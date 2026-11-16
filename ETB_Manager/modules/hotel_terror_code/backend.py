@@ -46,7 +46,7 @@ def _read_fstring(mem: ProcessMemory, address: int) -> str | None:
     if raw is None:
         return None
     try:
-        return raw.decode("utf-16-le", "replace").split("\\x00", 1)[0]
+        return raw.decode("utf-16-le", "replace").split("\x00", 1)[0]
     except Exception:
         return None
 
