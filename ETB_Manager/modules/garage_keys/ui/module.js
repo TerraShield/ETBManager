@@ -2,9 +2,19 @@
   function mount(root) {
     const $ = (id) => root.querySelector("#" + id);
     const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const mapFrame = root.querySelector("#gkeysMapFrame");
+    let latestKeys = [];
+    function sendKeysToMap() {
+      if (!mapFrame || !mapFrame.contentWindow) return;
+      mapFrame.contentWindow.postMessage({ type: "etb-garage-keys", keys: latestKeys }, "*");
+    }
+    if (mapFrame) mapFrame.addEventListener("load", sendKeysToMap);
+
     function update(state) {
       const data = state.module_state?.garage_keys || {};
       const keys = Array.isArray(data.keys) ? data.keys : [];
+      latestKeys = keys.map(key => ({ x: Number(key.x), y: Number(key.y) }));
+      sendKeysToMap();
       $("gkeysCount").textContent = String(data.count ?? keys.length);
       $("gkeysStatus").textContent = data.status || "En attente du scanner…";
       $("gkeysWorld").textContent = data.world_name || "Niveau inconnu";

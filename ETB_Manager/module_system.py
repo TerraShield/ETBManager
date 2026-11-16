@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import importlib
 import json
+import logging
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -57,6 +58,7 @@ class ModuleRegistry:
                 self._definitions[module_id] = {"manifest": manifest, "path": folder.resolve()}
             except Exception as exc:
                 self._errors[folder.name] = f"Fiche module invalide : {exc}"
+                logging.getLogger("ETB.Modules").exception("Module %s ignoré: fiche invalide", folder.name)
 
         # Chargement des backends après validation de toutes les fiches.
         for module_id, definition in self._definitions.items():
@@ -77,8 +79,10 @@ class ModuleRegistry:
                     raise TypeError("backend.py doit exposer create_module(context)")
                 context = ModuleContext(module_id, definition["path"], self.base_dir, self.port)
                 self._backends[module_id] = factory(context)
+                logging.getLogger("ETB.Modules").info("Module %s chargé (backend actif=True)", module_id)
             except Exception as exc:
                 self._errors[module_id] = f"Backend non chargé : {exc}"
+                logging.getLogger("ETB.Modules").exception("Backend du module %s non chargé", module_id)
 
     @staticmethod
     def _validate_manifest(folder: Path, manifest: Any) -> None:

@@ -517,6 +517,22 @@ const $ = id => document.getElementById(id);
 
 const EMBEDDED = window.__ETB_EMBEDDED_STATE__ || {};
 
+// Clés transmises par l'interface ETB Manager.
+let externalKeys = [];
+window.addEventListener('message', event => {
+    const data = event.data;
+    if (!data || data.type !== 'etb-garage-keys') return;
+    externalKeys = Array.isArray(data.keys)
+        ? data.keys.filter(p =>
+            p &&
+            Number.isFinite(Number(p.x)) &&
+            Number.isFinite(Number(p.y))
+          )
+        : [];
+    draw();
+});
+
+
 let s = .05;
 let ox = 0;
 let oy = 0;
@@ -1529,6 +1545,28 @@ function draw() {
         });
 
         cx.stroke();
+    }
+
+    // Marqueurs des clés détectées en mémoire.
+    for (const [index, key] of externalKeys.entries()) {
+        const [px,py] = P(Number(key.x), Number(key.y));
+        cx.save();
+        cx.shadowColor = '#000';
+        cx.shadowBlur = 5;
+        cx.fillStyle = '#f4c542';
+        cx.strokeStyle = '#3b2b08';
+        cx.lineWidth = 2;
+        cx.beginPath();
+        cx.arc(px, py, 10, 0, Math.PI*2);
+        cx.fill();
+        cx.stroke();
+        cx.shadowBlur = 0;
+        cx.fillStyle = '#241b08';
+        cx.font = 'bold 12px system-ui';
+        cx.textAlign = 'center';
+        cx.textBaseline = 'middle';
+        cx.fillText('🔑', px, py+0.5);
+        cx.restore();
     }
 
     // Tracé manuel
@@ -3737,6 +3775,13 @@ addEventListener('resize',()=>{
 fit();
 
 restoreEmbeddedView();
+
+// Dans ETB Manager, afficher la carte entière à l'ouverture de l'iframe.
+// Le suivi du joueur est désactivé pour éviter de cadrer uniquement sur lui.
+if (window.parent !== window) {
+    $('fo').checked = false;
+    fit();
+}
 
 updatePathUI();
 routeUpdateUI();
