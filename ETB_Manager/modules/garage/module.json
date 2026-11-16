@@ -1,14 +1,12 @@
 {
   "id": "garage",
-  "name": "Garage Floor 4",
+  "name": "Garage",
   "short_name": "Garage",
   "description": "Prédiction des clignotements et calibration de la lampe.",
   "icon": "◉",
   "order": 30,
   "levels": [
-    "Floor4",
-    "GarageLevel2",
-    "garage_floor_4"
+    "MiddleFloor"
   ],
   "ui": {
     "entry": "ui/index.html",
