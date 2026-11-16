@@ -3158,7 +3158,8 @@ $('cl').onclick=()=>{
 // RACCOURCIS CLAVIER
 // ======================================================
 
-addEventListener('keydown',event=>{\n    return; // Les raccourcis d'édition sont réservés au chargeur de cartes.
+addEventListener('keydown',event=>{
+    return; // Les raccourcis d'édition sont réservés au chargeur de cartes.
     if (
         event.target instanceof HTMLInputElement ||
         event.target instanceof HTMLTextAreaElement ||
