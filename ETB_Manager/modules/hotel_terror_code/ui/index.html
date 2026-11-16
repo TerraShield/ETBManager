@@ -1,0 +1,18 @@
+<section class="htc-layout">
+  <header class="htc-header">
+    <div><div class="htc-eyebrow">HOTEL TERROR · FLOOR 3</div><h2>Code du cadenas</h2><p>Le code est lu directement dans la variable Password du cadenas actif.</p></div>
+    <div class="htc-mark">🔐</div>
+  </header>
+  <div class="htc-status"><span id="htcDot" class="htc-dot"></span><span id="htcStatus">Connexion au jeu…</span><span id="htcWorld" class="htc-world">—</span></div>
+  <div class="htc-code-panel">
+    <span class="htc-label">CODE À UTILISER</span>
+    <strong id="htcCode">·····</strong>
+    <span id="htcHint">En attente du cadenas…</span>
+  </div>
+  <div class="htc-details" id="htcDetails">Aucune donnée de cadenas pour le moment.</div>
+  <footer class="htc-footer"><span id="htcPlayer">Position joueur : —</span><span id="htcUpdated">Dernier scan : —</span></footer>
+  <p class="htc-note">Lecture mémoire en lecture seule de <code>BP_PadLock_C.Password</code>. Le code est conservé comme texte pour préserver un éventuel zéro initial.</p>
+</section>
+<style>
+.htc-layout{display:flex;flex-direction:column;gap:16px;color:var(--text,#e8edf5);font-family:inherit}.htc-header{display:flex;justify-content:space-between;align-items:center;gap:18px}.htc-eyebrow{font-size:11px;letter-spacing:.14em;color:var(--muted,#91a0b5);font-weight:700}.htc-header h2{margin:5px 0;font-size:24px}.htc-header p{margin:0;color:var(--muted,#91a0b5);font-size:13px}.htc-mark{width:54px;height:54px;display:grid;place-items:center;border:1px solid var(--border,#334155);border-radius:14px;background:var(--panel,#182230);font-size:27px}.htc-status{display:flex;align-items:center;gap:9px;padding:12px 14px;border:1px solid var(--border,#334155);border-radius:10px;background:var(--panel,#182230);font-size:13px}.htc-dot{width:9px;height:9px;border-radius:50%;background:#d69b45;flex:none}.htc-dot.live{background:#42c58a;box-shadow:0 0 10px #42c58a66}.htc-world{margin-left:auto;color:var(--muted,#91a0b5);font-size:11px}.htc-code-panel{display:flex;flex-direction:column;align-items:center;gap:10px;padding:30px 18px;border:1px solid var(--border,#334155);border-radius:16px;background:var(--panel,#182230);text-align:center}.htc-label{font-size:10px;letter-spacing:.16em;font-weight:800;color:var(--muted,#91a0b5)}.htc-code-panel strong{font:800 clamp(38px,7vw,62px)/1 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.16em;color:var(--text,#e8edf5)}.htc-code-panel strong.ready{color:#55d69a}.htc-code-panel>span:last-child{font-size:12px;color:var(--muted,#91a0b5)}.htc-details{padding:13px 15px;border:1px solid var(--border,#334155);border-radius:10px;background:var(--panel,#182230);font-size:12px;color:var(--muted,#91a0b5);line-height:1.6}.htc-footer{display:flex;justify-content:space-between;gap:12px;color:var(--muted,#91a0b5);font-size:11px}.htc-note{margin:0;color:var(--muted,#91a0b5);font-size:11px;line-height:1.5}.htc-note code{color:inherit}@media(max-width:600px){.htc-header h2{font-size:20px}.htc-footer{flex-direction:column}}
+</style>
