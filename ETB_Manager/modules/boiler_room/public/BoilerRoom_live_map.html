@@ -360,16 +360,6 @@ canvas {
         Trace joueur
     </label>
 
-    <label>
-        Calque
-        <select id="ly"><option value="-1">Tous</option><option value="0">z ≈ -2002  (28 pièces)</option><option value="1">z ≈ -1702  (32 pièces)</option><option value="2">z ≈ -1104  (45 pièces)</option><option value="3">z ≈ -372  (16 pièces)</option><option value="4">z ≈ +26  (1141 pièces)</option><option value="5">z ≈ +425  (76 pièces)</option></select>
-    </label>
-
-    <label>
-        <input type="checkbox" id="vo" checked="">
-        Volumes
-    </label>
-
     <label class="lv" hidden="">
         <input type="checkbox" id="sim">
         Test : clic = téléporter
@@ -999,15 +989,8 @@ const by0 = YS.length ? q(YS, .005) : -1000;
 const by1 = YS.length ? q(YS, .995) : 1000;
 
 
-$('ly').innerHTML =
-    '<option value="-1">Tous</option>' +
-    LBL.map((t,i) =>
-        '<option value="' + i + '">' + t + '</option>'
-    ).join('');
-
-$('ly').value = layer;
-
-
+const layerOptions = '<option value="-1">Tous</option>' + LBL.map((t,i) => '<option value="' + i + '">' + t + '</option>').join('');
+let volumesVisible = true;
 if (!LIVE) {
     document.querySelectorAll('.lv').forEach(e => e.hidden = true);
 
@@ -1039,7 +1022,9 @@ function buildCats(filter) {
         '<button id="ca">Tout</button>' +
         '<button id="cn">Aucun</button>' +
         '<button id="cd">Défaut</button>' +
-        '</div>';
+        '</div>' +
+        '<label>Calque <select id="ly">' + layerOptions + '</select></label>' +
+        '<label><input type="checkbox" id="vo" ' + (volumesVisible ? 'checked' : '') + '> Volumes</label>';
 
     GR.forEach((g, gi) => {
         const ids = CATS.map((c, i) => i).filter(i =>
@@ -1087,6 +1072,10 @@ function buildCats(filter) {
     });
 
     $('cats').innerHTML = html;
+    $('ly').value = String(layer);
+    $('ly').onchange = () => { layer = +$('ly').value; $('au').checked = false; draw(); };
+    $('vo').checked = volumesVisible;
+    $('vo').onchange = () => { volumesVisible = $('vo').checked; draw(); };
 
     $('cats').querySelectorAll('input[data-ind="1"]').forEach(e => {
         e.indeterminate = true;
@@ -3125,13 +3114,6 @@ cv.onwheel=e=>{
         draw();
     };
 });
-
-
-$('ly').onchange=()=>{
-    layer=+$('ly').value;
-    $('au').checked=false;
-    draw();
-};
 
 
 $('o').onchange=()=>{
