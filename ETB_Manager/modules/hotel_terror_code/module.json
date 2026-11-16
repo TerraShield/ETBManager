@@ -6,6 +6,7 @@
   "icon": "🔐",
   "order": 32,
   "levels": [
+    "Hotel",
     "Floor3"
   ],
   "ui": {
