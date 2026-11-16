@@ -16,7 +16,7 @@ from memory_reader import (
 MAX_LEVELS = 256
 MAX_ACTORS = 1_000_000
 KEY_CLASS = "bp_keypiece_c"
-GARAGE_WORLD_NAMES = ("garage", "floor4", "level2")
+GARAGE_WORLD_NAMES = ("middlefloor",)
 
 
 def _read_keys(mem, world, resolver, player_position):
@@ -92,7 +92,7 @@ class GarageKeysBackend:
                         raise RuntimeError("GWorld est nul : attends le chargement d'une partie.")
                     world_name = resolver.object_name(world)
                     if not any(token in world_name.casefold() for token in GARAGE_WORLD_NAMES):
-                        self._set(active=False, status=f"Niveau détecté : {world_name}. En attente du Garage…",
+                        self._set(active=False, status=f"Niveau détecté : {world_name}. En attente de MiddleFloor…",
                                   world_name=world_name, keys=[], count=0, last_scan=time.time(), player_position=None)
                         failures = 0
                         self.stop_event.wait(1.0)
