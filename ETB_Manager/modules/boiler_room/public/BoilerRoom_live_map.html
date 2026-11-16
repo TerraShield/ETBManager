@@ -559,7 +559,7 @@ function loadManualPath() {
 
 // Les anciens tracés ne sont pas chargés dans les cartes de jeu.
 
-$('pathColor').value = pathColor;
+
 
 
 // ------------------------------------------------------
@@ -574,40 +574,7 @@ window.__ETB_GET_MANUAL_TRACE__ = () => ({
 // ------------------------------------------------------
 // INTERFACE
 
-function updatePathUI() {
-    $('pathToggle').textContent = pathDrawing
-        ? 'Terminer (Échap)'
-        : 'Tracer (T)';
-
-    $('pathToggle').classList.toggle(
-        'active',
-        pathDrawing
-    );
-
-    $('pathFinish').disabled =
-        !pathDrawing || pathPoints.length < 2;
-
-    $('pathUndo').disabled =
-        !pathDrawing || pathPoints.length === 0;
-
-    $('pathDelete').disabled =
-        selectedPathSegment < 0;
-
-    if (pathDrawing) {
-        $('pathHelp').textContent =
-            'T ajoute un segment · clic gauche ajoute un point · Échap termine.';
-
-    } else if (selectedPathSegment >= 0) {
-        $('pathHelp').textContent =
-            'Segment ' +
-            (selectedPathSegment + 1) +
-            ' sélectionné : modifie sa couleur.';
-
-    } else {
-        $('pathHelp').textContent =
-            'T pour commencer · sélectionne un segment pour le recolorer.';
-    }
-}
+function updatePathUI() { /* éditeur déplacé vers le chargeur de cartes */ }
 
 
 // ------------------------------------------------------
@@ -855,7 +822,7 @@ window.addEventListener(
 
         pathColor = color;
 
-        $('pathColor').value = color;
+        
 
         if (
             selectedPathSegment >= 0 &&
@@ -871,9 +838,7 @@ window.addEventListener(
 );
 
 
-$('pathColor').addEventListener('input', event => {
-    changePathColor(event.target.value);
-});
+
 
 
 // ------------------------------------------------------
@@ -1746,7 +1711,7 @@ function routeLoad() {
             routeColor = embedded.color;
         }
 
-        $('routeColor').value = routeColor;
+        
 
         return;
     }
@@ -1787,32 +1752,7 @@ function routeLoad() {
 // ------------------------------------------------------
 // INTERFACE
 
-function routeUpdateUI() {
-    $('routeSelect').classList.toggle(
-        'active',
-        routeSelecting
-    );
-
-    $('routeSelect').textContent = routeSelecting
-        ? 'Terminer les points'
-        : 'Ajouter des points';
-
-    $('routeUndo').disabled =
-        routeWaypoints.length === 0;
-
-    $('routeCalculate').disabled =
-        routeWaypoints.length < (LIVE ? 1 : 2);
-
-    routeStatus(
-        routeSelecting
-            ? `Clique sur la carte pour ajouter des destinations (${routeWaypoints.length}/${ROUTE_MAX_TARGETS}).`
-            : `${routeWaypoints.length} point(s) sélectionné(s). ${
-                routePath.length
-                    ? `Trajet : ${(routeDistance/100).toFixed(1)} m.`
-                    : 'Calcule le parcours.'
-            }`
-    );
-}
+function routeUpdateUI() { /* calcul d'itinéraire déplacé vers le chargeur de cartes */ }
 
 
 // ------------------------------------------------------
@@ -2862,7 +2802,7 @@ window.addEventListener(
 
         routeColor=event.detail.color;
 
-        $('routeColor').value=routeColor;
+        
 
         routeSave();
         draw();
@@ -2870,22 +2810,7 @@ window.addEventListener(
 );
 
 
-$('routeColor').addEventListener('input',event=>{
-    routeColor=event.target.value;
 
-    routeSave();
-
-    window.dispatchEvent(
-        new CustomEvent('etb-trace-color-change',{
-            detail:{
-                color:routeColor,
-                source:'route'
-            }
-        })
-    );
-
-    draw();
-});
 
 
 // ======================================================
@@ -3358,8 +3283,7 @@ fit();
 
 restoreEmbeddedView();
 
-updatePathUI();
-routeUpdateUI();
+// Aucun outil d'édition n'est initialisé dans ce module.
 
 if (LIVE) {
     poll();
