@@ -1,0 +1,129 @@
+{
+  "version": "v0",
+  "source_map": "level0_2d.png",
+  "source_map_dimensions_px": [
+    1024,
+    768
+  ],
+  "calibration": "Affine transform exactly fitted to the three supplied Unreal landmarks and their manually placed pixels on the provisional reference map. Not validated against extracted wall geometry.",
+  "world_to_pixel": {
+    "formula": "[pixel_x, pixel_y] = [world_X, world_Y, 1] @ matrix_3x2",
+    "matrix_3x2": [
+      [
+        -0.05643704317578884,
+        -0.00431846966410731
+      ],
+      [
+        0.006156359115438878,
+        -0.04050804299837216
+      ],
+      [
+        600.5670001647898,
+        386.30776447843635
+      ]
+    ]
+  },
+  "pixel_to_world": {
+    "formula": "[world_X, world_Y] = ([pixel_x, pixel_y] - offset) @ inverse_matrix_2x2",
+    "inverse_matrix_2x2": [
+      [
+        -17.51517209648795,
+        1.8672523716670701
+      ],
+      [
+        -2.6619328265013324,
+        -24.402672918081635
+      ]
+    ],
+    "offset": [
+      600.5670001647898,
+      386.30776447843635
+    ]
+  },
+  "landmarks": {
+    "spawn": {
+      "world": {
+        "x": 7217.0,
+        "y": 2719.0,
+        "z": 112.5
+      },
+      "pixel": {
+        "x": 210.0,
+        "y": 245.0
+      }
+    },
+    "key_room": {
+      "world": {
+        "x": 1606.0,
+        "y": -7298.0,
+        "z": 112.5
+      },
+      "pixel": {
+        "x": 465.0,
+        "y": 675.0
+      }
+    },
+    "locked_door": {
+      "world": {
+        "x": -3449.0,
+        "y": 1264.0,
+        "z": 112.5
+      },
+      "pixel": {
+        "x": 803.0,
+        "y": 350.0
+      }
+    }
+  },
+  "wall_mesh_inferences": {
+    "SM_Wall_05m": {
+      "length_cm": 50,
+      "height_cm": 400,
+      "local_center": [
+        0,
+        0,
+        200
+      ],
+      "local_half_extent": [
+        25,
+        0,
+        200
+      ],
+      "confidence": "direct from Bounds / BoxElems; Y thickness is essentially zero"
+    },
+    "SM_Wall_1m": {
+      "length_cm": 100,
+      "height_cm": 400,
+      "local_center": [
+        0,
+        0,
+        200
+      ],
+      "local_half_extent": [
+        50,
+        0,
+        200
+      ],
+      "confidence": "direct from Bounds / BoxElems; Y thickness is essentially zero"
+    },
+    "SM_Wall_2m": {
+      "length_cm": 200,
+      "height_cm": 400,
+      "local_axis": "X",
+      "confidence": "inferred from naming convention; not yet verified"
+    },
+    "SM_Wall_3m": {
+      "length_cm": 300,
+      "height_cm": 400,
+      "local_axis": "X",
+      "confidence": "inferred from naming convention; not yet verified"
+    },
+    "SM_Wall_4m": {
+      "length_cm": 400,
+      "height_cm": 400,
+      "local_axis": "X",
+      "confidence": "inferred from naming convention; not yet verified"
+    }
+  },
+  "next_required_input": "Complete Level0_map_data.json or filtered wall JSON containing all 358 wall placement records (actor, mesh, x, y, z, yaw, scale). Other straight-wall mesh exports are not required for a first approximation, but corner/doorway mesh geometry will need separate treatment."
+}

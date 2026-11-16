@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ETB Manager · Modules</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">ETB</div>
+        <div>
+          <div class="brand-title">ETB Manager</div>
+          <div class="brand-subtitle">Escape the Backrooms · plateforme modulaire</div>
+        </div>
+      </div>
+      <div class="topbar-tools" id="moduleToolbar" aria-label="Outils du module actif" hidden></div>
+      <div class="topbar-status">
+        <div class="game-level-pill" id="gameLevelPill">
+          <span class="game-level-icon">⌁</span>
+          <div class="game-level-copy"><span>NIVEAU ACTUEL</span><strong id="gameLevelName">En attente du jeu…</strong></div>
+        </div>
+        <div class="connection-pill" id="connectionPill"><span class="pulse"></span><span id="connectionText">Connexion…</span></div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="side-label">ESPACE DE TRAVAIL</div>
+        <button class="nav-item active" type="button" data-module="none" aria-current="page"><span class="nav-icon">⌂</span><span>Accueil</span></button>
+        <div class="side-label module-nav-label">MODULES INSTALLÉS</div>
+        <nav id="moduleNav" aria-label="Modules installés">
+          <div class="nav-loading">Chargement des modules…</div>
+        </nav>
+        <div class="sidebar-bottom">
+          <div class="side-label">LECTEUR MÉMOIRE</div>
+          <div class="memory-mini">
+            <div class="mini-row"><span class="dot" id="memoryDot"></span><span id="memoryMiniStatus">En attente du jeu…</span></div>
+            <div class="mini-coords" id="miniCoords">X — · Y — · Z —</div>
+          </div>
+          <div class="small-note">Lecture seule · traitement local uniquement</div>
+          <div class="module-version">ETB MANAGER v0.3.1 · MODULE HOST</div>
+        </div>
+      </aside>
+
+      <main class="main-content">
+        <div class="page-heading">
+          <div>
+            <div class="eyebrow">TABLEAU DE BORD</div>
+            <h1 id="pageTitle">Accueil</h1>
+            <p id="pageSubtitle">Une plateforme commune pour des modules développés indépendamment.</p>
+          </div>
+          <div class="level-detection"><span class="detection-icon">⌁</span><div><span class="detection-label">DÉTECTION AUTOMATIQUE</span><strong id="detectionStatus">En attente…</strong></div></div>
+        </div>
+
+        <section class="home-view" id="homeView">
+          <div class="welcome-card">
+            <div class="welcome-copy">
+              <div class="eyebrow">UNE AIDE POUR CHAQUE NIVEAU</div>
+              <h2>Un gestionnaire.<br><span>Des modules indépendants.</span></h2>
+              <p id="noModuleMessage">En attente de la détection du niveau par le lecteur mémoire.</p>
+            </div>
+            <div class="welcome-orbit"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit-core">ETB</div><i class="orbit-dot dot-one"></i><i class="orbit-dot dot-two"></i><i class="orbit-dot dot-three"></i></div>
+          </div>
+
+          <div class="section-title">MODULES DISPONIBLES</div>
+          <div class="module-catalog" id="moduleCatalog">
+            <div class="catalog-empty">Les modules installés apparaîtront ici.</div>
+          </div>
+
+          <div class="section-title">ÉTAT DU SYSTÈME</div>
+          <div class="status-grid">
+            <div class="status-card"><div class="status-card-label">LECTURE DU JEU</div><strong id="homeMemoryStatus">En attente…</strong><span>Position et nom du niveau</span></div>
+            <div class="status-card"><div class="status-card-label">MODULE ACTIF</div><strong id="homeModuleStatus">Accueil</strong><span id="homeModuleHint">Détection automatique par niveau</span></div>
+            <div class="status-card"><div class="status-card-label">SERVEUR LOCAL</div><strong class="positive">Opérationnel</strong><span>127.0.0.1 · aucun service externe</span></div>
+          </div>
+        </section>
+
+        <section class="module-view" id="moduleView" hidden>
+          <div id="moduleStage" class="module-stage">
+            <div class="module-loading">Chargement du module…</div>
+          </div>
+        </section>
+
+        <footer class="main-footer"><span>ETB MANAGER · v0.3.1</span><span>Modules locaux · lecteur mémoire partagé</span></footer>
+      </main>
+    </div>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>

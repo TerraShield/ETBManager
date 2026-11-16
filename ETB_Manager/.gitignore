@@ -1,0 +1,6 @@
+__pycache__/
+*.py[cod]
+.venv/
+modules/butterflies/fmodel_export.json
+modules/butterflies/butterflies_map*.html
+*.uploading

@@ -1,0 +1,19 @@
+ETB MANAGER v0.3 — INSTALLATION RAPIDE
+
+1. Ferme ETB Manager et fais une copie de sauvegarde de ton ancien dossier.
+2. Décompresse le dossier ETB_Manager de cette archive à l'emplacement souhaité.
+3. Si ton ancienne carte Level 0 interactive existe, copie level0_live_map.html dans modules/level0/ (ou modules/level0/public/).
+4. Copie ton fichier etb_map_builder.py existant dans modules/butterflies/ sans modifier son contenu.
+5. Dans un terminal ouvert dans ETB_Manager :
+      python -m pip install -r requirements.txt
+      python main.py
+6. Pour vérifier les modules sans lancer le jeu :
+      python main.py --fake --fake-level Moths
+
+AJOUT D'UN MODULE
+- Copie modules/_template/ vers modules/<id>/.
+- Renomme module.json.example en module.json et définis les noms UWorld dans levels.
+- Développe l'interface dans ui/ et, si nécessaire, le backend.py.
+- Redémarre ETB Manager : le dossier est découvert automatiquement.
+
+Les explications complètes et le contrat frontend/backend sont dans README.md.

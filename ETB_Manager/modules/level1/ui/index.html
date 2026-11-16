@@ -1,0 +1,42 @@
+<div class="puzzle-intro-card">
+            <div>
+              <div class="eyebrow">HABITABLE ZONE · FLOOR 1</div>
+              <h2>Code couleur de l'ascenseur</h2>
+              <p>Chaque ligne représente une position du code. Le bouton coloré indique la bonne couleur ; les trois autres restent grisés.</p>
+            </div>
+            <div class="puzzle-live-state"><span class="puzzle-live-dot" id="carPuzzleDot"></span><strong id="carPuzzleStatus">En attente du niveau TopFloor…</strong></div>
+          </div>
+
+          <div class="intercom-layout">
+            <div class="intercom-device">
+              <div class="intercom-top">
+                <div class="intercom-speaker"><i></i><i></i><i></i><i></i><i></i></div>
+                <span>ACCESS CONTROL · ELEVATOR</span>
+                <span class="intercom-led" id="intercomLed"></span>
+              </div>
+              <div class="intercom-screen">
+                <span>COMBINAISON À <b id="carPuzzleCount">4</b> POSITIONS</span>
+                <strong id="carPuzzleManager">BP_Car_Manager_C</strong>
+              </div>
+              <div class="intercom-column-labels">
+                <span>POSITION</span><span>ROUGE</span><span>VERT</span><span>BLEU</span><span>JAUNE</span>
+              </div>
+              <div class="intercom-rows">
+                <div class="intercom-row" data-code-row="0"><span class="intercom-row-number">01</span><div class="intercom-key is-muted" data-color="0">ROUGE</div><div class="intercom-key is-muted" data-color="1">VERT</div><div class="intercom-key is-muted" data-color="2">BLEU</div><div class="intercom-key is-muted" data-color="3">JAUNE</div></div>
+                <div class="intercom-row" data-code-row="1"><span class="intercom-row-number">02</span><div class="intercom-key is-muted" data-color="0">ROUGE</div><div class="intercom-key is-muted" data-color="1">VERT</div><div class="intercom-key is-muted" data-color="2">BLEU</div><div class="intercom-key is-muted" data-color="3">JAUNE</div></div>
+                <div class="intercom-row" data-code-row="2"><span class="intercom-row-number">03</span><div class="intercom-key is-muted" data-color="0">ROUGE</div><div class="intercom-key is-muted" data-color="1">VERT</div><div class="intercom-key is-muted" data-color="2">BLEU</div><div class="intercom-key is-muted" data-color="3">JAUNE</div></div>
+                <div class="intercom-row" data-code-row="3"><span class="intercom-row-number">04</span><div class="intercom-key is-muted" data-color="0">ROUGE</div><div class="intercom-key is-muted" data-color="1">VERT</div><div class="intercom-key is-muted" data-color="2">BLEU</div><div class="intercom-key is-muted" data-color="3">JAUNE</div></div>
+              </div>
+              <div class="intercom-bottom"><span>ETB SECURITY SYSTEM</span><span id="carPuzzleReadState">LECTURE MÉMOIRE : EN ATTENTE</span></div>
+            </div>
+
+            <aside class="puzzle-side-card">
+              <div class="eyebrow">SÉQUENCE DÉTECTÉE</div>
+              <h3>Ordre des couleurs</h3>
+              <div class="sequence-list" id="carPuzzleSequence">
+                <div class="sequence-placeholder">Les couleurs apparaîtront ici lorsque le gestionnaire sera détecté.</div>
+              </div>
+              <div class="puzzle-source-note" id="carPuzzleSource">Source : BP_Car_Manager_C · CorrectColors</div>
+            </aside>
+          </div>
+          <p class="puzzle-footnote">Les couleurs proviennent du tableau CorrectColors lu dans l'instance active de BP_Car_Manager_C. L'affichage est une aide visuelle uniquement : aucune entrée n'est envoyée au jeu.</p>

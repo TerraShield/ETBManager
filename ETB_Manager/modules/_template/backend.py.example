@@ -1,0 +1,28 @@
+"""Backend optionnel : exemple de contrat minimal d'un module ETB."""
+
+class ExampleBackend:
+    def __init__(self, context):
+        # context.module_id, context.module_dir, context.base_dir, context.port
+        self.message = f"Backend prêt pour {context.module_id}."
+
+    def snapshot(self, shared_state):
+        # Données renvoyées dans state.module_state[<id>].
+        return {"message": self.message}
+
+    def action(self, action, payload, shared_state):
+        # Appelé par POST /api/modules/<id>/action.
+        if action == "example":
+            return {"ok": True, "message": "Action exécutée."}
+        raise ValueError(f"Action inconnue : {action}")
+
+    def upload(self, temp_path, filename, shared_state):
+        # Optionnel : appelé par POST /api/modules/<id>/upload.
+        raise ValueError("Ce module n'accepte pas de fichiers.")
+
+    def shutdown(self):
+        # Optionnel : libérer les threads, hooks et ressources du module.
+        pass
+
+
+def create_module(context):
+    return ExampleBackend(context)

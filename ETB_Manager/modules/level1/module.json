@@ -1,0 +1,17 @@
+{
+  "id": "level1",
+  "name": "Habitable Zone · Interphone",
+  "short_name": "Habitable Zone",
+  "description": "Lecture automatique du code couleur de l’ascenseur.",
+  "icon": "▦",
+  "order": 20,
+  "levels": [
+    "TopFloor"
+  ],
+  "ui": {
+    "entry": "ui/index.html",
+    "script": "ui/module.js",
+    "style": null
+  },
+  "backend": "backend.py"
+}

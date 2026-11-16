@@ -1,0 +1,17 @@
+{
+  "id": "butterflies",
+  "name": "Labyrinthe des papillons",
+  "short_name": "Labyrinthe",
+  "description": "Carte 2D interactive et position du joueur en direct.",
+  "icon": "✣",
+  "order": 40,
+  "levels": [
+    "Moths"
+  ],
+  "ui": {
+    "entry": "ui/index.html",
+    "script": "ui/module.js",
+    "style": null
+  },
+  "backend": "backend.py"
+}
