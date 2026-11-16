@@ -82,6 +82,11 @@ document.addEventListener('pointerdown',event=>{
   $('filtersToggle').setAttribute('aria-expanded','false');
  }
 });
+if (typeof ResizeObserver !== 'undefined') {
+    const mapResizeObserver = new ResizeObserver(() => fit());
+    mapResizeObserver.observe(document.getElementById('w'));
+}
+
 for(const id of ['showWalls','showEntities','showPoints','showVolumes','fl','bp']){
  $(id).addEventListener('change',()=>{
   if(id==='showWalls')showWalls=$('showWalls').checked;
