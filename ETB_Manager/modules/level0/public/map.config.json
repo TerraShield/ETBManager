@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "visibility": {
+    "walls": true,
+    "entities": true,
+    "floors": false,
+    "prefabs": false,
+    "points": false,
+    "volumes": false
+  },
+  "interface": {
+    "filters": "context-menu",
+    "fitMapOnOpen": true
+  }
+}
