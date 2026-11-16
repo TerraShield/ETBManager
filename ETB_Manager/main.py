@@ -391,10 +391,15 @@ def main():
 
     if not (WEB_DIR / "index.html").is_file():
         raise SystemExit("Interface web introuvable : le dossier web doit rester à côté de main.py.")
+    log_dir = configure_logging()
+    logging.getLogger("ETB").info("Démarrage ETB Manager (port=%s, fake=%s)", args.port, args.fake)
     manager = Manager(args.port, fake=args.fake, hz=args.hz, fake_level=args.fake_level)
-    print(f"Modules chargés : {', '.join(manager.registry.ids()) or 'aucun'}", flush=True)
+    logging.getLogger("ETB").info("Modules chargés: %s", manager.registry.ids())
     for module_id, error in manager.registry._errors.items():
+        logging.getLogger("ETB").error("Module %s: %s", module_id, error)
         print(f"[Module {module_id}] {error}", flush=True)
+    print(f"Journaux disponibles dans : {log_dir}", flush=True)
+    print(f"Modules chargés : {', '.join(manager.registry.ids()) or 'aucun'}", flush=True)
 
     try:
         server = ThreadingHTTPServer(("127.0.0.1", args.port), make_handler(manager))
