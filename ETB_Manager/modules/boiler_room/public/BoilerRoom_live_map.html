@@ -3298,6 +3298,11 @@ function restoreEmbeddedView() {
 addEventListener('resize',()=>{
     fit();
 });
+if (typeof ResizeObserver !== 'undefined') {
+    const mapResizeObserver = new ResizeObserver(() => fit());
+    mapResizeObserver.observe(document.getElementById('w'));
+}
+
 
 fit();
 
