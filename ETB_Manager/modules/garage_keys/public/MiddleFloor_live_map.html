@@ -161,7 +161,7 @@ body {
    CARTE
 -------------------------------------------------- */
 
-#m {
+#toolbars {\n    border-top: 1px solid var(--border);\n    border-bottom: none;\n}\n\n#traceToolbar, #routeToolbar, #exportToolbar {\n    display: none !important;\n}\n\n#m {
     flex: 1;
     min-height: 0;
     display: flex;
@@ -324,6 +324,21 @@ canvas {
      1. AFFICHAGE ET NAVIGATION
 ====================================================== -->
 
+<div id="m">
+    <aside id="cats"></aside>
+
+    <div id="w">
+        <canvas id="cv"></canvas>
+
+        <div id="hud">
+            <span id="st"></span>
+            <span id="tx">en attente de position…</span>
+        </div>
+    </div>
+
+    <aside id="pn"></aside>
+</div>
+
 <div id="toolbars">
 
 <div class="toolbar" id="viewToolbar">
@@ -454,28 +469,6 @@ canvas {
     <button id="pathExport">Tracé JSON</button>
     <button id="routeExport">Itinéraire JSON</button>
     <button id="routeExportHTML">Exporter HTML complet</button>
-</div>
-
-</div>
-
-
-<!-- ======================================================
-     CARTE ET PANNEAUX
-====================================================== -->
-
-<div id="m">
-    <aside id="cats"></aside>
-
-    <div id="w">
-        <canvas id="cv"></canvas>
-
-        <div id="hud">
-            <span id="st"></span>
-            <span id="tx">en attente de position…</span>
-        </div>
-    </div>
-
-    <aside id="pn"></aside>
 </div>
 
 
