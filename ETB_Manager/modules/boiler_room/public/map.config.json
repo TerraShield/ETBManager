@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "visibility": {
+    "defaultGroups": [
+      3,
+      12
+    ],
+    "walls": true,
+    "entities": true,
+    "floors": false,
+    "prefabs": false,
+    "points": false,
+    "volumes": false
+  },
+  "interface": {
+    "filters": "context-menu",
+    "fitMapOnOpen": true
+  },
+  "tools": {
+    "manualTrace": false,
+    "shortestPath": false,
+    "export": false
+  }
+}
