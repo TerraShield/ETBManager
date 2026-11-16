@@ -6,19 +6,23 @@ body{display:flex;flex-direction:column}
 #bar{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;padding:8px 12px;background:#1b222b;border-top:1px solid #39434e;flex:0 0 auto}
 #bar .toolbar-title{font-weight:700;font-size:12px;opacity:.8;text-transform:uppercase;letter-spacing:.04em;margin-right:6px}
 #bar label{white-space:nowrap}#w{flex:1;min-height:0;position:relative;background:#11151b}
+#filtersToggle{position:absolute;z-index:20;top:10px;left:10px;padding:7px 11px;border:1px solid #39434e;border-radius:8px;background:#1b222b;color:#e6ebf0;cursor:pointer;font:600 12px system-ui}
+#filtersMenu{display:none;position:absolute;z-index:19;top:48px;left:10px;width:190px;padding:12px;background:#1b222b;border:1px solid #39434e;border-radius:10px;box-shadow:0 12px 34px #0008}
+#filtersMenu.open{display:grid;gap:9px}
+#filtersMenu label{display:flex;align-items:center;gap:7px;font-size:13px}
 canvas{width:100%;height:100%;display:block;touch-action:none}
 #hud{position:absolute;left:8px;bottom:8px;background:#000a;padding:4px 8px;border-radius:4px;font:12px ui-monospace,monospace;line-height:1.5}
 #st{display:inline-block;width:9px;height:9px;border-radius:50%;background:#e55;margin-right:5px}
 </style></head><body>
 
-<div id="w"><canvas id="cv"></canvas><div id="hud"><span id="st"></span><span id="tx">en attente de position…</span></div>
+<div id="w"><button type="button" id="filtersToggle" aria-expanded="false">☷ Filtres</button><div id="filtersMenu"><strong>Éléments visibles</strong><label><input type="checkbox" id="showWalls" checked> Murs</label><label><input type="checkbox" id="showEntities" checked> Entités</label><label><input type="checkbox" id="fl"> Sols</label><label><input type="checkbox" id="bp"> Préfabs</label><label><input type="checkbox" id="showPoints"> Points</label><label><input type="checkbox" id="showVolumes"> Volumes</label></div><canvas id="cv"></canvas><div id="hud"><span id="st"></span><span id="tx">en attente de position…</span></div>
 </div>
 <div id="bar"><span class="toolbar-title">Affichage et navigation</span><b>Level 0 — live</b>
 <label><input type="checkbox" id="fo" checked> Suivre le joueur</label>
 <label><input type="checkbox" id="au" checked> Calque auto (selon Z)</label>
 <label><input type="checkbox" id="tr" checked> Trace</label>
-<label><input type="checkbox" id="fl" checked> Sols</label>
-<label><input type="checkbox" id="bp" checked> Préfabs</label>
+
+
 <label><input type="checkbox" id="sim"> Test : clic = téléporter</label>
 <label>Orientation <select id="o"><option value="0">Vue UE (X→, Y↓)</option><option value="1">Y vers le haut</option></select></label>
 <button id="r">Recentrer</button><button id="cl">Effacer la trace</button></div>
@@ -42,11 +46,11 @@ function draw(){const k=devicePixelRatio||1;cx.setTransform(k,0,0,k,0,0);cx.clea
  for(let g=-12000;g<=16000;g+=st){let[a,b]=P(g,0);cx.beginPath();cx.moveTo(a,0);cx.lineTo(a,h);cx.stroke();cx.fillText('X '+g,a+2,12);
   [a,b]=P(0,g);cx.beginPath();cx.moveTo(0,b);cx.lineTo(w,b);cx.stroke();cx.fillText('Y '+g,2,b-2)}
  if($('fl').checked)for(const[x,y,l]of F){if(l!=layer)continue;const[px,py]=P(x,y),z=400*s;cx.fillStyle=LC[l]+'22';cx.fillRect(px-z/2,py-z/2,z,z)}
- cx.lineCap='butt';for(const a of W)seg(a,a[5]==2?'#ff8a65':LC[a[4]]);
+ cx.lineCap='butt';if(showWalls)for(const a of W)seg(a,a[5]==2?'#ff8a65':LC[a[4]]);
  if($('bp').checked)for(const a of B)seg(a,'#e8d44d');
- for(const[x,y,l]of PI){if(l!=layer)continue;const[px,py]=P(x,y);cx.fillStyle='#ffe066';cx.fillRect(px-3,py-3,6,6)}
- for(const[x,y,l]of PT){if(l!=layer)continue;const[px,py]=P(x,y);cx.strokeStyle='#ff5252';cx.lineWidth=1.5;cx.strokeRect(px-200*s,py-200*s,400*s,400*s)}
- cx.font='bold 12px sans-serif';for(const[n,x,y,c]of A){const[px,py]=P(x,y);cx.fillStyle=c;cx.beginPath();cx.arc(px,py,4,0,7);cx.fill();cx.fillText(n,px+8,py+4)}
+ if(showPoints)for(const[x,y,l]of PI){if(l!=layer)continue;const[px,py]=P(x,y);cx.fillStyle='#ffe066';cx.fillRect(px-3,py-3,6,6)}
+ if(showVolumes)for(const[x,y,l]of PT){if(l!=layer)continue;const[px,py]=P(x,y);cx.strokeStyle='#ff5252';cx.lineWidth=1.5;cx.strokeRect(px-200*s,py-200*s,400*s,400*s)}
+ cx.font='bold 12px sans-serif';if(showEntities)for(const[n,x,y,c]of A){const[px,py]=P(x,y);cx.fillStyle=c;cx.beginPath();cx.arc(px,py,4,0,7);cx.fill();cx.fillText(n,px+8,py+4)}
  if($('tr').checked&&tr.length>1){cx.strokeStyle='#35b7ff88';cx.lineWidth=2;cx.beginPath();tr.forEach((p,i)=>{const[px,py]=P(p[0],p[1]);i?cx.lineTo(px,py):cx.moveTo(px,py)});cx.stroke()}
  if(pl){const[px,py]=P(pl.x,pl.y),r=pl.yaw*Math.PI/180,dx=Math.cos(r),dy=fy()*Math.sin(r);
   cx.fillStyle='#35b7ff';cx.strokeStyle='#fff';cx.lineWidth=2;cx.beginPath();
@@ -66,4 +70,24 @@ cv.onwheel=e=>{e.preventDefault();const r=cv.getBoundingClientRect(),mx=$('fo').
 document.querySelectorAll('input').forEach(i=>i.onchange=()=>{if(i.id=='fo'&&i.checked)center();if(i.id=='au'&&pl)layer=lay(pl.z-ZOFF);draw()});
 $('o').onchange=()=>{fit();center();draw()};$('r').onclick=()=>{fit();$('fo').checked=false};$('cl').onclick=()=>{tr=[];draw()};
 addEventListener('resize',fit);fit();poll();
+
+$('filtersToggle').onclick=()=>{
+ const open=$('filtersMenu').classList.toggle('open');
+ $('filtersToggle').setAttribute('aria-expanded',String(open));
+};
+document.addEventListener('pointerdown',event=>{
+ if(!$('filtersMenu').contains(event.target)&&event.target!==$('filtersToggle')){
+  $('filtersMenu').classList.remove('open');
+  $('filtersToggle').setAttribute('aria-expanded','false');
+ }
+});
+for(const id of ['showWalls','showEntities','showPoints','showVolumes','fl','bp']){
+ $(id).addEventListener('change',()=>{
+  if(id==='showWalls')showWalls=$('showWalls').checked;
+  if(id==='showEntities')showEntities=$('showEntities').checked;
+  if(id==='showPoints')showPoints=$('showPoints').checked;
+  if(id==='showVolumes')showVolumes=$('showVolumes').checked;
+  draw();
+ });
+}
 </script></body></html>
