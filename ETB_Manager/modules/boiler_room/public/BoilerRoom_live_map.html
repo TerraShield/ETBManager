@@ -132,35 +132,11 @@ body {
     opacity: .7;
 }
 
-#pathToggle.active,
-#routeSelect.active {
-    background: #2563a6;
-    color: white;
-    border-color: #2563a6;
-}
-
-#routeCalculate {
-    background: #246d4b;
-    color: white;
-    border-color: #246d4b;
-}
-
-#routeExportHTML {
-    background: #2563a6;
-    color: white;
-    border-color: #2563a6;
-}
-
-#pathHelp,
-#routeStatus {
-    overflow-wrap: anywhere;
-}
-
 /* --------------------------------------------------
    CARTE
 -------------------------------------------------- */
 
-#toolbars {\n    border-top: 1px solid var(--border);\n    border-bottom: none;\n}\n\n#traceToolbar, #routeToolbar, #exportToolbar {\n    display: none !important;\n}\n\n#m {
+#m {
     flex: 1;
     min-height: 0;
     display: flex;
@@ -174,12 +150,36 @@ body {
 }
 
 #cats {
-    width: 270px;
+    display: none;
+    position: absolute;
+    z-index: 20;
+    top: 48px;
+    left: 10px;
+    width: min(320px, calc(100% - 20px));
+    max-height: min(72vh, 680px);
     overflow: auto;
     background: var(--bar);
-    padding: 8px 10px;
+    color: var(--fg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 12px 34px #0008;
+    padding: 10px;
     box-sizing: border-box;
     font-size: 13px;
+}
+#cats.open { display: block; }
+#filtersToggle {
+    position: absolute;
+    z-index: 21;
+    top: 10px;
+    left: 10px;
+    padding: 7px 11px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bar);
+    color: var(--fg);
+    font: 600 12px system-ui, sans-serif;
+    cursor: pointer;
 }
 
 #cats input[type=search] {
@@ -324,7 +324,3050 @@ canvas {
 ====================================================== -->
 
 <div id="m">
-    <aside id="cats"><input type="search" id="sq" placeholder="Filtrer…" value=""><div style="display:flex;gap:6px;margin-bottom:6px"><button id="ca">Tout</button><button id="cn">Aucun</button><button id="cd">Défaut</button></div><details open=""><summary><input type="checkbox" data-g="2" checked="" data-ind="0"> Portes / ouvertures<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">114</span></summary><label class="row"><input type="checkbox" data-c="21" checked=""><span class="sw" style="background:#ff8a65"></span><span class="nm" title="SM_Wall_Doorway_4m_02">SM_Wall_Doorway_4m_02</span><span class="n">45</span></label><label class="row"><input type="checkbox" data-c="22" checked=""><span class="sw" style="background:#ff8a65"></span><span class="nm" title="SM_Wall_Doorway_4m_03">SM_Wall_Doorway_4m_03</span><span class="n">51</span></label><label class="row"><input type="checkbox" data-c="26" checked=""><span class="sw" style="background:#ff8a65"></span><span class="nm" title="SM_Wall_Doorway_4m_01">SM_Wall_Doorway_4m_01</span><span class="n">18</span></label></details><details open=""><summary><input type="checkbox" data-g="3" checked="" data-ind="0"> Murs<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">995</span></summary><label class="row"><input type="checkbox" data-c="19" checked=""><span class="sw" style="background:#cfe0f0"></span><span class="nm" title="SM_Wall_2m_01">SM_Wall_2m_01</span><span class="n">239</span></label><label class="row"><input type="checkbox" data-c="20" checked=""><span class="sw" style="background:#cfe0f0"></span><span class="nm" title="SM_Wall_4m_01">SM_Wall_4m_01</span><span class="n">587</span></label><label class="row"><input type="checkbox" data-c="23" checked=""><span class="sw" style="background:#cfe0f0"></span><span class="nm" title="SM_Wall_Corner_01">SM_Wall_Corner_01</span><span class="n">50</span></label><label class="row"><input type="checkbox" data-c="36" checked=""><span class="sw" style="background:#cfe0f0"></span><span class="nm" title="SM_Wall_01">SM_Wall_01</span><span class="n">119</span></label></details><details open=""><summary><input type="checkbox" data-g="4" checked="" data-ind="0"> Sols<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">203</span></summary><label class="row"><input type="checkbox" data-c="2" checked=""><span class="sw" style="background:#9fb3c8"></span><span class="nm" title="SM_Floor_01">SM_Floor_01</span><span class="n">16</span></label><label class="row"><input type="checkbox" data-c="10" checked=""><span class="sw" style="background:#9fb3c8"></span><span class="nm" title="SM_Floor_4m_01">SM_Floor_4m_01</span><span class="n">187</span></label></details><details><summary><input type="checkbox" data-g="7" checked="" data-ind="0"> Escaliers / rampes<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">8</span></summary><label class="row"><input type="checkbox" data-c="3" checked=""><span class="sw" style="background:#5fd0a0"></span><span class="nm" title="SM_Stairs_01">SM_Stairs_01</span><span class="n">8</span></label></details><details><summary><input type="checkbox" data-g="8" data-ind="0"> Tuyaux / conduits<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">1604</span></summary><label class="row"><input type="checkbox" data-c="11"><span class="sw" style="background:#e8d44d"></span><span class="nm" title="SM_hose_b">SM_hose_b</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="12"><span class="sw" style="background:#e8d44d"></span><span class="nm" title="SM_Pipe_Standard_4m_01">SM_Pipe_Standard_4m_01</span><span class="n">764</span></label><label class="row"><input type="checkbox" data-c="13"><span class="sw" style="background:#e8d44d"></span><span class="nm" title="SM_Pipe_Standard_T_2m_01">SM_Pipe_Standard_T_2m_01</span><span class="n">76</span></label><label class="row"><input type="checkbox" data-c="14"><span class="sw" style="background:#e8d44d"></span><span class="nm" title="SM_Pipe_Standard_Bend_90_1m_01">SM_Pipe_Standard_Bend_90_1m_01</span><span class="n">282</span></label><label class="row"><input type="checkbox" data-c="15"><span class="sw" style="background:#e8d44d"></span><span class="nm" title="SM_Pipe_Standard_1m_01">SM_Pipe_Standard_1m_01</span><span class="n">127</span></label><label class="row"><input type="checkbox" data-c="16"><span class="sw" style="background:#e8d44d"></span><span class="nm" title="SM_Pipe_Standard_2m_01">SM_Pipe_Standard_2m_01</span><span class="n">281</span></label><label class="row"><input type="checkbox" data-c="24"><span class="sw" style="background:#e8d44d"></span><span class="nm" title="SM_Pipe_Standard_Bend_S_2m_01">SM_Pipe_Standard_Bend_S_2m_01</span><span class="n">56</span></label><label class="row"><input type="checkbox" data-c="25"><span class="sw" style="background:#e8d44d"></span><span class="nm" title="SM_Pipe_Standard_Bend_180_1m_01">SM_Pipe_Standard_Bend_180_1m_01</span><span class="n">17</span></label></details><details><summary><input type="checkbox" data-g="9" checked="" data-ind="0"> Clôtures / barrières<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">18</span></summary><label class="row"><input type="checkbox" data-c="4" checked=""><span class="sw" style="background:#c792ea"></span><span class="nm" title="SM_Fence_02">SM_Fence_02</span><span class="n">16</span></label><label class="row"><input type="checkbox" data-c="9" checked=""><span class="sw" style="background:#c792ea"></span><span class="nm" title="SM_Fence_01">SM_Fence_01</span><span class="n">2</span></label></details><details><summary><input type="checkbox" data-g="10" data-ind="0"> Décals<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">192</span></summary><label class="row"><input type="checkbox" data-c="7"><span class="sw" style="background:#6b7785"></span><span class="nm" title="SM_Decal_01">SM_Decal_01</span><span class="n">192</span></label></details><details><summary><input type="checkbox" data-g="11" checked="" data-ind="0"> Autres meshes<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">97</span></summary><label class="row"><input type="checkbox" data-c="0" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="StaticMesh">StaticMesh</span><span class="n">47</span></label><label class="row"><input type="checkbox" data-c="1" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="Cube">Cube</span><span class="n">2</span></label><label class="row"><input type="checkbox" data-c="5" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="Plane">Plane</span><span class="n">8</span></label><label class="row"><input type="checkbox" data-c="6" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="SM_Concrete_Block_03">SM_Concrete_Block_03</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="8" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="SM_Exit_02">SM_Exit_02</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="17" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="SM_RackTable_01">SM_RackTable_01</span><span class="n">3</span></label><label class="row"><input type="checkbox" data-c="18" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="SM_SignB_13">SM_SignB_13</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="27" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="storage5">storage5</span><span class="n">5</span></label><label class="row"><input type="checkbox" data-c="28" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="storage6">storage6</span><span class="n">5</span></label><label class="row"><input type="checkbox" data-c="29" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="storage7">storage7</span><span class="n">8</span></label><label class="row"><input type="checkbox" data-c="30" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="storage8">storage8</span><span class="n">7</span></label><label class="row"><input type="checkbox" data-c="31" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="storage1">storage1</span><span class="n">2</span></label><label class="row"><input type="checkbox" data-c="32" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="storage11">storage11</span><span class="n">2</span></label><label class="row"><input type="checkbox" data-c="33" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="storage4">storage4</span><span class="n">2</span></label><label class="row"><input type="checkbox" data-c="34" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="storage2">storage2</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="35" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="storage9">storage9</span><span class="n">2</span></label></details><details><summary><input type="checkbox" data-g="12" data-ind="1"> Objets (acteurs)<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">309</span></summary><label class="row"><input type="checkbox" data-c="37"><span class="sw" style="background:#ff5252"></span><span class="nm" title="Actor">Actor</span><span class="n">3</span></label><label class="row"><input type="checkbox" data-c="38"><span class="sw" style="background:#ffe066"></span><span class="nm" title="AmbientSound">AmbientSound</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="39"><span class="sw" style="background:#ff80ab"></span><span class="nm" title="BoxReflectionCapture">BoxReflectionCapture</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="40" checked=""><span class="sw" style="background:#ff5252"></span><span class="nm" title="BP_BoilerDoor">BP_BoilerDoor</span><span class="n">4</span></label><label class="row"><input type="checkbox" data-c="41" checked=""><span class="sw" style="background:#ffe066"></span><span class="nm" title="BP_Boilerroom_Checkpoint_Trigger">BP_Boilerroom_Checkpoint_Trigger</span><span class="n">2</span></label><label class="row"><input type="checkbox" data-c="42" checked=""><span class="sw" style="background:#a5d6a7"></span><span class="nm" title="BP_DroppedItem_AlmondWater">BP_DroppedItem_AlmondWater</span><span class="n">2</span></label><label class="row"><input type="checkbox" data-c="43" checked=""><span class="sw" style="background:#5fd0a0"></span><span class="nm" title="BP_DroppedItem_EnergyBar">BP_DroppedItem_EnergyBar</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="44" checked=""><span class="sw" style="background:#ff80ab"></span><span class="nm" title="BP_DroppedItem_Juice">BP_DroppedItem_Juice</span><span class="n">2</span></label><label class="row"><input type="checkbox" data-c="45" checked=""><span class="sw" style="background:#c792ea"></span><span class="nm" title="BP_DroppedItem_Thermometer">BP_DroppedItem_Thermometer</span><span class="n">12</span></label><label class="row"><input type="checkbox" data-c="46" checked=""><span class="sw" style="background:#f48fb1"></span><span class="nm" title="BP_ExitZone">BP_ExitZone</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="47" checked=""><span class="sw" style="background:#5fd0a0"></span><span class="nm" title="BP_Flashlight_Trigger">BP_Flashlight_Trigger</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="48" checked=""><span class="sw" style="background:#5fd0a0"></span><span class="nm" title="BP_HeatZone">BP_HeatZone</span><span class="n">13</span></label><label class="row"><input type="checkbox" data-c="49" checked=""><span class="sw" style="background:#35b7ff"></span><span class="nm" title="BP_Lamp">BP_Lamp</span><span class="n">134</span></label><label class="row"><input type="checkbox" data-c="50" checked=""><span class="sw" style="background:#ffb86b"></span><span class="nm" title="BP_Moth">BP_Moth</span><span class="n">10</span></label><label class="row"><input type="checkbox" data-c="51" checked=""><span class="sw" style="background:#c792ea"></span><span class="nm" title="BP_Moths">BP_Moths</span><span class="n">5</span></label><label class="row"><input type="checkbox" data-c="52"><span class="sw" style="background:#ff5252"></span><span class="nm" title="BP_Note">BP_Note</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="53" checked=""><span class="sw" style="background:#35b7ff"></span><span class="nm" title="BP_PipeSpray">BP_PipeSpray</span><span class="n">14</span></label><label class="row"><input type="checkbox" data-c="54" checked=""><span class="sw" style="background:#ff80ab"></span><span class="nm" title="BP_TimeStampCapture">BP_TimeStampCapture</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="55" checked=""><span class="sw" style="background:#00e5ff"></span><span class="nm" title="BP_Valve">BP_Valve</span><span class="n">14</span></label><label class="row"><input type="checkbox" data-c="56" checked=""><span class="sw" style="background:#a5d6a7"></span><span class="nm" title="BP_ValveHint">BP_ValveHint</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="57"><span class="sw" style="background:#00e5ff"></span><span class="nm" title="DecalActor">DecalActor</span><span class="n">7</span></label><label class="row"><input type="checkbox" data-c="58"><span class="sw" style="background:#ff5252"></span><span class="nm" title="Emitter">Emitter</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="59"><span class="sw" style="background:#ffb86b"></span><span class="nm" title="InstancedFoliageActor">InstancedFoliageActor</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="60"><span class="sw" style="background:#00e5ff"></span><span class="nm" title="LevelSequenceActor">LevelSequenceActor</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="61"><span class="sw" style="background:#ffe066"></span><span class="nm" title="LightmassImportanceVolume">LightmassImportanceVolume</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="62"><span class="sw" style="background:#c792ea"></span><span class="nm" title="NavMeshBoundsVolume">NavMeshBoundsVolume</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="63" checked=""><span class="sw" style="background:#ff80ab"></span><span class="nm" title="Pipe_Exit">Pipe_Exit</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="64" checked=""><span class="sw" style="background:#ce93d8"></span><span class="nm" title="PlayerStart">PlayerStart</span><span class="n">16</span></label><label class="row"><input type="checkbox" data-c="65" checked=""><span class="sw" style="background:#ff5252"></span><span class="nm" title="PointLight">PointLight</span><span class="n">3</span></label><label class="row"><input type="checkbox" data-c="66"><span class="sw" style="background:#c792ea"></span><span class="nm" title="PostProcessVolume">PostProcessVolume</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="67"><span class="sw" style="background:#a5d6a7"></span><span class="nm" title="RecastNavMesh">RecastNavMesh</span><span class="n">2</span></label><label class="row"><input type="checkbox" data-c="68"><span class="sw" style="background:#ffe066"></span><span class="nm" title="SphereReflectionCapture">SphereReflectionCapture</span><span class="n">51</span></label></details></aside>
+    <button type="button" id="filtersToggle" aria-expanded="false">☷ Filtres</button>
+<aside id="cats"><input type="search" id="sq" placeholder="Filtrer…" value=""><div style="display:flex;gap:6px;margin-bottom:6px"><button id="ca">Tout</button><button id="cn">Aucun</button><button id="cd">Défaut</button></div><details open=""><summary><input type="checkbox" data-g="2" checked="" data-ind="0"> Portes / ouvertures<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">114</span></summary><label class="row"><input type="checkbox" data-c="21" checked=""><span class="sw" style="background:#ff8a65"></span><span class="nm" title="SM_Wall_Doorway_4m_02">SM_Wall_Doorway_4m_02</span><span class="n">45</span></label><label class="row"><input type="checkbox" data-c="22" checked=""><span class="sw" style="background:#ff8a65"></span><span class="nm" title="SM_Wall_Doorway_4m_03">SM_Wall_Doorway_4m_03</span><span class="n">51</span></label><label class="row"><input type="checkbox" data-c="26" checked=""><span class="sw" style="background:#ff8a65"></span><span class="nm" title="SM_Wall_Doorway_4m_01">SM_Wall_Doorway_4m_01</span><span class="n">18</span></label></details><details open=""><summary><input type="checkbox" data-g="3" checked="" data-ind="0"> Murs<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">995</span></summary><label class="row"><input type="checkbox" data-c="19" checked=""><span class="sw" style="background:#cfe0f0"></span><span class="nm" title="SM_Wall_2m_01">SM_Wall_2m_01</span><span class="n">239</span></label><label class="row"><input type="checkbox" data-c="20" checked=""><span class="sw" style="background:#cfe0f0"></span><span class="nm" title="SM_Wall_4m_01">SM_Wall_4m_01</span><span class="n">587</span></label><label class="row"><input type="checkbox" data-c="23" checked=""><span class="sw" style="background:#cfe0f0"></span><span class="nm" title="SM_Wall_Corner_01">SM_Wall_Corner_01</span><span class="n">50</span></label><label class="row"><input type="checkbox" data-c="36" checked=""><span class="sw" style="background:#cfe0f0"></span><span class="nm" title="SM_Wall_01">SM_Wall_01</span><span class="n">119</span></label></details><details open=""><summary><input type="checkbox" data-g="4" checked="" data-ind="0"> Sols<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">203</span></summary><label class="row"><input type="checkbox" data-c="2" checked=""><span class="sw" style="background:#9fb3c8"></span><span class="nm" title="SM_Floor_01">SM_Floor_01</span><span class="n">16</span></label><label class="row"><input type="checkbox" data-c="10" checked=""><span class="sw" style="background:#9fb3c8"></span><span class="nm" title="SM_Floor_4m_01">SM_Floor_4m_01</span><span class="n">187</span></label></details><details><summary><input type="checkbox" data-g="7" checked="" data-ind="0"> Escaliers / rampes<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">8</span></summary><label class="row"><input type="checkbox" data-c="3" checked=""><span class="sw" style="background:#5fd0a0"></span><span class="nm" title="SM_Stairs_01">SM_Stairs_01</span><span class="n">8</span></label></details><details><summary><input type="checkbox" data-g="8" data-ind="0"> Tuyaux / conduits<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">1604</span></summary><label class="row"><input type="checkbox" data-c="11"><span class="sw" style="background:#e8d44d"></span><span class="nm" title="SM_hose_b">SM_hose_b</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="12"><span class="sw" style="background:#e8d44d"></span><span class="nm" title="SM_Pipe_Standard_4m_01">SM_Pipe_Standard_4m_01</span><span class="n">764</span></label><label class="row"><input type="checkbox" data-c="13"><span class="sw" style="background:#e8d44d"></span><span class="nm" title="SM_Pipe_Standard_T_2m_01">SM_Pipe_Standard_T_2m_01</span><span class="n">76</span></label><label class="row"><input type="checkbox" data-c="14"><span class="sw" style="background:#e8d44d"></span><span class="nm" title="SM_Pipe_Standard_Bend_90_1m_01">SM_Pipe_Standard_Bend_90_1m_01</span><span class="n">282</span></label><label class="row"><input type="checkbox" data-c="15"><span class="sw" style="background:#e8d44d"></span><span class="nm" title="SM_Pipe_Standard_1m_01">SM_Pipe_Standard_1m_01</span><span class="n">127</span></label><label class="row"><input type="checkbox" data-c="16"><span class="sw" style="background:#e8d44d"></span><span class="nm" title="SM_Pipe_Standard_2m_01">SM_Pipe_Standard_2m_01</span><span class="n">281</span></label><label class="row"><input type="checkbox" data-c="24"><span class="sw" style="background:#e8d44d"></span><span class="nm" title="SM_Pipe_Standard_Bend_S_2m_01">SM_Pipe_Standard_Bend_S_2m_01</span><span class="n">56</span></label><label class="row"><input type="checkbox" data-c="25"><span class="sw" style="background:#e8d44d"></span><span class="nm" title="SM_Pipe_Standard_Bend_180_1m_01">SM_Pipe_Standard_Bend_180_1m_01</span><span class="n">17</span></label></details><details><summary><input type="checkbox" data-g="9" checked="" data-ind="0"> Clôtures / barrières<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">18</span></summary><label class="row"><input type="checkbox" data-c="4" checked=""><span class="sw" style="background:#c792ea"></span><span class="nm" title="SM_Fence_02">SM_Fence_02</span><span class="n">16</span></label><label class="row"><input type="checkbox" data-c="9" checked=""><span class="sw" style="background:#c792ea"></span><span class="nm" title="SM_Fence_01">SM_Fence_01</span><span class="n">2</span></label></details><details><summary><input type="checkbox" data-g="10" data-ind="0"> Décals<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">192</span></summary><label class="row"><input type="checkbox" data-c="7"><span class="sw" style="background:#6b7785"></span><span class="nm" title="SM_Decal_01">SM_Decal_01</span><span class="n">192</span></label></details><details><summary><input type="checkbox" data-g="11" checked="" data-ind="0"> Autres meshes<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">97</span></summary><label class="row"><input type="checkbox" data-c="0" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="StaticMesh">StaticMesh</span><span class="n">47</span></label><label class="row"><input type="checkbox" data-c="1" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="Cube">Cube</span><span class="n">2</span></label><label class="row"><input type="checkbox" data-c="5" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="Plane">Plane</span><span class="n">8</span></label><label class="row"><input type="checkbox" data-c="6" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="SM_Concrete_Block_03">SM_Concrete_Block_03</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="8" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="SM_Exit_02">SM_Exit_02</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="17" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="SM_RackTable_01">SM_RackTable_01</span><span class="n">3</span></label><label class="row"><input type="checkbox" data-c="18" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="SM_SignB_13">SM_SignB_13</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="27" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="storage5">storage5</span><span class="n">5</span></label><label class="row"><input type="checkbox" data-c="28" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="storage6">storage6</span><span class="n">5</span></label><label class="row"><input type="checkbox" data-c="29" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="storage7">storage7</span><span class="n">8</span></label><label class="row"><input type="checkbox" data-c="30" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="storage8">storage8</span><span class="n">7</span></label><label class="row"><input type="checkbox" data-c="31" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="storage1">storage1</span><span class="n">2</span></label><label class="row"><input type="checkbox" data-c="32" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="storage11">storage11</span><span class="n">2</span></label><label class="row"><input type="checkbox" data-c="33" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="storage4">storage4</span><span class="n">2</span></label><label class="row"><input type="checkbox" data-c="34" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="storage2">storage2</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="35" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="storage9">storage9</span><span class="n">2</span></label></details><details><summary><input type="checkbox" data-g="12" data-ind="1"> Objets (acteurs)<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">309</span></summary><label class="row"><input type="checkbox" data-c="37"><span class="sw" style="background:#ff5252"></span><span class="nm" title="Actor">Actor</span><span class="n">3</span></label><label class="row"><input type="checkbox" data-c="38"><span class="sw" style="background:#ffe066"></span><span class="nm" title="AmbientSound">AmbientSound</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="39"><span class="sw" style="background:#ff80ab"></span><span class="nm" title="BoxReflectionCapture">BoxReflectionCapture</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="40" checked=""><span class="sw" style="background:#ff5252"></span><span class="nm" title="BP_BoilerDoor">BP_BoilerDoor</span><span class="n">4</span></label><label class="row"><input type="checkbox" data-c="41" checked=""><span class="sw" style="background:#ffe066"></span><span class="nm" title="BP_Boilerroom_Checkpoint_Trigger">BP_Boilerroom_Checkpoint_Trigger</span><span class="n">2</span></label><label class="row"><input type="checkbox" data-c="42" checked=""><span class="sw" style="background:#a5d6a7"></span><span class="nm" title="BP_DroppedItem_AlmondWater">BP_DroppedItem_AlmondWater</span><span class="n">2</span></label><label class="row"><input type="checkbox" data-c="43" checked=""><span class="sw" style="background:#5fd0a0"></span><span class="nm" title="BP_DroppedItem_EnergyBar">BP_DroppedItem_EnergyBar</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="44" checked=""><span class="sw" style="background:#ff80ab"></span><span class="nm" title="BP_DroppedItem_Juice">BP_DroppedItem_Juice</span><span class="n">2</span></label><label class="row"><input type="checkbox" data-c="45" checked=""><span class="sw" style="background:#c792ea"></span><span class="nm" title="BP_DroppedItem_Thermometer">BP_DroppedItem_Thermometer</span><span class="n">12</span></label><label class="row"><input type="checkbox" data-c="46" checked=""><span class="sw" style="background:#f48fb1"></span><span class="nm" title="BP_ExitZone">BP_ExitZone</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="47" checked=""><span class="sw" style="background:#5fd0a0"></span><span class="nm" title="BP_Flashlight_Trigger">BP_Flashlight_Trigger</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="48" checked=""><span class="sw" style="background:#5fd0a0"></span><span class="nm" title="BP_HeatZone">BP_HeatZone</span><span class="n">13</span></label><label class="row"><input type="checkbox" data-c="49" checked=""><span class="sw" style="background:#35b7ff"></span><span class="nm" title="BP_Lamp">BP_Lamp</span><span class="n">134</span></label><label class="row"><input type="checkbox" data-c="50" checked=""><span class="sw" style="background:#ffb86b"></span><span class="nm" title="BP_Moth">BP_Moth</span><span class="n">10</span></label><label class="row"><input type="checkbox" data-c="51" checked=""><span class="sw" style="background:#c792ea"></span><span class="nm" title="BP_Moths">BP_Moths</span><span class="n">5</span></label><label class="row"><input type="checkbox" data-c="52"><span class="sw" style="background:#ff5252"></span><span class="nm" title="BP_Note">BP_Note</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="53" checked=""><span class="sw" style="background:#35b7ff"></span><span class="nm" title="BP_PipeSpray">BP_PipeSpray</span><span class="n">14</span></label><label class="row"><input type="checkbox" data-c="54" checked=""><span class="sw" style="background:#ff80ab"></span><span class="nm" title="BP_TimeStampCapture">BP_TimeStampCapture</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="55" checked=""><span class="sw" style="background:#00e5ff"></span><span class="nm" title="BP_Valve">BP_Valve</span><span class="n">14</span></label><label class="row"><input type="checkbox" data-c="56" checked=""><span class="sw" style="background:#a5d6a7"></span><span class="nm" title="BP_ValveHint">BP_ValveHint</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="57"><span class="sw" style="background:#00e5ff"></span><span class="nm" title="DecalActor">DecalActor</span><span class="n">7</span></label><label class="row"><input type="checkbox" data-c="58"><span class="sw" style="background:#ff5252"></span><span class="nm" title="Emitter">Emitter</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="59"><span class="sw" style="background:#ffb86b"></span><span class="nm" title="InstancedFoliageActor">InstancedFoliageActor</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="60"><span class="sw" style="background:#00e5ff"></span><span class="nm" title="LevelSequenceActor">LevelSequenceActor</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="61"><span class="sw" style="background:#ffe066"></span><span class="nm" title="LightmassImportanceVolume">LightmassImportanceVolume</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="62"><span class="sw" style="background:#c792ea"></span><span class="nm" title="NavMeshBoundsVolume">NavMeshBoundsVolume</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="63" checked=""><span class="sw" style="background:#ff80ab"></span><span class="nm" title="Pipe_Exit">Pipe_Exit</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="64" checked=""><span class="sw" style="background:#ce93d8"></span><span class="nm" title="PlayerStart">PlayerStart</span><span class="n">16</span></label><label class="row"><input type="checkbox" data-c="65" checked=""><span class="sw" style="background:#ff5252"></span><span class="nm" title="PointLight">PointLight</span><span class="n">3</span></label><label class="row"><input type="checkbox" data-c="66"><span class="sw" style="background:#c792ea"></span><span class="nm" title="PostProcessVolume">PostProcessVolume</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="67"><span class="sw" style="background:#a5d6a7"></span><span class="nm" title="RecastNavMesh">RecastNavMesh</span><span class="n">2</span></label><label class="row"><input type="checkbox" data-c="68"><span class="sw" style="background:#ffe066"></span><span class="nm" title="SphereReflectionCapture">SphereReflectionCapture</span><span class="n">51</span></label></details></aside>
+
+    <div id="w">
+        
+<canvas id="cv" width="642" height="627"></canvas>
+
+        <div id="hud">
+            <span id="st" hidden=""></span>
+            <span id="tx">X -18007  Y -11530   ›  SM_Wall_4m_01  (-17799, -11302)</span>
+        </div>
+    </div>
+
+    <aside id="pn" hidden=""></aside>
+</div>
+
+<div id="toolbars">
+<div class="toolbar" id="viewToolbar">
+    <span class="toolbar-title">Affichage et navigation</span>
+
+    <label class="lv" hidden="">
+        <input type="checkbox" id="fo" checked="">
+        Suivre le joueur
+    </label>
+
+    <label class="lv" hidden="">
+        <input type="checkbox" id="au" checked="">
+        Calque auto (selon Z)
+    </label>
+
+    <label class="lv" hidden="">
+        <input type="checkbox" id="tr" checked="">
+        Trace joueur
+    </label>
+
+    <label>
+        Calque
+        <select id="ly"><option value="-1">Tous</option><option value="0">z ≈ -2002  (28 pièces)</option><option value="1">z ≈ -1702  (32 pièces)</option><option value="2">z ≈ -1104  (45 pièces)</option><option value="3">z ≈ -372  (16 pièces)</option><option value="4">z ≈ +26  (1141 pièces)</option><option value="5">z ≈ +425  (76 pièces)</option></select>
+    </label>
+
+    <label>
+        <input type="checkbox" id="vo" checked="">
+        Volumes
+    </label>
+
+    <label class="lv" hidden="">
+        <input type="checkbox" id="sim">
+        Test : clic = téléporter
+    </label>
+
+    <label>
+        Orientation
+        <select id="o">
+            <option value="0">Vue UE (X→, Y↓)</option>
+            <option value="1">Y vers le haut</option>
+        </select>
+    </label>
+
+    <button id="r">Recentrer</button>
+    <button id="cl" class="lv" hidden="">Effacer trace joueur</button>
+</div>
+</div>
+<script>
+
+// ======================================================
+// DONNÉES DE LA CARTE
+// ======================================================
+
+const LIVE = true;
+const CATS = [{"n":"StaticMesh","g":11,"c":"#8fbcbb","on":1,"lw":0,"s":"c","cnt":47},{"n":"Cube","g":11,"c":"#8fbcbb","on":1,"lw":0,"s":"c","cnt":2},{"n":"SM_Floor_01","g":4,"c":"#9fb3c8","on":1,"lw":0,"s":"c","cnt":16},{"n":"SM_Stairs_01","g":7,"c":"#5fd0a0","on":1,"lw":0,"s":"c","cnt":8},{"n":"SM_Fence_02","g":9,"c":"#c792ea","on":1,"lw":14,"s":"c","cnt":16},{"n":"Plane","g":11,"c":"#8fbcbb","on":1,"lw":0,"s":"c","cnt":8},{"n":"SM_Concrete_Block_03","g":11,"c":"#8fbcbb","on":1,"lw":0,"s":"c","cnt":1},{"n":"SM_Decal_01","g":10,"c":"#6b7785","on":0,"lw":0,"s":"c","cnt":192},{"n":"SM_Exit_02","g":11,"c":"#8fbcbb","on":1,"lw":0,"s":"c","cnt":1},{"n":"SM_Fence_01","g":9,"c":"#c792ea","on":1,"lw":14,"s":"c","cnt":2},{"n":"SM_Floor_4m_01","g":4,"c":"#9fb3c8","on":1,"lw":0,"s":"c","cnt":187},{"n":"SM_hose_b","g":8,"c":"#e8d44d","on":0,"lw":14,"s":"c","cnt":1},{"n":"SM_Pipe_Standard_4m_01","g":8,"c":"#e8d44d","on":0,"lw":14,"s":"c","cnt":764},{"n":"SM_Pipe_Standard_T_2m_01","g":8,"c":"#e8d44d","on":0,"lw":14,"s":"c","cnt":76},{"n":"SM_Pipe_Standard_Bend_90_1m_01","g":8,"c":"#e8d44d","on":0,"lw":14,"s":"c","cnt":282},{"n":"SM_Pipe_Standard_1m_01","g":8,"c":"#e8d44d","on":0,"lw":14,"s":"c","cnt":127},{"n":"SM_Pipe_Standard_2m_01","g":8,"c":"#e8d44d","on":0,"lw":14,"s":"c","cnt":281},{"n":"SM_RackTable_01","g":11,"c":"#8fbcbb","on":1,"lw":0,"s":"c","cnt":3},{"n":"SM_SignB_13","g":11,"c":"#8fbcbb","on":1,"lw":0,"s":"c","cnt":1},{"n":"SM_Wall_2m_01","g":3,"c":"#cfe0f0","on":1,"lw":30,"s":"c","cnt":239},{"n":"SM_Wall_4m_01","g":3,"c":"#cfe0f0","on":1,"lw":30,"s":"c","cnt":587},{"n":"SM_Wall_Doorway_4m_02","g":2,"c":"#ff8a65","on":1,"lw":30,"s":"c","cnt":45},{"n":"SM_Wall_Doorway_4m_03","g":2,"c":"#ff8a65","on":1,"lw":30,"s":"c","cnt":51},{"n":"SM_Wall_Corner_01","g":3,"c":"#cfe0f0","on":1,"lw":30,"s":"c","cnt":50},{"n":"SM_Pipe_Standard_Bend_S_2m_01","g":8,"c":"#e8d44d","on":0,"lw":14,"s":"c","cnt":56},{"n":"SM_Pipe_Standard_Bend_180_1m_01","g":8,"c":"#e8d44d","on":0,"lw":14,"s":"c","cnt":17},{"n":"SM_Wall_Doorway_4m_01","g":2,"c":"#ff8a65","on":1,"lw":30,"s":"c","cnt":18},{"n":"storage5","g":11,"c":"#8fbcbb","on":1,"lw":0,"s":"c","cnt":5},{"n":"storage6","g":11,"c":"#8fbcbb","on":1,"lw":0,"s":"c","cnt":5},{"n":"storage7","g":11,"c":"#8fbcbb","on":1,"lw":0,"s":"c","cnt":8},{"n":"storage8","g":11,"c":"#8fbcbb","on":1,"lw":0,"s":"c","cnt":7},{"n":"storage1","g":11,"c":"#8fbcbb","on":1,"lw":0,"s":"c","cnt":2},{"n":"storage11","g":11,"c":"#8fbcbb","on":1,"lw":0,"s":"c","cnt":2},{"n":"storage4","g":11,"c":"#8fbcbb","on":1,"lw":0,"s":"c","cnt":2},{"n":"storage2","g":11,"c":"#8fbcbb","on":1,"lw":0,"s":"c","cnt":1},{"n":"storage9","g":11,"c":"#8fbcbb","on":1,"lw":0,"s":"c","cnt":2},{"n":"SM_Wall_01","g":3,"c":"#cfe0f0","on":1,"lw":30,"s":"c","cnt":119},{"n":"Actor","g":12,"c":"#ff5252","on":0,"lw":0,"s":"c","cnt":3},{"n":"AmbientSound","g":12,"c":"#ffe066","on":0,"lw":0,"s":"c","cnt":1},{"n":"BoxReflectionCapture","g":12,"c":"#ff80ab","on":0,"lw":0,"s":"c","cnt":1},{"n":"BP_BoilerDoor","g":12,"c":"#ff5252","on":1,"lw":0,"s":"s","cnt":4},{"n":"BP_Boilerroom_Checkpoint_Trigger","g":12,"c":"#ffe066","on":1,"lw":0,"s":"r","cnt":2},{"n":"BP_DroppedItem_AlmondWater","g":12,"c":"#a5d6a7","on":1,"lw":0,"s":"c","cnt":2},{"n":"BP_DroppedItem_EnergyBar","g":12,"c":"#5fd0a0","on":1,"lw":0,"s":"c","cnt":1},{"n":"BP_DroppedItem_Juice","g":12,"c":"#ff80ab","on":1,"lw":0,"s":"c","cnt":2},{"n":"BP_DroppedItem_Thermometer","g":12,"c":"#c792ea","on":1,"lw":0,"s":"c","cnt":12},{"n":"BP_ExitZone","g":12,"c":"#f48fb1","on":1,"lw":0,"s":"r","cnt":1},{"n":"BP_Flashlight_Trigger","g":12,"c":"#5fd0a0","on":1,"lw":0,"s":"r","cnt":1},{"n":"BP_HeatZone","g":12,"c":"#5fd0a0","on":1,"lw":0,"s":"r","cnt":13},{"n":"BP_Lamp","g":12,"c":"#35b7ff","on":1,"lw":0,"s":"c","cnt":134},{"n":"BP_Moth","g":12,"c":"#ffb86b","on":1,"lw":0,"s":"c","cnt":10},{"n":"BP_Moths","g":12,"c":"#c792ea","on":1,"lw":0,"s":"c","cnt":5},{"n":"BP_Note","g":12,"c":"#ff5252","on":0,"lw":0,"s":"c","cnt":1},{"n":"BP_PipeSpray","g":12,"c":"#35b7ff","on":1,"lw":0,"s":"c","cnt":14},{"n":"BP_TimeStampCapture","g":12,"c":"#ff80ab","on":1,"lw":0,"s":"c","cnt":1},{"n":"BP_Valve","g":12,"c":"#00e5ff","on":1,"lw":0,"s":"s","cnt":14},{"n":"BP_ValveHint","g":12,"c":"#a5d6a7","on":1,"lw":0,"s":"s","cnt":1},{"n":"DecalActor","g":12,"c":"#00e5ff","on":0,"lw":0,"s":"c","cnt":7},{"n":"Emitter","g":12,"c":"#ff5252","on":0,"lw":0,"s":"c","cnt":1},{"n":"InstancedFoliageActor","g":12,"c":"#ffb86b","on":0,"lw":0,"s":"c","cnt":1},{"n":"LevelSequenceActor","g":12,"c":"#00e5ff","on":0,"lw":0,"s":"c","cnt":1},{"n":"LightmassImportanceVolume","g":12,"c":"#ffe066","on":0,"lw":0,"s":"r","cnt":1},{"n":"NavMeshBoundsVolume","g":12,"c":"#c792ea","on":0,"lw":0,"s":"r","cnt":1},{"n":"Pipe_Exit","g":12,"c":"#ff80ab","on":1,"lw":0,"s":"c","cnt":1},{"n":"PlayerStart","g":12,"c":"#ce93d8","on":1,"lw":0,"s":"d","cnt":16},{"n":"PointLight","g":12,"c":"#ff5252","on":1,"lw":0,"s":"c","cnt":3},{"n":"PostProcessVolume","g":12,"c":"#c792ea","on":0,"lw":0,"s":"r","cnt":1},{"n":"RecastNavMesh","g":12,"c":"#a5d6a7","on":0,"lw":0,"s":"c","cnt":2},{"n":"SphereReflectionCapture","g":12,"c":"#ffe066","on":0,"lw":0,"s":"c","cnt":51}];
+const GR = ["Plinthes","Lumières (meshes)","Portes / ouvertures","Murs","Sols","Plafonds","Piliers / colonnes","Escaliers / rampes","Tuyaux / conduits","Clôtures / barrières","Décals","Autres meshes","Objets (acteurs)"];
+const L = [[-16165,-1385,90.0,100,4,15],[-15705,-3745,180.0,100,4,15],[-16165,-685,90.0,100,4,15],[-16155,-3745,180.0,400,4,12],[-16405,-3745,0.0,100,4,15],[-16569,-4909,0.0,100,4,15],[-17019,-4909,0.0,400,4,12],[-17269,-4909,0.0,100,4,15],[-16120,-6846,0.0,428,4,12],[-16384,-6846,0.0,100,4,15],[-20104,-7295,180.0,100,4,15],[-19654,-7295,180.0,400,4,12],[-19404,-7295,0.0,100,4,15],[-16165,-1135,90.0,400,4,12],[-16978,-4568,36.6,190,4,19],[-14010,110,180.0,400,4,20],[-14860,450,180.0,400,4,12],[-14410,-290,0.0,400,4,20],[-14710,110,180.0,200,4,19],[-3863,-6603,180.0,316,4,20],[-16033,-10433,180.0,400,4,20],[-18543,-8273,0.0,311,4,19],[-4699,-7099,180.0,373,4,20],[-14810,-190,180.0,400,4,20],[-5885,-7099,180.0,400,4,20],[-13602,-10633,90.0,296,4,16],[-12992,-10486,180.0,400,4,21],[-17351,-7922,0.0,145,4,19],[-15210,-90,90.0,400,4,22],[-12741,-10342,90.0,289,4,19],[-13602,-10337,90.0,279,4,16],[-13218,-10686,90.0,400,4,20],[-15489,-7877,90.0,435,4,20],[-13602,-10093,90.0,190,4,16],[-13218,-11111,90.0,450,4,20],[-13602,-9898,90.0,200,4,16],[-13602,-9671,90.0,256,4,16],[-13810,-190,180.0,400,4,20],[-15349,-7997,0.0,200,4,16],[-15539,-8197,0.0,400,4,12],[-12576,-9618,90.0,389,4,20],[-15374,-8127,0.0,200,4,12],[-15344,-8057,0.0,200,4,12],[-13602,-10928,90.0,296,4,16],[-12046,-9487,90.0,126,4,19],[-16399,-10433,180.0,332,4,20],[-14758,-10734,180.0,508,4,20],[-14110,-190,180.0,200,4,19],[-17415,-7850,90.0,145,4,19],[-11355,-9551,180.0,500,4,20],[-13602,-11162,90.0,174,4,16],[-15549,-7997,0.0,200,4,16],[-15574,-8127,0.0,200,4,12],[-15544,-8057,0.0,200,4,12],[-14999,-9298,180.0,200,4,19],[-15390,-10102,90.0,391,4,20],[-14689,-6811,0.0,400,4,20],[-14426,-11195,180.0,146,4,19],[-16210,-490,90.0,400,4,22],[-19782,-7254,180.0,200,4,19],[-12376,-9885,180.0,400,4,21],[-18709,-8740,90.0,235,4,19],[-14670,-10935,180.0,160,4,19],[-14589,-10830,90.0,210,4,19],[-14836,-7904,180.0,435,4,20],[-15554,-9859,90.0,343,4,20],[-14343,-11197,90.0,200,4,19],[-14421,-6811,0.0,136,4,19],[-16410,-290,0.0,400,4,20],[-12108,-9885,180.0,136,4,19],[-12049,-10076,90.0,400,4,20],[-14484,-7904,180.0,269,4,20],[-15224,-9822,0.0,50,4,15],[-16709,-10695,180.0,400,4,20],[-14494,-8622,90.0,565,4,20],[-14503,-10644,90.0,180,4,19],[-14930,-6901,0.0,284,4,16],[-15690,-11275,90.0,180,4,19],[-18387,-8482,90.0,418,4,21],[-14421,-8904,180.0,145,4,20],[-15274,-9822,0.0,50,4,15],[-11999,-7976,90.0,400,4,20],[-19682,-7865,90.0,400,4,20],[-17010,-490,90.0,400,4,20],[-11999,-8376,90.0,400,4,20],[-11999,-8776,90.0,400,4,20],[-11999,-9155,90.0,358,4,20],[-18489,-6497,180.0,400,4,20],[-17698,-8893,90.0,400,4,20],[-12150,-11036,90.0,299,4,20],[-13710,-3047,90.0,106,4,19],[-16379,-11305,180.0,300,4,20],[-11940,-11195,180.0,400,4,20],[-12090,-10876,180.0,101,4,19],[-16810,-4100,180.0,200,4,19],[-16510,-4100,180.0,400,4,21],[-16679,-11305,180.0,300,4,20],[-15510,-3700,180.0,400,4,22],[-11540,-11195,180.0,400,4,20],[-15710,-3500,90.0,400,4,20],[-13710,110,0.0,200,4,19],[-15480,480,180.0,100,4,16],[-16510,-3500,90.0,400,4,20],[-15370,-3996,90.0,192,4,16],[-15670,-3800,0.0,400,4,12],[-16470,-3800,0.0,400,4,12],[-15864,-5074,90.0,400,4,12],[-12960,-1500,180.0,500,4,20],[-11140,-11195,180.0,400,4,20],[-17134,-8857,90.0,319,4,12],[-16470,-4000,0.0,400,4,12],[-16785,-4000,0.0,231,4,16],[-16610,-890,90.0,400,4,20],[-16979,-11305,180.0,300,4,20],[-10775,-11195,180.0,330,4,20],[-12015,-2201,180.0,400,4,20],[-16110,-4040,0.0,200,4,12],[-16335,-4040,0.0,50,4,15],[-16010,-4040,0.0,200,4,12],[-16810,-1490,0.0,400,4,20],[-17279,-11305,180.0,300,4,20],[-14143,-9543,180.0,400,4,20],[-16785,-4075,180.0,230,4,12],[-15859,-5238,180.0,100,4,16],[-16736,-4076,180.0,130,4,16],[-16851,-3926,90.0,200,4,12],[-11839,-10886,180.0,400,4,20],[-14687,-10564,180.0,367,4,20],[-11439,-10886,180.0,400,4,20],[-17454,-11305,180.0,300,4,20],[-16410,-1490,0.0,400,4,20],[-10608,-11077,90.0,400,4,26],[-15324,-9822,0.0,50,4,15],[-10608,-11377,90.0,200,4,19],[-10724,-10886,180.0,230,4,19],[-10731,-10686,90.0,400,4,20],[-14862,-10639,90.0,169,4,19],[-10731,-10261,90.0,450,4,20],[-16210,-1690,90.0,400,4,22],[-15374,-9822,0.0,50,4,15],[-10651,-10051,180.0,160,4,19],[-10570,-9891,90.0,320,4,20],[-10410,-9741,180.0,320,4,22],[-10170,-9741,180.0,160,4,19],[-15424,-9822,0.0,50,4,15],[-10080,-9490,90.0,483,4,20],[-17010,-1690,90.0,400,4,20],[-9880,-9258,180.0,400,4,20],[-9480,-9258,180.0,400,4,20],[-9023,-9258,180.0,515,4,20],[-8775,-9458,90.0,400,4,20],[-8775,-9818,90.0,319,4,19],[-17010,-2090,90.0,400,4,20],[-8575,-9970,180.0,400,4,21],[-10113,-7246,90.0,320,4,20],[-9769,-7246,90.0,319,4,20],[-14973,-10183,180.0,78,4,19],[-14533,-9992,90.0,400,4,20],[-14210,710,90.0,400,4,20],[-15610,-90,90.0,400,4,20],[-14533,-9592,90.0,400,4,20],[-14533,-9292,90.0,200,4,19],[-14743,-9191,180.0,420,4,20],[-15474,-9822,0.0,50,4,15],[-15527,-9822,0.0,56,4,15],[-9580,-7686,90.0,400,4,20],[-17010,-2790,90.0,200,4,19],[-15190,-9298,180.0,183,4,19],[-15362,-9707,180.0,400,4,20],[-9452,-8083,90.0,400,4,20],[-9511,-7892,180.0,138,4,19],[-9452,-8483,90.0,400,4,20],[-9452,-8783,90.0,200,4,19],[-16810,-2890,0.0,400,4,20],[-14044,-10012,0.0,200,4,12],[-14244,-10012,0.0,200,4,12],[-11219,-8874,180.0,355,4,20],[-14044,-10102,0.0,200,4,12],[-14244,-10102,0.0,200,4,12],[-11395,-8674,90.0,400,4,22],[-13644,-10012,0.0,200,4,12],[-9755,-8219,90.0,400,4,20],[-13844,-10012,0.0,200,4,12],[-13644,-10102,0.0,200,4,12],[-13844,-10102,0.0,200,4,12],[-9088,-8240,90.0,400,4,20],[-16010,-2890,0.0,400,4,20],[-9088,-8577,90.0,273,4,19],[-9273,-8704,180.0,388,4,26],[-13008,-11346,180.0,400,4,20],[-13244,-10012,0.0,200,4,12],[-15610,-2890,0.0,400,4,20],[-13444,-10012,0.0,200,4,12],[-12312,-11136,90.0,400,4,20],[-13244,-10102,0.0,200,4,12],[-12312,-10736,90.0,400,4,20],[-13444,-10102,0.0,200,4,12],[-12844,-10012,0.0,200,4,12],[-13044,-10012,0.0,200,4,12],[-12844,-10102,0.0,200,4,12],[-10090,-10331,90.0,400,4,20],[-13044,-10102,0.0,200,4,12],[-15410,-2690,90.0,400,4,20],[-10090,-10785,90.0,508,4,20],[-10408,-11356,180.0,400,4,20],[-10008,-11356,180.0,400,4,20],[-16774,-4864,0.0,400,4,20],[-17174,-4864,0.0,400,4,20],[-17574,-4864,0.0,400,4,21],[-17974,-4864,0.0,400,4,20],[-15410,-2390,90.0,200,4,19],[-9619,-11356,180.0,379,4,20],[-17975,-5268,180.0,400,4,22],[-18175,-5471,90.0,407,4,20],[-16374,-4874,180.0,400,4,20],[-9229,-11028,180.0,400,4,20],[-17213,-4745,36.6,400,4,20],[-17574,-4864,180.0,400,4,22],[-15610,-2290,0.0,400,4,21],[-16234,-5264,90.0,400,4,12],[-16534,-4964,0.0,400,4,12],[-17334,-4964,0.0,400,4,12],[-17734,-4964,0.0,400,4,12],[-16010,-2290,0.0,400,4,20],[-15949,-10587,90.0,180,4,16],[-17334,-5164,0.0,400,4,12],[-17634,-5164,0.0,200,4,16],[-13610,-490,90.0,400,4,20],[-13817,-11257,180.0,400,4,20],[-8760,-11108,90.0,178,4,19],[-8550,-11198,180.0,400,4,20],[-8150,-11198,180.0,400,4,20],[-16310,-2290,0.0,200,4,19],[-15500,-3300,180.0,400,4,20],[-7873,-11198,180.0,154,4,19],[-7786,-10988,90.0,400,4,20],[-7996,-9578,180.0,400,4,20],[-16910,-2290,0.0,200,4,19],[-8340,-9578,180.0,286,4,19],[-15974,-4864,0.0,400,4,22],[-8232,-9970,180.0,288,4,20],[-16610,-2290,0.0,400,4,26],[-16910,-3900,90.0,400,4,22],[-16785,-4124,0.0,230,4,16],[-8098,-10203,90.0,466,4,20],[-16910,-4301,90.0,400,4,21],[-8098,-10585,90.0,300,4,19],[-8288,-10735,180.0,400,4,20],[-16810,-4110,180.0,200,4,19],[-16785,-3800,0.0,230,4,16],[-8688,-10735,180.0,400,4,20],[-9088,-10735,180.0,400,4,20],[-9507,-10735,180.0,438,4,20],[-16878,-10184,90.0,298,4,19],[-9736,-10638,90.0,400,4,20],[-16910,-4692,90.0,363,4,20],[-16225,-5207,180.0,100,4,15],[-15799,-4292,90.0,400,4,20],[-15999,-5258,0.0,400,4,20],[-18649,-8647,90.0,400,4,12],[-18649,-8397,90.0,100,4,15],[-16409,-5258,0.0,400,4,20],[-16819,-5258,0.0,400,4,20],[-16210,-2690,90.0,400,4,21],[-19682,-7465,90.0,400,4,20],[-17229,-5258,0.0,400,4,20],[-17600,-10697,90.0,400,4,20],[-17607,-5258,0.0,336,4,20],[-21042,-7165,0.0,400,4,12],[-20742,-7465,90.0,400,4,12],[-18000,-11097,90.0,400,4,21],[-16210,-2390,90.0,200,4,19],[-18000,-10697,90.0,400,4,20],[-18000,-10297,90.0,400,4,20],[-15253,-10226,90.0,216,4,19],[-17356,-9686,180.0,154,4,19],[-20742,-7865,90.0,400,4,12],[-20742,-8165,90.0,200,4,16],[-16210,-2690,90.0,400,4,22],[-14654,-6901,0.0,268,4,16],[-20881,-8066,180.0,400,4,20],[-17110,-3700,0.0,400,4,20],[-17999,-8847,0.0,200,4,16],[-17508,-3883,42.7,540,4,20],[-17900,-4064,0.0,400,4,20],[-17500,-10037,0.0,200,4,16],[-13610,-890,90.0,400,4,20],[-17700,-10337,90.0,400,4,12],[-17700,-10937,90.0,400,4,12],[-17119,-10695,180.0,400,4,20],[-18300,-4064,0.0,400,4,26],[-20742,-7973,90.0,165,4,16],[-20742,-7998,90.0,116,4,16],[-14210,-2290,0.0,400,4,20],[-17799,-9017,90.0,140,4,15],[-18468,-10087,180.0,400,4,20],[-17449,-8613,0.0,34,4,15],[-18175,-5068,90.0,400,4,20],[-17555,-9559,180.0,246,4,19],[-14510,-2290,0.0,400,4,22],[-18000,-11097,90.0,400,4,22],[-17679,-9824,90.0,527,4,20],[-16599,-8069,90.0,100,4,16],[-17639,-10076,180.0,79,4,19],[-18392,-9887,90.0,400,4,20],[-14810,-2290,0.0,200,4,19],[-18392,-9621,90.0,133,4,19],[-17900,-11037,90.0,200,4,16],[-17950,-10637,90.0,200,4,16],[-17950,-10437,90.0,200,4,16],[-18000,-10637,0.0,400,4,12],[-14910,-2500,90.0,400,4,20],[-18541,-9553,180.0,298,4,20],[-21508,-8005,180.0,411,4,20],[-21607,-7119,180.0,213,4,19],[-17765,-10342,90.0,300,5,12],[-14010,-2190,90.0,200,4,19],[-17915,-10567,0.0,150,5,16],[-17625,-11137,90.0,200,4,12],[-17433,-9495,90.0,400,4,20],[-17625,-10937,90.0,200,4,12],[-17625,-10737,90.0,200,4,12],[-17279,-9197,90.0,200,4,19],[-14710,-3100,0.0,400,4,20],[-21704,-7771,90.0,469,4,20],[-21704,-7302,90.0,469,4,20],[-16233,-11099,90.0,536,4,22],[-16233,-10768,90.0,126,4,19],[-15400,-10497,90.0,400,4,20],[-17625,-10537,90.0,200,4,12],[-17625,-10337,90.0,200,4,12],[-14110,-2090,180.0,200,4,19],[-17625,-10162,90.0,150,4,16],[-20882,-7075,0.0,400,4,20],[-21473,-7165,0.0,462,4,12],[-17300,-10037,0.0,200,4,16],[-17100,-10037,0.0,200,4,16],[-15400,-10097,90.0,400,4,20],[-15564,-9859,90.0,343,4,20],[-15564,-10497,90.0,400,4,20],[-14310,-2900,90.0,400,4,20],[-15564,-10235,90.0,125,4,19],[-13743,-9543,180.0,400,4,20],[-13302,-9543,180.0,482,4,20],[-13060,-9343,90.0,400,4,20],[-13060,-8943,90.0,400,4,20],[-13060,-8543,90.0,400,4,20],[-13792,-10197,180.0,400,4,20],[-13392,-10197,180.0,400,4,20],[-14210,-1490,180.0,400,4,26],[-18789,-6497,180.0,200,4,19],[-12971,-10197,180.0,441,4,20],[-19425,-6793,180.0,400,4,20],[-19825,-6793,180.0,400,4,20],[-9736,-10938,90.0,200,4,19],[-20153,-10438,90.0,400,4,20],[-20508,-7140,90.0,400,4,20],[-9909,-11029,180.0,362,4,20],[-19499,-7340,0.0,400,4,20],[-13610,-1290,90.0,400,4,20],[-13910,-2900,90.0,400,4,20],[-19099,-7340,0.0,400,4,20],[-20153,-9978,90.0,520,4,20],[-12741,-9997,90.0,400,4,20],[-20353,-11038,180.0,400,4,20],[-20553,-10838,90.0,400,4,20],[-20084,-9728,180.0,136,4,19],[-19817,-9728,180.0,400,4,22],[-19667,-7467,90.0,253,4,19],[-20439,-6898,90.0,190,4,16],[-20139,-7214,0.0,400,4,12],[-19339,-7214,0.0,400,4,12],[-20553,-10438,90.0,400,4,20],[-20553,-10084,90.0,308,4,20],[-20361,-9638,90.0,400,4,21],[-13910,-2500,90.0,400,4,20],[-19339,-6893,0.0,400,4,12],[-19023,-6894,0.0,231,4,16],[-19699,-6853,0.0,200,4,12],[-14110,-2290,0.0,400,4,20],[-19474,-6853,0.0,50,4,15],[-19799,-6853,0.0,200,4,12],[-19004,-6612,180.0,268,4,12],[-11760,-2173,90.0,350,4,12],[-19073,-6611,180.0,130,4,16],[-18958,-7115,90.0,200,4,12],[-18958,-7240,90.0,50,4,15],[-18089,-6497,0.0,400,4,21],[-13810,-3100,0.0,200,4,19],[-18958,-6915,90.0,200,4,12],[-19997,-9862,180.0,311,4,20],[-12741,-9597,90.0,400,4,20],[-18845,-6482,90.0,200,4,19],[-19035,-6573,0.0,400,4,20],[-20753,-10428,180.0,400,4,20],[-19024,-7214,0.0,230,4,16],[-13910,-3700,0.0,400,4,20],[-19235,-6693,90.0,219,4,19],[-8879,-8714,180.0,400,4,20],[-12741,-9197,90.0,400,4,20],[-17450,-5964,90.0,200,4,19],[-17562,-5855,180.0,226,4,19],[-17562,-6063,180.0,226,4,19],[-18454,-7555,90.0,450,4,20],[-21353,-10228,90.0,400,4,20],[-21353,-9928,90.0,200,4,19],[-8590,-8714,180.0,177,4,19],[-18672,-7330,0.0,454,4,20],[-12741,-8797,90.0,400,4,22],[-21046,-10428,180.0,187,4,19],[-21353,-10828,90.0,400,4,20],[-21353,-10528,90.0,200,4,19],[-14210,-3700,0.0,200,4,19],[-21153,-11028,180.0,400,4,20],[-20753,-11028,180.0,400,4,20],[-8273,-9521,180.0,400,4,20],[-20351,-9238,90.0,400,4,20],[-20253,-9878,90.0,400,4,12],[-20253,-10378,90.0,200,4,16],[-20253,-10528,90.0,100,4,15],[-20150,-10891,90.0,225,4,16],[-14310,-3600,90.0,200,4,19],[-21131,-9789,90.0,400,4,20],[-21353,-9628,90.0,400,4,20],[-20940,-9940,180.0,400,4,21],[-19798,-10688,0.0,350,4,12],[-14610,-90,90.0,400,4,21],[-14410,-3500,0.0,200,4,19],[-20453,-10009,90.0,138,4,16],[-20210,-10968,0.0,200,4,16],[-14510,-3600,90.0,200,4,19],[-20213,-10278,90.0,200,4,12],[-20213,-10078,90.0,200,4,12],[-20351,-8838,90.0,400,4,20],[-20351,-8471,90.0,375,4,20],[-14710,-3700,0.0,400,4,20],[-20561,-9348,180.0,400,4,26],[-20861,-9348,180.0,200,4,19],[-21042,-9589,180.0,178,4,19],[-20546,-9940,180.0,388,4,20],[-21314,-10864,90.0,310,4,12],[-15110,-3700,0.0,400,4,20],[-20611,-10673,90.0,200,4,16],[-21314,-10963,90.0,110,4,15],[-18890,-8068,0.0,382,4,20],[-19289,-8058,0.0,400,4,20],[-19689,-8058,0.0,400,4,20],[-15310,-3500,90.0,400,4,26],[-18567,-7770,0.0,245,4,19],[-21353,-9352,90.0,153,4,19],[-18894,-8632,180.0,409,4,20],[-21254,-9270,180.0,177,4,19],[-21131,-10635,90.0,400,4,20],[-19416,-9458,90.0,400,4,20],[-7132,-9521,180.0,282,4,19],[-20995,-10835,180.0,289,4,20],[-18899,-9258,180.0,400,4,20],[-15310,-3100,90.0,400,4,20],[-19257,-9258,180.0,318,4,19],[-18699,-9058,90.0,400,4,21],[-18699,-8026,90.0,511,4,20],[-19639,-7067,90.0,147,4,15],[-18958,-6738,90.0,153,4,16],[-19349,-8347,0.0,200,4,16],[-19199,-8347,0.0,100,4,15],[-14510,-3100,0.0,400,4,20],[-19574,-8441,90.0,400,4,20],[-18904,-8632,180.0,390,4,20],[-18869,-8104,0.0,340,4,12],[-14710,-490,180.0,200,4,19],[-6980,-9011,90.0,200,4,19],[-18759,-8142,90.0,148,4,16],[-19449,-8118,0.0,200,4,12],[-19649,-8118,0.0,200,4,12],[-14910,-3000,90.0,200,4,19],[-18888,-6611,0.0,42,4,15],[-18864,-9219,0.0,310,4,12],[-15110,-2900,0.0,400,4,20],[-19054,-8517,0.0,200,4,16],[-18764,-9219,180.0,110,4,15],[-14810,450,180.0,400,4,12],[-20049,-8281,180.0,150,4,19],[-18689,-9058,90.0,400,4,21],[-18810,-6535,90.0,56,4,15],[-18813,-6535,90.0,56,4,15],[-20439,-7067,90.0,146,4,16],[-14963,-9149,90.0,102,4,19],[-15116,-9108,0.0,325,4,20],[-14889,-8697,90.0,400,4,20],[-14343,-8601,90.0,400,4,20],[-15210,450,180.0,400,4,12],[-6790,-8911,180.0,400,4,20],[-15289,-9069,90.0,482,4,20],[-14889,-9797,90.0,200,4,19],[-15089,-9897,0.0,400,4,21],[-15489,-9897,0.0,400,4,20],[-19339,-10580,180.0,154,4,19],[-19626,-9919,90.0,400,4,20],[-12710,-1300,90.0,400,4,20],[-16556,-9743,90.0,309,4,20],[-19626,-10789,90.0,538,4,20],[-19851,-9791,90.0,142,4,19],[-16829,-9016,0.0,391,4,20],[-14343,-9797,90.0,200,4,19],[-14343,-10097,90.0,400,4,20],[-14734,-10183,180.0,400,4,22],[-6340,-8911,180.0,500,4,20],[-19097,-10931,90.0,148,4,19],[-19451,-10931,90.0,148,4,19],[-19087,-9923,180.0,348,4,20],[-19924,-9316,180.0,400,4,21],[-16889,-10519,90.0,371,4,22],[-16889,-9835,90.0,400,4,22],[-16889,-9466,90.0,338,4,20],[-20114,-8398,90.0,235,4,19],[-17023,-8287,90.0,400,4,20],[-17023,-7950,90.0,274,4,19],[-16789,-7369,180.0,200,4,19],[-16489,-7369,180.0,400,4,20],[-15510,-150,90.0,200,4,16],[-16089,-7369,180.0,400,4,20],[-15689,-7369,180.0,400,4,20],[-21012,-8481,90.0,400,4,22],[-20995,-10825,180.0,289,4,20],[-15089,-8437,180.0,400,4,22],[-14889,-8397,90.0,200,4,19],[-12741,-8397,90.0,400,4,20],[-16989,-9297,180.0,200,4,19],[-14343,-8201,90.0,400,4,20],[-12951,-7564,180.0,400,4,20],[-14343,-7801,90.0,400,4,20],[-13851,-7564,180.0,200,4,19],[-15053,-7726,90.0,343,4,20],[-15053,-7457,90.0,194,4,19],[-13937,-7041,90.0,244,4,19],[-15889,-6801,0.0,400,4,20],[-16289,-6801,0.0,400,4,20],[-16689,-6801,0.0,400,4,20],[-13365,-7002,90.0,166,4,19],[-13165,-7086,180.0,400,4,20],[-15810,-350,180.0,400,4,12],[-17289,-7946,90.0,400,4,22],[-17289,-8322,90.0,351,4,20],[-17289,-8597,90.0,200,4,19],[-17289,-8897,90.0,400,4,20],[-11683,-7851,90.0,565,4,20],[-11596,-8299,90.0,329,4,20],[-17089,-9397,90.0,200,4,19],[-16175,-9310,180.0,400,4,26],[-16489,-9445,90.0,289,4,20],[-13260,-8175,180.0,400,4,20],[-13060,-8259,90.0,168,4,19],[-13702,-8175,180.0,484,4,20],[-14144,-8175,180.0,400,4,21],[-11999,-7576,90.0,400,4,20],[-12190,-7375,180.0,400,4,20],[-12590,-7375,180.0,400,4,20],[-15489,-9504,90.0,386,4,21],[-13273,-7375,180.0,166,4,19],[-15573,-8889,90.0,294,4,19],[-15573,-8542,90.0,400,4,21],[-16110,-650,90.0,400,4,12],[-12541,-9344,180.0,400,4,20],[-15896,-7159,90.0,400,4,21],[-16089,-8093,180.0,400,4,20],[-16489,-8093,180.0,400,4,20],[-16450,-8260,90.0,333,4,20],[-11395,-8274,90.0,400,4,20],[-11395,-7874,90.0,400,4,20],[-11395,-7474,90.0,400,4,20],[-11395,-7180,90.0,188,4,19],[-15573,-8222,90.0,239,4,19],[-10795,-7086,180.0,400,4,20],[-15253,-10534,90.0,400,4,20],[-10103,-6931,90.0,311,4,19],[-15299,-11195,180.0,400,4,20],[-15599,-11195,180.0,200,4,19],[-9103,-6775,180.0,400,4,20],[-8698,-6775,180.0,409,4,20],[-15152,-10834,90.0,200,4,19],[-14699,-11195,180.0,400,4,20],[-14999,-11195,180.0,200,4,19],[-14610,-1490,180.0,400,4,20],[-16110,-1450,90.0,400,4,12],[-14343,-10897,90.0,400,4,20],[-14343,-10497,90.0,400,4,20],[-14889,-9449,90.0,496,4,20],[-14889,-8497,90.0,400,4,20],[-14889,-8797,90.0,200,4,19],[-8072,-8614,180.0,400,4,20],[-15289,-8628,90.0,400,4,20],[-7272,-8614,180.0,400,4,20],[-6872,-8614,180.0,400,4,20],[-16110,-1850,90.0,400,4,12],[-15489,-6811,0.0,400,4,20],[-6336,-8541,90.0,147,4,19],[-6536,-8466,180.0,400,4,20],[-6850,-8466,180.0,226,4,19],[-7084,-8514,180.0,242,4,19],[-6954,-8490,90.0,48,4,19],[-7205,-8314,90.0,400,4,20],[-7185,-7592,90.0,400,4,20],[-7185,-7265,90.0,254,4,19],[-6985,-7139,180.0,400,4,20],[-16689,-6801,0.0,400,4,22],[-6353,-6939,90.0,400,4,20],[-17089,-6497,0.0,400,4,20],[-17489,-6497,0.0,400,4,20],[-17789,-6497,0.0,200,4,19],[-5391,-6603,180.0,330,4,20],[-5225,-6403,90.0,400,4,20],[-5225,-6003,90.0,400,4,20],[-15810,-2150,0.0,400,4,12],[-5225,-5603,90.0,400,4,20],[-17235,-7151,0.0,400,4,20],[-17356,-8081,0.0,154,4,19],[-17289,-7946,90.0,400,4,21],[-5021,-5456,180.0,400,4,20],[-17089,-7369,0.0,400,4,20],[-4221,-6603,180.0,400,4,20],[-16881,-6710,90.0,200,4,19],[-3712,-6852,90.0,497,4,20],[-3912,-7109,180.0,400,4,20],[-15410,-2150,0.0,400,4,12],[-4312,-7099,180.0,400,4,20],[-17044,-7259,90.0,236,4,19],[-5085,-7099,180.0,400,4,21],[-5485,-7099,180.0,400,4,20],[-18046,-7690,0.0,400,4,26],[-6221,-7099,180.0,272,4,19],[-13792,-10486,180.0,400,4,20],[-13392,-10486,180.0,400,4,20],[-17289,-8697,90.0,200,4,19],[-17708,-8893,90.0,400,4,20],[-15010,-2150,0.0,400,4,12],[-12754,-10486,180.0,75,4,19],[-18387,-8888,90.0,418,4,20],[-12876,-10749,90.0,525,4,20],[-18186,-9097,0.0,400,4,20],[-12726,-11012,180.0,300,4,19],[-12576,-10812,90.0,400,4,20],[-12576,-10412,90.0,400,4,20],[-12576,-10012,90.0,400,4,20],[-17279,-9496,90.0,400,4,20],[-12311,-9424,180.0,530,4,20],[-11825,-9551,180.0,440,4,20],[-18699,-9497,90.0,200,4,19],[-18699,-9297,90.0,200,4,19],[-11104,-9351,90.0,400,4,20],[-11104,-9006,90.0,291,4,19],[-8382,-9240,180.0,200,4,19],[-8483,-9414,90.0,347,4,20],[-20594,-7340,0.0,191,4,19],[-17633,-8273,0.0,400,4,20],[-14710,-1850,90.0,400,4,12],[-12049,-10476,90.0,400,4,20],[-12049,-10776,90.0,200,4,19],[-12541,-8281,180.0,400,4,20],[-12252,-8281,180.0,177,4,19],[-14549,-8697,90.0,400,4,12],[-14549,-8297,90.0,400,4,12],[-14849,-7997,0.0,400,4,12],[-15149,-7997,0.0,200,4,16],[-15410,-690,180.0,400,4,21],[-14418,-7461,90.0,200,4,16],[-15672,-6901,0.0,400,4,12],[-16506,-6911,0.0,400,4,12],[-16793,-7111,0.0,175,4,16],[-17134,-8303,90.0,400,4,12],[-11039,-10886,180.0,400,4,20],[-17134,-8497,90.0,400,4,12],[-14410,-1550,0.0,400,4,12],[-16849,-9116,0.0,400,4,12],[-16549,-9416,90.0,400,4,12],[-16616,-9816,90.0,400,4,12],[-16549,-9797,90.0,200,4,16],[-16249,-9997,0.0,400,4,12],[-15649,-9997,0.0,400,4,12],[-11410,-2401,90.0,400,4,20],[-14010,-1550,0.0,400,4,12],[-15149,-9997,0.0,200,4,16],[-14999,-9997,0.0,100,4,15],[-14549,-9397,90.0,400,4,12],[-14549,-9097,90.0,200,4,16],[-14549,-8947,90.0,100,4,15],[-9903,-7396,180.0,400,4,22],[-9569,-7086,180.0,400,4,20],[-15710,-690,180.0,200,4,19],[-9580,-7286,90.0,400,4,20],[-9642,-8874,180.0,400,4,20],[-10042,-8874,180.0,400,4,20],[-10442,-8874,180.0,400,4,20],[-10842,-8874,180.0,400,4,20],[-10751,-8647,90.0,455,4,20],[-10551,-8429,180.0,400,4,20],[-10151,-8429,180.0,400,4,20],[-9858,-8429,180.0,186,4,19],[-9755,-7819,90.0,400,4,20],[-9755,-7513,90.0,213,4,19],[-9903,-7386,180.0,400,4,22],[-13510,-1250,90.0,400,4,12],[-16556,-10170,90.0,545,4,20],[-15826,-10695,180.0,545,4,20],[-15899,-11375,180.0,400,4,20],[-16299,-10695,180.0,400,4,20],[-16299,-11375,180.0,400,4,20],[-12565,-11346,180.0,486,4,20],[-16649,-11375,180.0,300,4,20],[-14734,-10183,180.0,400,4,21],[-12312,-10336,90.0,400,4,20],[-15810,-890,90.0,400,4,20],[-12312,-10011,90.0,251,4,19],[-10080,-9931,90.0,400,4,20],[-16689,-9597,180.0,400,4,22],[-9419,-11187,90.0,318,4,20],[-8890,-11028,180.0,278,4,19],[-7786,-10588,90.0,400,4,20],[-7786,-10188,90.0,400,4,20],[-7786,-9788,90.0,400,4,20],[-14839,-9097,90.0,400,4,12],[-13510,-150,90.0,200,4,16],[-15139,-8197,0.0,400,4,12],[-14822,-7861,0.0,200,4,16],[-15022,-7661,90.0,200,4,16],[-15810,-1190,90.0,200,4,19],[-16506,-7111,0.0,400,4,12],[-7873,-9521,180.0,400,4,20],[-7473,-9521,180.0,400,4,20],[-17075,-8009,90.0,400,4,12],[-6980,-9311,90.0,400,4,20],[-17075,-8309,90.0,200,4,16],[-13510,0,90.0,100,4,15],[-6080,-8711,90.0,400,4,20],[-15810,-1490,90.0,400,4,22],[-15949,-7997,90.0,200,4,16],[-16033,-8988,0.0,400,4,12],[-16283,-8988,0.0,100,4,15],[-16133,-8988,0.0,400,4,12],[-15271,-7369,180.0,435,4,20],[-15758,-8888,0.0,350,4,12],[-14839,-9672,90.0,350,4,12],[-14110,450,180.0,400,4,12],[-2729,-8532,90.0,400,4,20],[-6080,-8311,90.0,400,4,20],[-14410,450,180.0,200,4,16],[-2729,-8232,90.0,200,4,19],[-6080,-7911,90.0,400,4,20],[-3177,-9732,90.0,400,4,20],[-15549,-10197,0.0,200,4,16],[-15610,-1690,180.0,400,4,20],[-15949,-10247,0.0,200,4,16],[-16149,-10247,0.0,200,4,16],[-15949,-10297,90.0,400,4,12],[-14549,-8647,90.0,400,4,12],[-6080,-7511,90.0,400,4,22],[-14549,-8247,90.0,400,4,12],[-14949,-7947,0.0,200,4,16],[-14519,-8777,90.0,200,4,12],[-14519,-8577,90.0,200,4,12],[-14519,-8377,90.0,200,4,12],[-14519,-8177,90.0,200,4,12],[-14519,-8027,90.0,100,4,16],[-14769,-7927,0.0,200,4,12],[-14994,-7927,0.0,50,4,15],[-14669,-7927,0.0,200,4,12],[-18123,-10097,180.0,268,4,19],[-6080,-7210,90.0,201,4,19],[-6964,-8365,90.0,400,4,22],[-17799,-11302,0.0,383,4,20],[-14419,-9077,90.0,200,4,12],[-14419,-9202,90.0,50,4,15],[-17553,-10695,180.0,99,4,19],[-14624,-8577,90.0,200,4,12],[-14624,-8377,90.0,200,4,12],[-14624,-8227,90.0,100,4,16],[-14774,-8127,0.0,200,4,12],[-14974,-8127,0.0,200,4,12],[-15174,-8127,0.0,200,4,12],[-14757,-7791,0.0,200,4,12],[-15015,-7791,0.0,116,4,16],[-14624,-8777,90.0,200,4,12],[-13610,-90,90.0,400,4,21],[-14624,-8977,90.0,200,4,12],[-14624,-9177,90.0,200,4,12],[-14624,-9377,90.0,200,4,12],[-14594,-8507,90.0,200,4,12],[-14594,-8307,90.0,200,4,12],[-14594,-8157,90.0,100,4,16],[-14744,-8057,0.0,200,4,12],[-14944,-8057,0.0,200,4,12],[-15144,-8057,0.0,200,4,12],[-14727,-7721,0.0,200,4,12],[-14995,-7721,0.0,136,4,16],[-14594,-8707,90.0,200,4,12],[-14594,-8907,90.0,200,4,12],[-14594,-9107,90.0,200,4,12],[-14594,-9307,90.0,200,4,12],[-14582,-9957,90.0,200,4,16],[-14781,-9587,0.0,215,4,16],[-16133,-7309,0.0,112,4,16],[-15210,-1690,180.0,400,4,20],[-16314,-7309,0.0,50,4,15],[-16033,-7309,0.0,112,4,16],[-18324,-8818,90.0,200,4,12],[-18324,-8593,90.0,50,4,15],[-18324,-8918,90.0,200,4,12],[-6773,-8049,180.0,400,4,20],[-17566,-8960,90.0,494,4,12],[-17566,-9397,90.0,380,4,12],[-16244,-10062,0.0,300,5,12],[-16019,-10212,90.0,150,5,16],[-16749,-7345,180.0,200,4,12],[-16899,-7345,180.0,100,4,16],[-16799,-7345,180.0,100,4,16],[-16699,-7195,90.0,200,4,12],[-16699,-6986,90.0,218,4,12],[-16674,-8169,0.0,50,4,15],[-15249,-9922,0.0,200,4,12],[-15449,-9922,0.0,200,4,12],[-13710,510,180.0,200,4,19],[-15649,-9922,0.0,200,4,12],[-15849,-9922,0.0,200,4,12],[-15174,-9822,0.0,50,4,15],[-16049,-9922,0.0,200,4,12],[-16249,-9922,0.0,200,4,12],[-16453,-9922,0.0,208,4,16],[-18199,-8847,0.0,200,4,16],[-10973,-8739,90.0,200,4,16],[-6964,-8102,90.0,125,4,19],[-10973,-8312,90.0,256,4,16],[-17600,-11097,90.0,400,4,20],[-17600,-10297,90.0,400,4,20],[-6332,-8049,180.0,482,4,20],[-10973,-9898,90.0,200,4,16],[-7005,-7794,180.0,400,4,20],[-12442,-10012,0.0,200,4,12],[-6580,-7794,180.0,451,4,22],[-18668,-10355,90.0,548,4,20],[-12642,-10012,0.0,200,4,12],[-13010,-1800,180.0,400,4,20],[-6353,-7594,90.0,400,4,20],[-12442,-10102,0.0,200,4,12],[-6353,-7266,90.0,255,4,19],[-12642,-10102,0.0,200,4,12],[-9379,-7136,90.0,100,4,19],[-11942,-10372,0.0,200,4,12],[-9470,-7177,180.0,200,4,19],[-12242,-10012,0.0,200,4,12],[-9019,-8040,180.0,138,4,19],[-13210,-1700,90.0,400,4,21],[-11942,-10462,0.0,200,4,12],[-8959,-8231,90.0,400,4,20],[-12242,-10102,0.0,200,4,12],[-8959,-8568,90.0,273,4,19],[-11542,-10372,0.0,200,4,12],[-9903,-10438,180.0,354,4,20],[-11742,-10372,0.0,200,4,12],[-6090,-9016,90.0,211,4,19],[-11542,-10462,0.0,200,4,12],[-13010,-700,180.0,400,4,20],[-5880,-9132,180.0,400,4,20],[-11742,-10462,0.0,200,4,12],[-5480,-9132,180.0,400,4,20],[-11142,-10372,0.0,200,4,12],[-5080,-9132,180.0,400,4,20],[-11342,-10372,0.0,200,4,12],[-4680,-9132,180.0,400,4,20],[-11142,-10462,0.0,200,4,12],[-4280,-9132,180.0,400,4,20],[-11342,-10462,0.0,200,4,12],[-12710,-900,90.0,400,4,20],[-3880,-9132,180.0,400,4,22],[-10233,-10100,90.0,204,4,16],[-3480,-9132,180.0,400,4,20],[-10233,-9671,90.0,256,4,16],[-3080,-9132,180.0,400,4,20],[-12883,-7967,0.0,200,4,12],[-2780,-9132,180.0,200,4,19],[-12483,-7967,0.0,200,4,12],[-12410,-900,90.0,400,4,20],[-20262,-6793,180.0,474,4,20],[-2729,-8932,90.0,400,4,20],[-5648,-7493,90.0,296,4,16],[-5648,-7245,90.0,200,4,16],[-3512,-7109,180.0,400,4,20],[-5648,-6845,90.0,200,4,16],[-3112,-7109,180.0,400,4,20],[-12683,-8057,0.0,200,4,12],[-2912,-7309,90.0,400,4,20],[-5648,-8450,90.0,291,4,16],[-13010,-100,180.0,400,4,20],[-2912,-7709,90.0,400,4,20],[-5648,-8004,90.0,200,4,16],[-2912,-8052,90.0,286,4,20],[-5648,-9005,90.0,236,4,16],[-3054,-8195,180.0,400,4,26],[-12283,-7967,0.0,200,4,12],[-2754,-8195,180.0,200,4,19],[-3383,-8195,180.0,257,4,19],[-13410,510,180.0,400,4,20],[-12410,-1300,90.0,400,4,20],[-3512,-8395,90.0,400,4,20],[-7525,-9106,90.0,200,4,16],[-3512,-8859,90.0,527,4,20],[-10792,-10372,0.0,101,4,12],[-3177,-9332,90.0,400,4,20],[-10942,-10372,0.0,200,4,12],[-10792,-10462,0.0,101,4,12],[-3177,-10132,90.0,400,4,20],[-10942,-10462,0.0,200,4,12],[-3377,-10332,180.0,400,4,20],[-10342,-10372,0.0,200,4,12],[-3762,-10332,180.0,370,4,20],[-10542,-10372,0.0,200,4,12],[-3377,-9338,180.0,400,4,21],[-10342,-10462,0.0,200,4,12],[-3777,-9338,180.0,400,4,20],[-10542,-10462,0.0,200,4,12],[-4065,-9338,180.0,176,4,19],[-9942,-10372,0.0,200,4,12],[-12610,-1800,180.0,400,4,20],[-4163,-9332,90.0,400,4,20],[-10142,-10372,0.0,200,4,12],[-4383,-9522,180.0,440,4,20],[-9942,-10462,0.0,200,4,12],[-4603,-9732,90.0,400,4,20],[-10142,-10462,0.0,200,4,12],[-4604,-10186,90.0,509,4,20],[-9542,-10372,0.0,200,4,12],[-4394,-10451,180.0,401,4,20],[-9742,-10372,0.0,200,4,12],[-12410,-1650,90.0,300,4,20],[-4203,-10651,90.0,400,4,20],[-9542,-10462,0.0,200,4,12],[-4203,-11093,90.0,485,4,20],[-9742,-10462,0.0,200,4,12],[-5436,-7552,90.0,200,4,16],[-3957,-10532,90.0,400,4,20],[-3957,-10932,90.0,400,4,20],[-5436,-6952,90.0,200,4,16],[-3957,-9439,90.0,183,4,19],[-5436,-9019,90.0,207,4,16],[-13210,300,90.0,400,4,21],[-4051,-9522,180.0,205,4,19],[-5436,-8615,90.0,200,4,16],[-3957,-11232,90.0,200,4,19],[-5436,-8215,90.0,200,4,16],[-3969,-7309,90.0,400,4,20],[-13033,-7967,0.0,101,4,12],[-3969,-7904,90.0,400,4,26],[-13033,-8057,0.0,101,4,12],[-3969,-7607,90.0,195,4,19],[-12883,-7197,0.0,200,4,12],[-13210,-100,90.0,400,4,20],[-3969,-8304,90.0,400,4,20],[-12483,-7197,0.0,200,4,12],[-3969,-8704,90.0,400,4,20],[-12483,-7287,0.0,200,4,12],[-3969,-9013,90.0,217,4,19],[-12083,-7197,0.0,200,4,12],[-12283,-7197,0.0,200,4,12],[-12083,-7287,0.0,200,4,12],[-12283,-7287,0.0,200,4,12],[-11733,-7197,0.0,101,4,12],[-13210,-490,90.0,400,4,22],[-11883,-7197,0.0,200,4,12],[-11733,-7287,0.0,101,4,12],[-11883,-7287,0.0,200,4,12],[-14183,-7197,0.0,200,4,12],[-14183,-7287,0.0,200,4,12],[-13783,-7197,0.0,200,4,12],[-13983,-7197,0.0,200,4,12],[-13783,-7287,0.0,200,4,12],[-13983,-7287,0.0,200,4,12],[-13383,-7197,0.0,200,4,12],[-15580,230,90.0,200,4,12],[-13583,-7197,0.0,200,4,12],[-9342,-10372,0.0,200,4,12],[-9342,-10462,0.0,200,4,12],[-8942,-10372,0.0,200,4,12],[-9142,-10372,0.0,200,4,12],[-8942,-10462,0.0,200,4,12],[-9142,-10462,0.0,200,4,12],[-8542,-10372,0.0,200,4,12],[-8742,-10372,0.0,200,4,12],[-8542,-10462,0.0,200,4,12],[-8742,-10462,0.0,200,4,12],[-8142,-10372,0.0,200,4,12],[-8342,-10372,0.0,200,4,12],[-8142,-10462,0.0,200,4,12],[-8342,-10462,0.0,200,4,12],[-7742,-10372,0.0,200,4,12],[-7942,-10372,0.0,200,4,12],[-7742,-10462,0.0,200,4,12],[-7942,-10462,0.0,200,4,12],[-11729,-9112,0.0,233,4,12],[-12610,-700,180.0,400,4,21],[-11943,-9112,0.0,200,4,12],[-14243,-9022,0.0,200,4,12],[-14243,-9112,0.0,200,4,12],[-13843,-9022,0.0,200,4,12],[-14043,-9022,0.0,200,4,12],[-13843,-9112,0.0,200,4,12],[-14043,-9112,0.0,200,4,12],[-13443,-9022,0.0,200,4,12],[-13643,-9022,0.0,200,4,12],[-13443,-9112,0.0,200,4,12],[-13210,310,90.0,400,4,22],[-13643,-9112,0.0,200,4,12],[-13093,-9022,0.0,101,4,12],[-13243,-9022,0.0,200,4,12],[-13093,-9112,0.0,101,4,12],[-13243,-9112,0.0,200,4,12],[-9993,-7662,0.0,200,4,12],[-9993,-7752,0.0,200,4,12],[-9593,-7662,0.0,200,4,12],[-9793,-7662,0.0,200,4,12],[-9593,-7752,0.0,200,4,12],[-9793,-7752,0.0,200,4,12],[-9193,-7662,0.0,200,4,12],[-9393,-7662,0.0,200,4,12],[-9193,-7752,0.0,200,4,12],[-9393,-7752,0.0,200,4,12],[-8843,-7662,0.0,101,4,12],[-10973,-8079,90.0,208,4,16],[-10973,-7876,90.0,200,4,16],[-10973,-7676,90.0,200,4,16],[-10973,-7476,90.0,200,4,16],[-10973,-7276,90.0,200,4,16],[-10973,-7049,90.0,256,4,16],[-10973,-9391,90.0,304,4,16],[-10973,-9139,90.0,200,4,16],[-10973,-8939,90.0,200,4,16],[-10973,-8539,90.0,200,4,16],[-10973,-10633,90.0,296,4,16],[-10973,-10342,90.0,289,4,16],[-10973,-10100,90.0,205,4,16],[-10973,-9671,90.0,256,4,16],[-12610,-100,180.0,400,4,26],[-10973,-10928,90.0,296,4,16],[-10973,-11162,90.0,174,4,16],[-10293,-7752,0.0,200,4,12],[-7393,-7662,0.0,200,4,12],[-7393,-7752,0.0,200,4,12],[-6993,-7662,0.0,200,4,12],[-7193,-7662,0.0,200,4,12],[-6993,-7752,0.0,200,4,12],[-7193,-7752,0.0,200,4,12],[-6593,-7662,0.0,200,4,12],[-6793,-7662,0.0,200,4,12],[-6593,-7752,0.0,200,4,12],[-6793,-7752,0.0,200,4,12],[-6243,-7662,0.0,101,4,12],[-6393,-7662,0.0,200,4,12],[-6243,-7752,0.0,101,4,12],[-6393,-7752,0.0,200,4,12],[-8693,-7662,0.0,200,4,12],[-8693,-7752,0.0,200,4,12],[-8293,-7662,0.0,200,4,12],[-13910,-1690,90.0,400,4,22],[-8493,-7662,0.0,200,4,12],[-8682,-8076,90.0,200,4,16],[-8682,-7876,90.0,200,4,16],[-8682,-7676,90.0,200,4,16],[-8682,-7476,90.0,200,4,16],[-8682,-7276,90.0,200,4,16],[-8682,-7049,90.0,256,4,16],[-8682,-9391,90.0,304,4,16],[-8682,-9139,90.0,200,4,16],[-8682,-8939,90.0,200,4,16],[-8682,-8739,90.0,200,4,16],[-8682,-8539,90.0,200,4,16],[-8682,-8312,90.0,256,4,16],[-8682,-10633,90.0,296,4,16],[-8682,-10336,90.0,299,4,16],[-8682,-10093,90.0,190,4,16],[-8682,-9898,90.0,200,4,16],[-8682,-9671,90.0,256,4,16],[-8682,-10928,90.0,296,4,16],[-8682,-11162,90.0,174,4,16],[-4193,-7752,0.0,200,4,12],[-3643,-7662,0.0,101,4,12],[-3793,-7662,0.0,200,4,12],[-3643,-7752,0.0,101,4,12],[-3793,-7752,0.0,200,4,12],[-6093,-7662,0.0,200,4,12],[-6093,-7752,0.0,200,4,12],[-5693,-7662,0.0,200,4,12],[-5893,-7662,0.0,200,4,12],[-5693,-7752,0.0,200,4,12],[-5893,-7752,0.0,200,4,12],[-5293,-7662,0.0,200,4,12],[-5493,-7662,0.0,200,4,12],[-5293,-7752,0.0,200,4,12],[-5493,-7752,0.0,200,4,12],[-4943,-7662,0.0,101,4,12],[-5093,-7662,0.0,200,4,12],[-4943,-7752,0.0,101,4,12],[-5093,-7752,0.0,200,4,12],[-10233,-8080,90.0,210,4,16],[-10233,-7876,90.0,200,4,16],[-10233,-7676,90.0,200,4,16],[-10233,-7476,90.0,200,4,16],[-10233,-7276,90.0,200,4,16],[-10233,-7049,90.0,256,4,16],[-10233,-9387,90.0,296,4,16],[-10233,-9139,90.0,200,4,16],[-10233,-8939,90.0,200,4,16],[-10233,-8739,90.0,200,4,16],[-10233,-8539,90.0,200,4,16],[-13210,-90,90.0,400,4,20],[-10233,-8312,90.0,256,4,16],[-10233,-10633,90.0,296,4,16],[-10233,-10342,90.0,289,4,16],[-10233,-9898,90.0,200,4,16],[-10233,-10928,90.0,296,4,16],[-10233,-11211,90.0,271,4,16],[-3293,-7662,0.0,200,4,12],[-3093,-7752,0.0,200,4,12],[-3293,-7752,0.0,200,4,12],[-2893,-7662,0.0,200,4,12],[-2893,-7752,0.0,200,4,12],[-4228,-9947,0.0,200,4,12],[-4428,-9947,0.0,200,4,12],[-4228,-10037,0.0,200,4,12],[-4428,-10037,0.0,200,4,12],[-3878,-9947,0.0,101,4,12],[-4028,-9947,0.0,200,4,12],[-3878,-10037,0.0,101,4,12],[-4028,-10037,0.0,200,4,12],[-4958,-6882,0.0,200,4,12],[-4958,-6972,0.0,200,4,12],[-4558,-6882,0.0,200,4,12],[-4758,-6882,0.0,200,4,12],[-5648,-7045,90.0,200,4,16],[-5648,-6675,90.0,144,4,16],[-5648,-8740,90.0,296,4,16],[-5648,-8206,90.0,202,4,16],[-5648,-7773,90.0,264,4,16],[-4358,-6972,0.0,200,4,12],[-3808,-6882,0.0,101,4,12],[-3958,-6882,0.0,200,4,12],[-3808,-6972,0.0,101,4,12],[-3958,-6972,0.0,200,4,12],[-6258,-6882,0.0,200,4,12],[-14410,160,180.0,400,4,12],[-6258,-6972,0.0,200,4,12],[-5858,-6882,0.0,200,4,12],[-6058,-6882,0.0,200,4,12],[-5858,-6972,0.0,200,4,12],[-6058,-6972,0.0,200,4,12],[-5458,-6882,0.0,200,4,12],[-5658,-6882,0.0,200,4,12],[-5458,-6972,0.0,200,4,12],[-5658,-6972,0.0,200,4,12],[-5108,-6882,0.0,101,4,12],[-5258,-6882,0.0,200,4,12],[-5108,-6972,0.0,101,4,12],[-5258,-6972,0.0,200,4,12],[-3708,-6882,0.0,101,4,12],[-3708,-6972,0.0,101,4,12],[-14402,-8947,0.0,101,4,12],[-7525,-9359,90.0,306,4,16],[-7525,-8906,90.0,200,4,16],[-7525,-8706,90.0,200,4,16],[-17625,-11336,90.0,200,4,12],[-15888,-9907,180.0,400,4,20],[-16322,-9907,180.0,468,4,20],[-20518,-7140,90.0,400,4,20],[-20940,-9950,180.0,400,4,21],[-20545,-9949,180.0,389,4,20],[-16944,-10037,0.0,111,4,15],[-3850,-7752,90.0,200,4,16],[-3850,-7552,90.0,200,4,16],[-3850,-7352,90.0,200,4,16],[-14179,-11257,180.0,326,4,20],[-3850,-7152,90.0,200,4,16],[-3850,-6952,90.0,200,4,16],[-3850,-6726,90.0,256,4,16],[-3850,-9072,90.0,296,4,16],[-3850,-8815,90.0,200,4,16],[-3850,-8615,90.0,200,4,16],[-3850,-8415,90.0,200,4,16],[-3850,-8215,90.0,200,4,16],[-3850,-7989,90.0,256,4,16],[-3850,-10248,90.0,171,4,16],[-13810,-1490,180.0,400,4,20],[-20114,-9115,90.0,400,4,20],[-3850,-10014,90.0,279,4,16],[-3850,-9770,90.0,190,4,16],[-3850,-9575,90.0,200,4,16],[-3850,-9348,90.0,256,4,16],[-13710,110,180.0,200,4,19],[-15310,-440,90.0,200,4,16],[-5436,-7757,90.0,209,4,16],[-5436,-7352,90.0,200,4,16],[-5436,-7152,90.0,200,4,16],[-5436,-6726,90.0,256,4,16],[-5436,-8815,90.0,200,4,16],[-15510,-640,0.0,200,4,16],[-5436,-8415,90.0,200,4,16],[-5436,-7989,90.0,256,4,16],[-8682,-6847,90.0,148,4,16],[-15010,110,180.0,400,4,20],[-12883,-8057,0.0,200,4,12],[-12683,-7967,0.0,200,4,12],[-12483,-8057,0.0,200,4,12],[-12083,-7967,0.0,200,4,12],[-12083,-8057,0.0,200,4,12],[-12283,-8057,0.0,200,4,12],[-11733,-7967,0.0,101,4,12],[-11883,-7967,0.0,200,4,12],[-11733,-8057,0.0,101,4,12],[-11883,-8057,0.0,200,4,12],[-14183,-7967,0.0,200,4,12],[-14183,-8057,0.0,200,4,12],[-13783,-7967,0.0,200,4,12],[-13983,-7967,0.0,200,4,12],[-13783,-8057,0.0,200,4,12],[-15110,-190,180.0,200,4,19],[-13983,-8057,0.0,200,4,12],[-13383,-7967,0.0,200,4,12],[-13583,-7967,0.0,200,4,12],[-13383,-8057,0.0,200,4,12],[-13583,-8057,0.0,200,4,12],[-13183,-7967,0.0,200,4,12],[-13183,-8057,0.0,200,4,12],[-13210,-890,90.0,400,4,20],[-15910,-1450,90.0,400,4,12],[-15910,-1750,90.0,200,4,16],[-12883,-7287,0.0,200,4,12],[-12683,-7197,0.0,200,4,12],[-12683,-7287,0.0,200,4,12],[-13383,-7287,0.0,200,4,12],[-13583,-7287,0.0,200,4,12],[-13033,-7197,0.0,101,4,12],[-13183,-7197,0.0,200,4,12],[-13033,-7287,0.0,101,4,12],[-13183,-7287,0.0,200,4,12],[-15110,-1950,0.0,200,4,16],[-12943,-9022,0.0,200,4,12],[-12943,-9112,0.0,200,4,12],[-12543,-9022,0.0,200,4,12],[-12743,-9022,0.0,200,4,12],[-12543,-9112,0.0,200,4,12],[-12743,-9112,0.0,200,4,12],[-12143,-9022,0.0,200,4,12],[-12343,-9022,0.0,200,4,12],[-12143,-9112,0.0,200,4,12],[-12343,-9112,0.0,200,4,12],[-11729,-9022,0.0,233,4,12],[-11943,-9022,0.0,200,4,12],[-16810,-290,0.0,400,4,20],[-15510,-1950,180.0,200,4,16],[-8993,-7662,0.0,200,4,12],[-8843,-7752,0.0,101,4,12],[-8993,-7752,0.0,200,4,12],[-11293,-7662,0.0,200,4,12],[-11293,-7752,0.0,200,4,12],[-10893,-7662,0.0,200,4,12],[-11093,-7662,0.0,200,4,12],[-10893,-7752,0.0,200,4,12],[-13210,-1290,90.0,400,4,20],[-11093,-7752,0.0,200,4,12],[-10493,-7662,0.0,200,4,12],[-10693,-7662,0.0,200,4,12],[-10493,-7752,0.0,200,4,12],[-10693,-7752,0.0,200,4,12],[-10143,-7662,0.0,101,4,12],[-10293,-7662,0.0,200,4,12],[-10143,-7752,0.0,101,4,12],[-17010,-890,90.0,400,4,20],[-8293,-7752,0.0,200,4,12],[-8493,-7752,0.0,200,4,12],[-7893,-7662,0.0,200,4,12],[-8093,-7662,0.0,200,4,12],[-7893,-7752,0.0,200,4,12],[-8093,-7752,0.0,200,4,12],[-16410,-690,180.0,400,4,20],[-7543,-7662,0.0,101,4,12],[-7693,-7662,0.0,200,4,12],[-7543,-7752,0.0,101,4,12],[-7693,-7752,0.0,200,4,12],[-15310,-140,90.0,400,4,12],[-13210,-1690,90.0,400,4,22],[-15060,-1400,90.0,100,4,15],[-4793,-7662,0.0,200,4,12],[-4793,-7752,0.0,200,4,12],[-4393,-7662,0.0,200,4,12],[-4593,-7662,0.0,200,4,12],[-4393,-7752,0.0,200,4,12],[-4593,-7752,0.0,200,4,12],[-3993,-7662,0.0,200,4,12],[-4193,-7662,0.0,200,4,12],[-16610,-1290,90.0,400,4,20],[-3993,-7752,0.0,200,4,12],[-15060,-1250,90.0,400,4,12],[-17010,-1290,90.0,400,4,20],[-3493,-7662,0.0,200,4,12],[-3493,-7752,0.0,200,4,12],[-3093,-7662,0.0,200,4,12],[-15160,-875,90.0,350,4,12],[-13835,160,0.0,350,4,12],[-3728,-9947,0.0,200,4,12],[-3728,-10037,0.0,200,4,12],[-3328,-9947,0.0,200,4,12],[-3528,-9947,0.0,200,4,12],[-3328,-10037,0.0,200,4,12],[-3528,-10037,0.0,200,4,12],[-14810,110,180.0,400,4,20],[-13410,-1890,180.0,400,4,20],[-2928,-9947,0.0,200,4,12],[-3128,-9947,0.0,200,4,12],[-2928,-10037,0.0,200,4,12],[-3128,-10037,0.0,200,4,12],[-2578,-9947,0.0,101,4,12],[-2728,-9947,0.0,200,4,12],[-2578,-10037,0.0,101,4,12],[-2728,-10037,0.0,200,4,12],[-5028,-9947,0.0,200,4,12],[-5028,-10037,0.0,200,4,12],[-4628,-9947,0.0,200,4,12],[-4828,-9947,0.0,200,4,12],[-4628,-10037,0.0,200,4,12],[-4828,-10037,0.0,200,4,12],[-17010,-2490,90.0,400,4,20],[-4558,-6972,0.0,200,4,12],[-4758,-6972,0.0,200,4,12],[-4158,-6882,0.0,200,4,12],[-4358,-6882,0.0,200,4,12],[-4158,-6972,0.0,200,4,12],[-14411,-8927,0.0,116,4,12],[-20682,-7960,90.0,191,4,20],[-13810,-1890,180.0,400,4,20],[-16410,-2890,0.0,400,4,20],[-16489,-9797,90.0,200,4,19],[-15410,-1950,0.0,400,4,12],[-14110,-1890,180.0,200,4,19],[-16210,-2090,90.0,400,4,20],[-13260,-1100,90.0,100,4,15],[-13910,-1490,180.0,200,4,19],[-13210,-950,0.0,400,4,12],[-15260,450,180.0,400,4,12],[-15510,-950,180.0,200,4,16],[-14560,726,90.0,352,4,12],[-14930,480,180.0,200,4,12],[-15060,-1150,90.0,400,4,12],[-15130,480,180.0,200,4,12],[-15330,480,180.0,200,4,12],[-14410,910,180.0,400,4,26],[-13810,-1290,90.0,400,4,20],[-15580,5,90.0,50,4,15],[-14730,480,180.0,200,4,12],[-14910,-2900,90.0,400,4,20],[-14410,-3100,0.0,200,4,19],[-14810,-1690,90.0,400,4,20],[-15580,330,90.0,200,4,12],[-19336,-8632,180.0,475,4,20],[-14580,630,90.0,200,4,12],[-14110,-2700,0.0,400,4,21],[-14580,780,90.0,100,4,16],[-13710,-3300,90.0,400,4,21],[-20114,-8715,90.0,400,4,20],[-19336,-8642,180.0,475,4,20],[-15810,-1790,90.0,200,4,19],[-14580,680,90.0,100,4,16],[-17006,-7255,90.0,208,4,16],[-15380,-175,90.0,200,4,12],[-14810,-3100,0.0,200,4,19],[-14430,580,0.0,200,4,12],[-14730,375,180.0,200,4,12],[-13310,-550,90.0,200,4,16],[-14305,580,0.0,50,4,15],[-14130,375,180.0,200,4,12],[-15810,-1090,90.0,400,4,20],[-15000,405,180.0,200,4,12],[-13260,-950,90.0,200,4,16],[-15450,255,90.0,200,4,12],[-15450,55,90.0,200,4,12],[-15450,-145,90.0,200,4,12],[-14580,830,90.0,200,4,12],[-11810,-2301,90.0,200,4,19],[-19511,-8347,0.0,125,4,15],[-14800,405,180.0,200,4,12],[-15510,150,90.0,400,4,12],[-14400,405,180.0,200,4,12],[-14200,405,180.0,200,4,12],[-11570,-2323,90.0,350,4,12],[-15410,-690,180.0,400,4,22],[-13550,440,0.0,200,4,16],[-15210,-490,90.0,400,4,20],[-14930,375,180.0,200,4,12],[-15130,375,180.0,200,4,12],[-15280,375,180.0,100,4,16],[-15870,-1090,90.0,200,4,12],[-15380,225,90.0,200,4,12],[-15796,-7280,90.0,158,4,16],[-13710,-1550,0.0,200,4,16],[-15380,25,90.0,200,4,12],[-15380,-375,90.0,200,4,12],[-15380,-633,90.0,116,4,16],[-15110,110,180.0,200,4,19],[-13510,-650,90.0,400,4,12],[-14530,375,180.0,200,4,12],[-14330,375,180.0,200,4,12],[-14500,-2540,0.0,400,4,12],[-14110,-2540,0.0,380,4,12],[-13445,-1245,90.0,300,5,12],[-14210,-1990,90.0,200,4,19],[-13295,-1020,0.0,150,5,16],[-15834,-1751,90.0,200,4,12],[-14560,450,180.0,100,4,15],[-15200,405,180.0,200,4,12],[-15350,405,180.0,100,4,16],[-15450,-345,90.0,200,4,12],[-15450,-613,90.0,136,4,16],[-14600,405,180.0,200,4,12],[-15734,-1676,90.0,50,4,15],[-13585,-250,90.0,200,4,12],[-13585,-650,90.0,200,4,12],[-13585,-850,90.0,200,4,12],[-13585,-450,90.0,200,4,12],[-14210,-90,90.0,400,4,22],[-15210,510,180.0,400,4,20],[-13685,-175,90.0,50,4,15],[-13585,-1050,90.0,200,4,12],[-13920,235,90.0,230,4,16],[-15510,510,180.0,200,4,19],[-13585,-1250,90.0,200,4,12],[-13585,-1425,90.0,150,4,16],[-13710,-1550,180.0,150,4,16],[-13885,-1550,180.0,200,4,16],[-13860,-1550,180.0,150,4,16],[-15610,310,90.0,400,4,20],[-15870,-1315,90.0,50,4,15],[-15870,-990,90.0,200,4,12],[-14860,-3650,180.0,400,4,12],[-15110,-3650,180.0,100,4,15],[-13210,-490,90.0,400,4,21],[-14960,-3650,180.0,400,4,12],[-14585,-3550,180.0,350,4,12],[-19774,-8281,180.0,400,4,20],[-12741,-7997,90.0,400,4,20],[-21012,-8838,90.0,314,4,20],[-15810,-290,180.0,400,4,20],[-14588,-3038,0.0,200,4,12],[-14813,-3038,0.0,50,4,15],[-14488,-3038,0.0,200,4,12],[-20455,-8281,180.0,210,4,19],[-12741,-7685,90.0,224,4,19],[-20660,-8281,180.0,200,4,19],[-16432,-9320,180.0,115,4,19],[-16110,-290,180.0,200,4,19],[-21022,-8481,90.0,400,4,22],[-13254,-7564,180.0,206,4,19],[-20891,-8281,180.0,262,4,19],[-14253,-7873,90.0,607,4,20],[-21022,-8838,90.0,314,4,20],[-14147,-7564,180.0,393,4,20],[-16210,-490,90.0,400,4,21],[-13937,-7364,90.0,400,4,20],[-20962,-9145,90.0,316,4,20],[-16879,-9835,90.0,400,4,22],[-20962,-9446,90.0,286,4,20],[-13837,-6920,180.0,200,4,19],[-21131,-10212,90.0,445,4,20],[-16210,-890,90.0,400,4,20],[-16889,-10184,90.0,298,4,19],[-13637,-6920,180.0,200,4,19],[-13451,-6920,180.0,172,4,19],[-21046,-10418,180.0,187,4,19],[-17412,-10695,180.0,187,4,19],[-16878,-10519,90.0,371,4,22],[-16210,-1290,90.0,400,4,20],[-15834,-1901,90.0,100,4,16],[-15834,-1801,90.0,100,4,16],[-15984,-1701,180.0,200,4,12],[-16109,-1701,180.0,50,4,15],[-16210,-1690,90.0,400,4,21],[-20553,-10084,90.0,308,4,19],[-12765,-7086,180.0,400,4,20],[-16110,-4100,180.0,400,4,20],[-15810,-4100,180.0,200,4,19],[-12365,-7086,180.0,400,4,20],[-20736,-6793,180.0,474,4,20],[-14110,-2710,0.0,400,4,21],[-21237,-6793,180.0,529,4,20],[-11585,-3762,180.0,310,4,12],[-20987,-8996,0.0,68,4,19],[-11924,-7086,180.0,482,4,20],[-20361,-9889,90.0,100,4,19],[-11683,-7327,90.0,482,4,20],[-15554,-10235,90.0,125,4,19],[-15832,-10242,90.0,400,4,20],[-11583,-8134,180.0,200,4,19],[-15610,-2290,0.0,400,4,22],[-10609,-10686,90.0,400,4,20],[-11496,-8464,180.0,200,4,19],[-11506,-8815,180.0,217,4,19],[-10609,-10265,90.0,443,4,20],[-15210,-2290,0.0,400,4,20],[-19416,-9858,90.0,400,4,20],[-17433,-9095,90.0,400,4,20],[-19416,-10319,90.0,501,4,20],[-8282,-9414,90.0,347,4,20],[-12990,-7375,180.0,400,4,20],[-14910,-2290,0.0,200,4,19],[-18345,-7690,0.0,200,4,19],[-15030,-9249,90.0,97,4,19],[-13357,-7475,90.0,197,4,19],[-19626,-10319,90.0,400,4,20],[-14660,-3200,90.0,200,4,16],[-14610,-2290,0.0,400,4,22],[-13470,-2501,90.0,150,4,16],[-11775,-3060,180.0,200,4,16],[-11485,-3762,180.0,110,4,15],[-15010,-1890,180.0,400,4,20],[-15710,-4200,90.0,200,4,19],[-15500,-4092,180.0,400,4,20],[-15300,-3900,90.0,400,4,20],[-15510,-3700,0.0,400,4,21],[-15910,-3700,0.0,400,4,20],[-16310,-3700,0.0,400,4,20],[-16710,-3700,0.0,400,4,20],[-15799,-5092,90.0,400,4,20],[-15910,-4100,180.0,400,4,20],[-14810,-1290,90.0,400,4,20],[-16210,-4100,180.0,200,4,19],[-16510,-4100,180.0,400,4,22],[-11810,-2501,90.0,200,4,19],[-12010,-2601,180.0,400,4,21],[-12410,-2601,180.0,400,4,20],[-12810,-2601,180.0,400,4,20],[-13210,-2601,180.0,400,4,20],[-13710,-3601,90.0,400,4,20],[-15799,-4692,90.0,400,4,20],[-11410,-2801,90.0,400,4,20],[-13810,-890,90.0,400,4,20],[-11610,-3001,180.0,400,4,22],[-12010,-3001,180.0,400,4,20],[-12410,-3001,180.0,400,4,21],[-12810,-3001,180.0,400,4,20],[-13210,-3001,180.0,400,4,20],[-13610,-3001,180.0,400,4,22],[-13810,-2801,90.0,400,4,20],[-13810,-2401,90.0,400,4,20],[-12620,-3201,90.0,400,4,20],[-12020,-3201,90.0,400,4,20],[-14810,-890,90.0,400,4,20],[-12020,-3601,90.0,400,4,26],[-12220,-3801,180.0,400,4,20],[-12520,-3801,180.0,200,4,19],[-12620,-3601,90.0,400,4,22],[-11620,-3801,180.0,400,4,20],[-11920,-3801,180.0,200,4,19],[-11420,-3601,90.0,400,4,20],[-11420,-3201,90.0,400,4,22],[-14010,510,180.0,400,4,20],[-13810,-590,90.0,200,4,19],[-12110,-2401,90.0,400,4,20],[-13470,-2501,90.0,200,4,16],[-13170,-2701,0.0,400,4,12],[-12570,-2701,0.0,400,4,12],[-12070,-2701,0.0,200,4,16],[-11920,-2701,0.0,100,4,15],[-14810,-590,90.0,200,4,19],[-13610,-3001,180.0,400,4,21],[-13420,-3251,90.0,500,4,20],[-12820,-3501,180.0,400,4,20],[-12820,-3801,180.0,400,4,20],[-13220,-3501,180.0,400,4,20],[-13220,-3801,180.0,400,4,20],[-14010,-490,180.0,400,4,20],[-13720,-3601,90.0,400,4,20],[-13570,-3801,180.0,300,4,20],[-11610,-3001,180.0,400,4,20],[-12410,-3001,180.0,400,4,22],[-12620,-3601,90.0,400,4,21],[-16851,-3801,90.0,50,4,15],[-14410,-490,180.0,400,4,20],[-11760,-2373,90.0,350,4,12],[-17975,-5268,180.0,400,4,21],[-15410,-1890,180.0,400,4,20],[-12470,-2901,0.0,200,4,16],[-12870,-2951,0.0,200,4,16],[-13070,-2951,0.0,200,4,16],[-12870,-3001,90.0,400,4,12],[-15560,50,90.0,200,4,16],[-11480,-2658,90.0,200,4,16],[-13165,-2766,0.0,300,5,12],[-14418,-7261,90.0,200,4,16],[-12940,-2916,90.0,150,5,16],[-12170,-2626,180.0,200,4,12],[-12370,-2626,180.0,200,4,12],[-12570,-2626,180.0,200,4,12],[-12770,-2626,180.0,200,4,12],[-15710,-1890,180.0,200,4,19],[-12095,-2526,180.0,50,4,15],[-12970,-2626,180.0,200,4,12],[-13170,-2626,180.0,200,4,12],[-13345,-2626,180.0,150,4,16],[-16974,-5204,0.0,200,4,12],[-17199,-5204,0.0,50,4,15],[-14418,-7079,90.0,164,4,15],[-16874,-5204,0.0,200,4,12],[-14610,710,90.0,400,4,20],[-17673,-5240,180.0,200,4,12],[-17823,-5240,180.0,100,4,16],[-17723,-5240,180.0,100,4,16],[-17623,-5090,90.0,200,4,12],[-17623,-4965,90.0,50,4,15],[-18500,-4264,90.0,400,4,20],[-18500,-4664,90.0,400,4,20],[-15272,-6901,0.0,400,4,12],[-18374,-4864,0.0,400,4,20],[-17877,-5471,90.0,406,4,20],[-18126,-5541,90.0,128,4,15],[-18327,-5905,90.0,200,4,16],[-18327,-6105,90.0,200,4,16],[-15010,-1590,90.0,200,4,19],[-18327,-6352,90.0,294,4,16],[-18365,-5664,180.0,400,4,20],[-18466,-5864,90.0,400,4,20],[-18466,-6281,90.0,434,4,20],[-17676,-5764,90.0,200,4,19],[-17676,-6281,90.0,434,4,20],[-17772,-5664,180.0,211,4,19],[-20153,-10843,90.0,391,4,20],[-12141,-9344,180.0,400,4,20],[-19062,-10580,180.0,400,4,22],[-15010,-1290,90.0,400,4,20],[-15141,-10734,180.0,240,4,19],[-19160,-9668,180.0,492,4,20],[-14343,-9050,90.0,495,4,20],[-14992,-9191,0.0,76,4,19],[-19925,-11014,180.0,456,4,20],[-18915,-9868,90.0,400,4,20],[-19497,-11014,180.0,400,4,20],[-18915,-10268,90.0,400,4,20],[-11773,-9344,180.0,336,4,20],[-15010,-890,90.0,400,4,20],[-18915,-10668,90.0,400,4,20],[-19106,-11014,180.0,382,4,20],[-18915,-10968,90.0,200,4,19],[-13602,-8076,90.0,200,4,16],[-19269,-10857,180.0,345,4,20],[-11605,-9134,90.0,400,4,20],[-18849,-8106,90.0,76,4,15],[-11615,-2201,180.0,400,4,20],[-18769,-8104,180.0,140,4,15],[-11605,-8870,90.0,129,4,19],[-15110,-690,180.0,200,4,19],[-19840,-7067,90.0,147,4,15],[-18133,-10087,180.0,268,4,19],[-19570,-9316,180.0,307,4,20],[-13602,-7876,90.0,200,4,16],[-11195,-7086,180.0,400,4,20],[-15810,-1490,90.0,400,4,21],[-10349,-7086,180.0,491,4,20],[-13610,-2601,180.0,381,4,20],[-9903,-6775,180.0,400,4,20],[-9503,-6775,180.0,400,4,20],[-13602,-7676,90.0,200,4,16],[-14343,-7401,90.0,400,4,20],[-13602,-7476,90.0,200,4,16],[-8502,-6975,90.0,400,4,20],[-17023,-8687,90.0,400,4,22],[-17023,-8952,90.0,129,4,19],[-12410,-300,90.0,400,4,20],[-8502,-7375,90.0,400,4,20],[-8502,-7775,90.0,400,4,20],[-14343,-7001,90.0,400,4,20],[-8502,-8175,90.0,400,4,20],[-8502,-8575,90.0,400,4,20],[-8502,-8848,90.0,146,4,19],[-14810,510,180.0,400,4,20],[-12410,-600,90.0,200,4,19],[-15271,-7904,180.0,435,4,20],[-8387,-8922,180.0,229,4,19],[-8282,-8727,90.0,226,4,19],[-14494,-8122,90.0,435,4,20],[-16175,-9320,180.0,400,4,26],[-8282,-9040,90.0,400,4,26],[-15774,-9320,180.0,400,4,20],[-12610,-700,180.0,400,4,22],[-15774,-9027,180.0,400,4,20],[-7672,-8614,180.0,400,4,20],[-13602,-7276,90.0,200,4,16],[-15381,-9320,180.0,385,4,20],[-15784,-8093,180.0,210,4,19],[-16174,-9027,180.0,400,4,20],[-16641,-8417,0.0,400,4,20],[-6505,-8614,180.0,334,4,20],[-15577,-8093,180.0,210,4,19],[-13602,-7049,90.0,256,4,16],[-15390,-10497,90.0,400,4,20],[-15554,-10497,90.0,400,4,20],[-15362,-9697,180.0,400,4,20],[-15810,-790,90.0,200,4,19],[-7205,-7949,90.0,330,4,20],[-14951,-10935,180.0,400,4,20],[-15043,-9320,180.0,290,4,19],[-14343,-9419,90.0,245,4,20],[-12410,300,90.0,400,4,20],[-20682,-7665,90.0,400,4,26],[-20682,-7265,90.0,400,4,20],[-20882,-7065,0.0,400,4,20],[-21313,-8195,90.0,400,4,20],[-16432,-9310,180.0,115,4,19],[-21500,-6918,90.0,400,4,20],[-21280,-8066,180.0,400,4,20],[-21313,-8595,90.0,400,4,20],[-12410,0,90.0,200,4,19],[-20482,-8065,180.0,400,4,20],[-15896,-6759,90.0,400,4,20],[-6574,-7139,180.0,422,4,20],[-13602,-9387,90.0,296,4,16],[-6353,-6671,90.0,136,4,19],[-20482,-7254,180.0,400,4,20],[-20082,-8065,180.0,400,4,20],[-17433,-8284,90.0,423,4,20],[-12610,500,180.0,400,4,20],[-17433,-8695,90.0,400,4,20],[-6154,-6603,180.0,398,4,20],[-13602,-9139,90.0,200,4,16],[-17561,-7151,0.0,254,4,19],[-5756,-6603,180.0,400,4,20],[-17689,-7342,90.0,400,4,20],[-16931,-6523,120.0,200,4,19],[-20082,-7254,180.0,400,4,20],[-13010,500,180.0,400,4,20],[-19782,-8065,180.0,200,4,19],[-13602,-8939,90.0,200,4,16],[-17689,-7675,90.0,266,4,19],[-13602,-8739,90.0,200,4,16],[-17746,-7690,0.0,200,4,19],[-15089,-6811,0.0,400,4,20],[-17083,-7814,0.0,392,4,20],[-13602,-8539,90.0,200,4,16],[-21313,-9037,90.0,484,4,20],[-16574,-9027,180.0,400,4,20],[-4821,-6403,90.0,400,4,20],[-17837,-9097,0.0,297,4,20],[-16857,-8093,0.0,337,4,19],[-16936,-8417,0.0,191,4,19],[-17557,-7809,0.0,266,4,19],[-4821,-6003,90.0,400,4,20],[-16891,-6980,90.0,340,4,20],[-13417,-11257,180.0,400,4,20],[-16958,-7151,0.0,152,4,19],[-4821,-5603,90.0,400,4,20],[-13602,-8312,90.0,256,4,16],[-15022,-10268,90.0,400,4,20],[-15841,-9520,90.0,400,4,20],[-15022,-10608,90.0,279,4,19],[-18699,-8740,90.0,235,4,19],[-4621,-6603,180.0,400,4,20],[-4066,-11340,0.0,363,4,26]];
+const R = [[-11900,-2401,4,400,400,0.0,10],[-19133,-10363,4,1390,439,-90.0,10],[-15510,-3500,4,400,400,0.0,10],[-11500,-2401,4,400,400,0.0,10],[-15510,-3500,5,400,400,0.0,10],[-19752,-10158,4,1800,800,-90.0,10],[-15889,-10096,5,402,400,90.0,10],[-16289,-10096,5,402,400,90.0,10],[-15289,-9297,4,400,400,-0.0,10],[-15486,-8492,5,405,1190,-0.0,10],[-15289,-8897,4,400,400,-0.0,10],[-15489,-8497,4,400,400,-0.0,10],[-16788,-8560,4,201,274,-0.0,10],[-14417,-9097,4,1600,144,-90.0,10],[-16877,-10851,4,1301,898,-0.0,10],[-16110,-3900,4,1600,400,-0.0,10],[-15510,-4200,4,400,200,-0.0,10],[-16110,-3900,5,1600,400,-0.0,10],[-15510,-4200,5,400,200,-0.0,10],[-15616,-10497,5,2545,400,-0.0,10],[-15818,-11036,5,2941,672,-0.0,10],[-15187,-9494,5,604,820,-0.0,10],[-16792,-8370,5,655,207,90.0,10],[-18146,-7526,5,1496,331,-0.0,10],[-21410,-7665,5,1200,658,90.0,10],[-21526,-6876,5,388,489,90.0,10],[-19839,-10203,5,2300,1891,-0.0,10],[-21315,-9690,5,2871,658,90.0,10],[-21378,-7960,4,1560,784,90.0,10],[-16975,-5064,4,1600,400,-0.0,10],[-17474,-4464,4,2600,800,-0.0,10],[-16813,-4499,5,400,200,90.0,10],[-15975,-5074,4,400,402,90.0,10],[-17975,-5064,4,400,400,-0.0,10],[-15974,-4674,4,400,400,90.0,10],[-15966,-11285,4,533,180,-0.0,10],[-15974,-4283,4,382,400,90.0,10],[-20882,-7665,5,1200,400,90.0,10],[-20182,-7565,5,1000,1000,-0.0,10],[-15089,-8495,5,400,1189,-0.0,10],[-15089,-8743,4,400,899,-0.0,10],[-17289,-6615,4,1200,373,-0.0,10],[-14424,-10225,4,145,664,180.0,10],[-19699,-6993,4,1600,400,180.0,10],[-20482,-6868,5,1600,400,180.0,10],[-20299,-6840,5,400,200,180.0,10],[-18595,-6732,4,469,480,-90.0,10],[-18117,-6732,4,469,476,-90.0,10],[-20353,-9838,4,2400,400,90.0,10],[-20953,-9888,4,2300,800,-90.0,10],[-19889,-8258,4,2400,400,180.0,10],[-19839,-8858,4,2300,800,-0.0,10],[-19889,-8258,5,2400,400,180.0,10],[-19839,-8858,5,2300,800,-0.0,10],[-14689,-8897,4,1200,400,-90.0,10],[-15689,-10097,4,2400,400,180.0,10],[-16689,-9297,4,1200,400,90.0,10],[-17089,-8652,4,1689,400,90.0,10],[-15017,-8097,4,1344,400,-0.0,10],[-16189,-8493,4,1000,800,-0.0,10],[-15989,-9197,4,1000,1000,-0.0,10],[-15984,-9797,4,990,200,-0.0,10],[-15293,-10746,4,1880,898,-0.0,10],[-16113,-7086,4,3551,569,-0.0,10],[-14989,-9697,4,1000,400,180.0,10],[-14615,-8929,5,1943,546,-90.0,10],[-16689,-9297,5,1200,400,90.0,10],[-17089,-8648,5,1699,400,90.0,10],[-14712,-7761,5,722,400,-0.0,10],[-14680,-7461,5,784,200,-0.0,10],[-16189,-8493,5,1000,800,-0.0,10],[-15989,-9395,5,1000,1004,-0.0,10],[-15689,-10497,5,2400,400,-0.0,10],[-16089,-7081,5,3600,562,-0.0,10],[-17987,-8742,5,1403,2110,-0.0,10],[-17764,-10566,4,480,476,-90.0,10],[-16339,-10536,4,480,476,-90.0,10],[-19035,-6766,4,400,400,-90.0,10],[-17554,-5957,4,224,215,-0.0,10],[-18627,-7206,4,482,544,-90.0,10],[-18117,-7206,4,482,476,-90.0,10],[-14410,310,4,1600,400,-0.0,10],[-13410,-690,4,2400,400,-90.0,10],[-15110,-2090,4,2200,400,180.0,10],[-15410,-90,4,1200,400,90.0,10],[-15410,-1190,4,1000,800,90.0,10],[-14310,-990,4,1000,1000,90.0,10],[-14410,-90,4,400,1600,90.0,10],[-12810,-640,4,2300,800,90.0,10],[-16610,-1590,4,2600,800,90.0,10],[-15810,-2590,4,600,800,90.0,10],[-14210,-1690,4,1200,400,180.0,10],[-14410,710,4,400,400,90.0,10],[-16010,-1090,4,1600,400,90.0,10],[-14989,-9345,4,200,304,-0.0,10],[-3410,-8716,4,3200,2400,180.0,10],[-3410,-11116,4,3200,2400,180.0,10],[-6610,-6316,4,3200,2400,180.0,10],[-6610,-8716,4,3200,2400,180.0,10],[-6610,-11116,4,3200,2400,180.0,10],[-9810,-6316,4,3200,2400,180.0,10],[-9810,-8716,4,3200,2400,180.0,10],[-9810,-11116,4,3200,2400,180.0,10],[-12873,-6316,4,2929,2400,180.0,10],[-12877,-8716,4,2936,2400,180.0,10],[-12881,-11116,4,2944,2400,180.0,10],[-3410,-8716,5,3200,2400,180.0,10],[-3410,-11116,5,3200,2400,180.0,10],[-15710,-490,4,400,200,90.0,10],[-6610,-6316,5,3200,2400,180.0,10],[-6610,-8716,5,3200,2400,180.0,10],[-6610,-11116,5,3200,2400,180.0,10],[-9810,-6316,5,3200,2400,180.0,10],[-9810,-8716,5,3200,2400,180.0,10],[-9810,-11116,5,3200,2400,180.0,10],[-12873,-6316,5,2929,2400,180.0,10],[-14510,-2990,4,1400,1600,90.0,10],[-14410,310,5,1600,400,-0.0,10],[-13410,-690,5,2400,400,-90.0,10],[-16010,-1090,5,1600,400,90.0,10],[-15710,-490,5,400,200,90.0,10],[-15410,-1190,5,1000,800,90.0,10],[-14310,-990,5,1000,1000,90.0,10],[-14410,-90,5,400,1600,90.0,10],[-16610,-1590,5,2600,800,90.0,10],[-15810,-2590,5,600,800,90.0,10],[-14510,-2990,5,1400,1600,90.0,10],[-14410,710,5,400,400,90.0,10],[-14210,-1690,5,1200,400,180.0,10],[-15110,-2090,5,2200,400,180.0,10],[-15410,-90,5,1200,400,90.0,10],[-12810,-640,5,2300,800,90.0,10],[-3410,-6316,4,3200,2400,180.0,10],[-16349,-4686,5,1111,1158,-0.0,10],[-17536,-5064,5,1268,402,-0.0,10],[-17831,-5884,5,1268,1232,-0.0,10],[-16113,-7651,4,3551,569,-0.0,10],[-17884,-6932,5,3600,860,-0.0,10],[-20882,-7665,4,1200,400,90.0,10],[-20182,-7565,4,1000,1000,-0.0,10],[-19290,-7262,4,783,138,180.0,10],[-21102,-6993,4,1208,400,180.0,10],[-18627,-7686,4,480,544,-90.0,10],[-18117,-7686,4,480,476,-90.0,10],[-18627,-8166,4,480,544,-90.0,10],[-18117,-8166,4,480,476,-90.0,10],[-18419,-8646,4,480,544,-90.0,10],[-17909,-8646,4,480,476,-90.0,10],[-18419,-9126,4,480,544,-90.0,10],[-17909,-9126,4,480,476,-90.0,10],[-12610,-2801,4,2400,400,180.0,10],[-12560,-3401,4,2300,800,-0.0,10],[-12610,-2801,5,2400,400,180.0,10],[-12560,-3401,5,2300,800,-0.0,10],[-11808,-2401,5,797,400,180.0,10],[-18419,-9606,4,480,544,-90.0,10],[-17100,-3873,4,382,400,90.0,10],[-17500,-3873,4,382,400,90.0,10],[-17975,-5464,4,400,400,-0.0,10],[-17909,-9606,4,480,476,-90.0,10],[-18066,-6081,4,800,833,-0.0,10],[-17642,-7630,4,523,476,-90.0,10],[-17642,-8153,4,523,476,-90.0,10],[-17434,-8702,4,578,476,-90.0,10],[-17434,-9280,4,578,476,-90.0,10],[-17705,-4270,5,1600,1199,-0.0,10],[-18419,-10086,4,480,544,-90.0,10],[-17909,-10086,4,480,476,-90.0,10],[-17434,-10086,4,480,476,-90.0,10],[-17764,-11052,4,491,476,-90.0,10],[-3410,-6316,5,3200,2400,180.0,10],[-17987,-10847,5,1403,2110,-0.0,10],[-17345,-8008,4,234,119,-90.0,10],[-12877,-8716,5,2936,2400,180.0,10],[-17434,-9606,4,480,476,-90.0,10],[-17289,-10566,4,480,476,-90.0,10],[-16814,-10536,4,480,476,-90.0,10],[-12881,-11116,5,2944,2400,180.0,10],[-17042,-10086,4,480,309,-90.0,10],[-17042,-9674,4,356,309,-90.0,10],[-16689,-10096,5,402,400,90.0,10],[-17089,-10096,5,402,400,90.0,10],[-17089,-9696,5,402,400,90.0,10],[-17089,-10496,5,402,400,90.0,10],[-14621,-10096,5,402,545,90.0,10],[-15089,-10096,5,402,400,90.0,10],[-15489,-10096,5,402,400,90.0,10]];
+const D = [[-4095,-11338,4,0],[-11421,-3120,4,0],[-18332,-4066,4,0],[-17997,-11080,4,0],[-14245,-196,4,0],[-14537,-219,4,0],[-7064,-9230,4,0],[-7064,-9185,4,0],[-7064,-9145,4,0],[-14439,-212,4,0],[-14373,-211,4,0],[-14345,-211,4,0],[-13147,-9212,4,0],[-13148,-9174,4,0],[-13148,-9129,4,0],[-13149,-9089,4,0],[-7063,-9268,4,0],[-14467,-213,4,0],[-14406,-213,4,0],[-13258,-1322,4,0],[-13330,-7126,4,0],[-4550,-6651,4,0],[-2787,-8526,4,0],[-3223,-9554,4,0],[-17149,-3752,4,0],[-16394,-4067,4,0],[-17725,-9903,4,0],[-13919,-9596,4,0],[-10560,-10262,4,0],[-10206,-8928,4,0],[-6999,-8663,4,0],[-8143,-9635,4,0],[-9143,-6833,4,0],[-13288,-7192,4,0],[-4508,-6717,4,0],[-2853,-8568,4,0],[-3289,-9596,4,0],[-17107,-3818,4,0],[-16436,-4001,4,0],[-17791,-9944,4,0],[-13877,-9662,4,0],[-10494,-10220,4,0],[-10165,-8994,4,0],[-6957,-8729,4,0],[-8101,-9701,4,0],[-9102,-6899,4,0],[-13324,-1363,4,0],[-4079,-12380,4,1],[-14159,1345,1,1],[-14792,1646,1,2],[-14692,1819,1,2],[-14614,1156,1,2],[-14414,1156,1,2],[-14792,1646,2,2],[-14692,1819,2,2],[-14073,1487,2,2],[-13892,1572,2,2],[-14614,1156,2,2],[-14414,1156,2,2],[-14792,1646,3,2],[-14692,1819,3,2],[-14073,1487,3,2],[-13892,1572,3,2],[-14614,1156,4,2],[-14414,1156,4,2],[-14481,1564,1,3],[-14571,1564,1,4],[-14391,1564,1,4],[-13974,1433,1,3],[-13929,1511,1,4],[-14019,1355,1,4],[-14481,1564,2,3],[-14571,1564,2,4],[-14391,1564,2,4],[-13974,1433,2,3],[-13929,1511,2,4],[-14019,1355,2,4],[-14337,1086,1,3],[-14303,1003,1,4],[-14372,1169,1,4],[-14481,1564,3,3],[-14571,1564,3,4],[-14391,1564,3,4],[-13974,1433,3,3],[-13929,1511,3,4],[-14019,1355,3,4],[-14337,1086,2,3],[-14303,1003,2,4],[-14372,1169,2,4],[-19376,-7056,4,5],[-19206,-8806,4,5],[-3295,-8350,4,5],[-14107,-1239,4,5],[-17466,-9811,4,5],[-10311,-10651,4,5],[-14324,-2141,4,5],[-14140,1369,1,5],[-14183,1789,4,6],[-15105,120,4,7],[-14263,398,4,7],[-14702,-8857,4,7],[-16221,-8288,4,7],[-18176,-8822,4,7],[-17906,-8809,4,7],[-15186,-7908,4,7],[-14749,-7908,4,7],[-14366,-8347,4,7],[-16796,-6812,4,7],[-16169,-7359,4,7],[-14458,-8895,4,7],[-13329,-409,4,7],[-14893,-8183,4,7],[-16827,-7072,4,7],[-16167,-7022,4,7],[-17478,-6813,4,7],[-16847,-9365,4,7],[-16146,-9837,4,7],[-16012,-8593,4,7],[-14991,-9873,4,7],[-15101,-8639,4,7],[-16518,-9875,4,7],[-15021,284,4,7],[-16728,-10220,4,7],[-16575,-9155,4,7],[-15740,-7177,4,7],[-16388,-8728,4,7],[-17989,-11643,4,7],[-16889,-10236,4,7],[-17880,-11179,4,7],[-20691,-8281,4,7],[-17821,-9898,4,7],[-18022,-10300,4,7],[-14313,-2161,4,7],[-18079,-10711,4,7],[-17576,-11595,4,7],[-17577,-10068,4,7],[-17922,-9858,4,7],[-19644,-7330,4,7],[-19058,-7117,4,7],[-20322,-7117,4,7],[-19123,-7330,4,7],[-19369,-6943,4,7],[-19621,-7196,4,7],[-15851,-1946,4,7],[-19969,-7061,4,7],[-18688,-8026,4,7],[-20542,-10584,4,7],[-20433,-10120,4,7],[-20374,-10840,4,7],[-20575,-9241,4,7],[-20632,-9652,4,7],[-20129,-10536,4,7],[-19144,-8622,4,7],[-19804,-8217,4,7],[-15987,-2084,4,7],[-18887,-8279,4,7],[-19191,-8278,4,7],[-20965,-7262,4,7],[-21353,-7563,4,7],[-20925,-7511,4,7],[-21040,-7734,4,7],[-13312,-9873,4,7],[-20711,-8243,4,7],[-20768,-7524,4,7],[-20581,-6700,4,7],[-14613,-1773,4,7],[-13688,-10008,4,7],[-13496,-10946,4,7],[-13103,-10878,4,7],[-13901,-8671,4,7],[-13508,-8603,4,7],[-11343,-8514,4,7],[-11743,-8513,4,7],[-11133,-10519,4,7],[-11533,-10518,4,7],[-15987,-467,4,7],[-7323,-9309,4,7],[-7723,-9308,4,7],[-5303,-7454,4,7],[-5703,-7453,4,7],[-4533,-5744,4,7],[-4933,-5743,4,7],[-2998,-8849,4,7],[-3398,-8848,4,7],[-4431,-10252,4,7],[-3774,-10043,4,7],[-14914,312,4,7],[-7990,-8338,4,7],[-7683,-8083,4,7],[-6710,-8708,4,7],[-6403,-8453,4,7],[-10055,-7153,4,7],[-9748,-6898,4,7],[-9560,-10098,4,7],[-9253,-9843,4,7],[-10780,-9463,4,7],[-10473,-9208,4,7],[-13389,312,4,7],[-12530,-7958,4,7],[-12223,-7703,4,7],[-13845,-7563,4,7],[-13538,-7308,4,7],[-14823,120,4,7],[-13389,-1690,4,7],[-15987,-1579,4,7],[-14492,-2075,4,7],[-14413,312,4,7],[-15320,-1461,4,7],[-14526,-2478,4,7],[-14526,-2754,4,7],[-14492,-1690,4,7],[-15599,250,4,7],[-15160,499,4,7],[-13221,55,4,7],[-16200,-1817,4,7],[-16200,-1990,4,7],[-14612,541,4,7],[-15324,105,4,7],[-15813,-1420,4,7],[-15599,-187,4,7],[-16116,-2139,4,7],[-14142,-1848,4,7],[-13187,-1287,4,7],[-13130,-876,4,7],[-13876,-1500,4,7],[-13634,8,4,7],[-14180,-208,4,7],[-13632,-1520,4,7],[-13287,-1730,4,7],[-16157,-1168,4,7],[-15697,-742,4,7],[-15175,-1389,4,7],[-11864,-2990,4,7],[-13419,-2611,4,7],[-12328,-2882,4,7],[-16200,-1145,4,7],[-11608,-2822,4,7],[-13609,-2822,4,7],[-13207,-3024,4,7],[-12796,-3080,4,7],[-14352,-1576,4,7],[-13439,-2579,4,7],[-13649,-2924,4,7],[-16165,-3710,4,7],[-15935,-5211,4,7],[-16599,-3923,4,7],[-15021,-1110,4,7],[-15486,-3923,4,7],[-16686,-3710,4,7],[-15809,-5066,4,7],[-16440,-4098,4,7],[-16188,-3844,4,7],[-16050,-5018,4,7],[-15840,-3979,4,7],[-18057,-6168,4,7],[-17029,-4874,4,7],[-17830,-5224,4,7],[-15021,-1438,4,7],[-17463,-5087,4,7],[-16350,-5087,4,7],[-17772,-4874,4,7],[-17974,-4874,4,7],[-14878,-8369,4,7],[-17052,-5079,4,7],[-18023,-4958,4,7],[-16631,-4957,4,7],[-14878,-8646,4,7],[-11912,-2577,4,7],[-15429,-3310,4,7],[-15538,-1680,4,7],[-14943,-10286,4,7],[-16565,-9866,4,7],[-16144,-6811,4,7],[-16340,-9027,4,7],[-15810,-9027,4,7],[-16077,-8103,4,7],[-14714,-8486,4,7],[-14601,-9244,4,7],[-15407,-10178,4,7],[-16772,-8894,4,7],[-17119,-8677,4,7],[-17062,-6734,4,7],[-17147,-7995,4,7],[-16471,-7080,4,7],[-15465,-7192,4,7],[-14687,-8593,4,7],[-14687,-10118,4,7],[-16688,-10118,4,7],[-16729,-9167,4,7],[-17150,-9144,4,7],[-4071,-11329,4,8],[-14214,926,4,9],[-14216,1144,4,9],[-13249,-1338,4,11],[-14625,-1610,4,12],[-14810,-2250,4,12],[-16839,-9982,4,12],[-16839,-9982,4,12],[-17239,-9447,4,12],[-17134,-9422,4,12],[-17134,-9312,4,12],[-17134,-9312,4,12],[-17129,-9357,4,12],[-17129,-9357,4,12],[-17254,-9357,4,12],[-17254,-9357,4,12],[-14810,-2250,4,12],[-17259,-9297,4,12],[-17259,-9297,4,12],[-17259,-9242,4,12],[-17259,-9242,4,12],[-20802,-7250,4,12],[-20712,-7110,4,12],[-20712,-7110,4,12],[-20767,-7110,4,12],[-20767,-7110,4,12],[-20937,-7110,4,12],[-15270,-2250,4,12],[-20937,-7110,4,12],[-17495,-9747,4,12],[-17495,-9747,4,12],[-17700,-9747,4,12],[-17701,-9747,4,12],[-18563,-7844,4,12],[-18563,-7844,4,12],[-18458,-7844,4,12],[-18358,-7844,4,12],[-17526,-6034,4,12],[-15270,-2250,4,12],[-17520,-5899,4,12],[-17637,-5899,4,12],[-17588,-6019,4,12],[-17648,-6021,4,12],[-17646,-5960,4,12],[-17588,-5961,4,12],[-17588,-5900,4,12],[-17637,-5899,4,12],[-17588,-6019,4,12],[-17648,-6021,4,12],[-15675,-2250,4,12],[-17646,-5960,4,12],[-17588,-5961,4,12],[-17588,-5900,4,12],[-20505,-10748,4,12],[-20508,-10748,4,12],[-20508,-10678,4,12],[-20505,-10608,4,12],[-20508,-10608,4,12],[-20505,-10418,4,12],[-20508,-10418,4,12],[-15675,-2250,4,12],[-18979,-8410,4,12],[-18979,-8413,4,12],[-19049,-8413,4,12],[-19119,-8410,4,12],[-19119,-8413,4,12],[-19309,-8410,4,12],[-19309,-8413,4,12],[-21032,-7110,4,12],[-21032,-7110,4,12],[-21032,-8020,4,12],[-15945,-2250,4,12],[-21032,-8020,4,12],[-21032,-8090,4,12],[-13519,-9588,4,12],[-13520,-9588,4,12],[-13311,-11176,4,12],[-13312,-11176,4,12],[-13185,-11316,4,12],[-13186,-11316,4,12],[-12343,-10432,4,12],[-12344,-10432,4,12],[-15945,-2250,4,12],[-12074,-9457,4,12],[-12075,-9457,4,12],[-10610,-10019,4,12],[-10611,-10019,4,12],[-10363,-10617,4,12],[-10364,-10617,4,12],[-7824,-9626,4,12],[-7825,-9626,4,12],[-7712,-9086,4,12],[-7713,-9086,4,12],[-16050,-2250,4,12],[-6927,-8078,4,12],[-6928,-8078,4,12],[-6775,-7474,4,12],[-6776,-7474,4,12],[-4468,-8711,4,12],[-4469,-8711,4,12],[-2996,-7191,4,12],[-2997,-7191,4,12],[-3800,-6727,4,12],[-3801,-6727,4,12],[-5023,-5526,4,12],[-5024,-5526,4,12],[-3217,-9166,4,12],[-3218,-9166,4,12],[-3897,-9579,4,12],[-3898,-9579,4,12],[-4169,-11090,4,12],[-4170,-11090,4,12],[-9856,-8360,4,12],[-9857,-8360,4,12],[-14765,-1520,4,12],[-15200,-2250,4,12],[-9991,-6850,4,12],[-9992,-6850,4,12],[-8609,-8581,4,12],[-8610,-8581,4,12],[-11750,-7166,4,12],[-11751,-7166,4,12],[-13900,-7529,4,12],[-13901,-7529,4,12],[-13161,-8242,4,12],[-13162,-8242,4,12],[-15560,-1645,4,12],[-20569,-7212,4,12],[-20569,-7212,4,12],[-20624,-7212,4,12],[-20624,-7212,4,12],[-20569,-7171,4,12],[-20569,-7171,4,12],[-20624,-7171,4,12],[-20624,-7171,4,12],[-20569,-7121,4,12],[-20569,-7121,4,12],[-15560,-1645,4,12],[-20624,-7121,4,12],[-20624,-7121,4,12],[-15490,-1645,4,12],[-13255,220,4,12],[-13255,220,4,12],[-13255,150,4,12],[-13255,80,4,12],[-13255,80,4,12],[-13255,-110,4,12],[-14765,-1520,4,12],[-13255,-110,4,12],[-13855,-1840,4,12],[-13855,-1840,4,12],[-13785,-1840,4,12],[-13715,-1840,4,12],[-13715,-1840,4,12],[-13525,-1840,4,12],[-13525,-1840,4,12],[-14085,-2135,4,12],[-14765,-1575,4,12],[-14195,-2135,4,12],[-14195,-2135,4,12],[-14150,-2130,4,12],[-14150,-2130,4,12],[-14150,-2255,4,12],[-14150,-2255,4,12],[-14210,-2260,4,12],[-14210,-2260,4,12],[-14265,-2260,4,12],[-14265,-2260,4,12],[-14765,-1575,4,12],[-11700,-2953,4,12],[-11700,-2956,4,12],[-11770,-2956,4,12],[-11840,-2953,4,12],[-11840,-2956,4,12],[-12030,-2953,4,12],[-12030,-2956,4,12],[-13760,-2496,4,12],[-13760,-2496,4,12],[-13760,-2686,4,12],[-14765,-1745,4,12],[-13760,-2686,4,12],[-15663,-3565,4,12],[-15663,-3565,4,12],[-15663,-3460,4,12],[-15663,-3360,4,12],[-16609,-9201,4,12],[-16519,-9061,4,12],[-16519,-9061,4,12],[-16150,-2250,4,12],[-16574,-9061,4,12],[-16574,-9061,4,12],[-14765,-1745,4,12],[-16744,-9061,4,12],[-14060,-2240,4,12],[-16744,-9061,4,12],[-16839,-9061,4,12],[-16839,-9061,4,12],[-17249,-8697,4,12],[-17249,-8697,4,12],[-17249,-8326,4,12],[-17249,-8326,4,12],[-17249,-7832,4,12],[-17249,-7832,4,12],[-14765,-1840,4,12],[-17249,-8257,4,12],[-17249,-8257,4,12],[-17249,-8152,4,12],[-17249,-8396,4,12],[-16405,-8343,4,12],[-16405,-8343,4,12],[-16405,-8413,4,12],[-14779,-10252,4,12],[-14779,-10252,4,12],[-14765,-1840,4,12],[-14849,-10252,4,12],[-14919,-10252,4,12],[-14919,-10252,4,12],[-15109,-10252,4,12],[-15109,-10252,4,12],[-16839,-9652,4,12],[-16839,-9652,4,12],[-16839,-9722,4,12],[-16839,-9792,4,12],[-16839,-9792,4,12],[-16165,-735,4,13],[-16165,-1435,4,14],[-16165,-1335,4,14],[-15494,-6846,4,13],[-16165,-1535,4,16],[-16165,-1435,4,15],[-15755,-3745,4,13],[-15655,-3745,4,14],[-15555,-3745,4,15],[-15555,-3745,4,14],[-15655,-3745,4,14],[-15855,-3745,4,14],[-16455,-3745,4,14],[-16355,-3745,4,14],[-16555,-3745,4,16],[-16455,-3745,4,15],[-16619,-4909,4,13],[-16165,-635,4,14],[-16519,-4909,4,14],[-16419,-4909,4,15],[-16419,-4909,4,14],[-16519,-4909,4,14],[-16719,-4909,4,14],[-17319,-4909,4,14],[-17219,-4909,4,14],[-16165,-535,4,15],[-17419,-4909,4,16],[-17319,-4909,4,15],[-15694,-6846,4,13],[-15494,-6846,4,14],[-15394,-6846,4,15],[-15394,-6846,4,14],[-15494,-6846,4,14],[-15794,-6846,4,14],[-16165,-535,4,14],[-16434,-6846,4,14],[-16334,-6846,4,14],[-16534,-6846,4,16],[-16434,-6846,4,15],[-20054,-7295,4,13],[-20154,-7295,4,14],[-16165,-635,4,14],[-20254,-7295,4,15],[-20254,-7295,4,14],[-20154,-7295,4,14],[-19954,-7295,4,14],[-19354,-7295,4,14],[-19454,-7295,4,14],[-19254,-7295,4,16],[-16165,-835,4,14],[-19354,-7295,4,15],[-15594,-6846,4,15],[-14406,-213,4,17],[-13147,-9151,4,17],[-7063,-9207,4,17],[-4069,-11329,4,18],[-16909,-10695,4,23],[-16906,-7041,4,14],[-15370,-3900,4,14],[-15870,-3800,4,13],[-15710,-4100,4,23],[-16900,-4100,4,23],[-16070,-3800,4,13],[-15970,-3900,4,14],[-15870,-4000,4,14],[-16170,-3900,4,14],[-15875,-5307,4,14],[-15975,-5207,4,24],[-15860,-4090,4,14],[-15910,-4040,4,24],[-16210,-4040,4,13],[-16360,-4040,4,14],[-16410,-4040,4,12],[-15860,-4090,4,14],[-16110,-4040,4,14],[-16160,-4040,4,16],[-16670,-4075,4,25],[-15909,-5238,4,25],[-15909,-5238,4,24],[-16851,-3726,4,12],[-16851,-3726,4,15],[-16670,-4076,4,14],[-15809,-5238,4,14],[-15530,480,4,14],[-16234,-5064,4,14],[-16734,-4964,4,13],[-16900,-4511,4,23],[-16199,-5268,4,23],[-16934,-4964,4,13],[-16834,-5064,4,14],[-16734,-5164,4,14],[-17034,-5064,4,14],[-17734,-5164,4,14],[-18126,-5278,4,24],[-16913,-4759,4,14],[-16724,-5254,4,14],[-16774,-5204,4,24],[-16670,-4075,4,25],[-16621,-4076,4,15],[-18299,-8847,4,24],[-16609,-5268,4,23],[-20548,-7390,4,15],[-17019,-5268,4,23],[-17429,-5268,4,23],[-20842,-7165,4,14],[-16275,-5207,4,14],[-21082,-7075,4,23],[-16375,-5207,4,15],[-17600,-10037,4,14],[-17700,-10537,4,13],[-17600,-10097,4,23],[-20742,-7890,4,14],[-18500,-10087,4,23],[-20742,-7940,4,14],[-20742,-7890,4,15],[-20742,-7890,4,14],[-20742,-7840,4,16],[-20742,-7840,4,14],[-17700,-11137,4,13],[-17800,-11237,4,13],[-17900,-10937,4,24],[-17950,-10337,4,14],[-17950,-10237,5,16],[-16706,-6911,4,14],[-17840,-10117,5,14],[-17915,-10042,5,13],[-17915,-9892,5,14],[-17915,-9817,4,16],[-17765,-10492,5,14],[-17915,-9817,4,15],[-20439,-7114,4,14],[-19939,-7214,4,13],[-19739,-7214,4,13],[-19839,-6993,4,14],[-19939,-6893,4,14],[-19639,-6993,4,14],[-20039,-6940,4,14],[-19949,-6803,4,14],[-19899,-6853,4,24],[-19599,-6853,4,13],[-19449,-6853,4,14],[-19399,-6853,4,12],[-19549,-6853,4,12],[-19949,-6803,4,14],[-19699,-6853,4,14],[-19649,-6853,4,16],[-19138,-6612,4,25],[-18908,-6611,4,13],[-18958,-7265,4,14],[-18958,-7315,4,12],[-18958,-7315,4,15],[-19138,-6611,4,14],[-19138,-6612,4,25],[-19188,-6610,4,15],[-17899,-8847,4,14],[-20250,-10578,4,24],[-20153,-10638,4,23],[-19973,-10688,4,14],[-20073,-10688,4,14],[-19973,-10688,4,24],[-20253,-10078,4,13],[-20353,-10178,4,13],[-20010,-10968,4,13],[-20310,-10968,4,14],[-20410,-10968,4,15],[-20213,-10378,4,14],[-20213,-9978,4,14],[-20213,-9978,4,14],[-20562,-10819,4,24],[-20762,-10919,4,14],[-21314,-10708,4,14],[-21314,-10608,4,14],[-21314,-10708,4,24],[-20611,-10873,4,13],[-20611,-10573,4,14],[-20611,-10473,4,15],[-20611,-10873,4,15],[-20611,-10873,4,15],[-19149,-8344,4,24],[-18949,-8244,4,14],[-19089,-8058,4,23],[-19039,-8104,4,14],[-19139,-8104,4,14],[-19039,-8104,4,24],[-18759,-8215,4,14],[-18759,-8315,4,15],[-19349,-8118,4,14],[-19349,-8118,4,14],[-18870,-6612,4,14],[-18867,-6612,4,14],[-18870,-6612,4,14],[-18809,-8642,4,14],[-19019,-9219,4,14],[-19119,-9219,4,14],[-19019,-9219,4,24],[-18854,-8517,4,13],[-19154,-8517,4,14],[-19254,-8517,4,15],[-18854,-8517,4,15],[-18854,-8517,4,15],[-15410,450,4,14],[-15510,-250,4,14],[-16010,-350,4,14],[-16110,-850,4,13],[-7195,-7792,4,23],[-16110,-2050,4,14],[-14810,-2150,4,14],[-14549,-8097,4,14],[-14318,-7661,4,14],[-14420,-6997,4,14],[-15906,-6911,4,13],[-17034,-8003,4,14],[-17134,-9016,4,14],[-16649,-9116,4,14],[-16616,-9897,4,14],[-16049,-9997,4,13],[-14949,-9997,4,24],[-14749,-9897,4,14],[-14649,-9797,4,24],[-17023,-9016,4,23],[-17089,-9297,4,23],[-16889,-9297,4,23],[-14889,-9897,4,23],[-13610,-1550,4,14],[-14889,-8297,4,23],[-17977,-9096,4,23],[-17685,-9090,4,23],[-16499,-10695,4,23],[-13510,-1050,4,13],[-14839,-8897,4,24],[-14839,-9297,4,24],[-14839,-8697,4,13],[-14839,-8297,4,14],[-14839,-8497,4,24],[-14922,-7861,4,14],[-15022,-7561,4,14],[-15022,-7461,4,16],[-16106,-6911,4,13],[-16006,-7011,4,14],[-15896,-7101,4,14],[-16206,-7011,4,14],[-17075,-8409,4,25],[-17075,-8209,4,13],[-17075,-8209,4,24],[-17075,-8009,4,14],[-17075,-8309,4,15],[-15749,-7697,4,14],[-15849,-7797,4,13],[-16081,-8103,4,14],[-16081,-8203,4,16],[-15949,-8097,4,24],[-15849,-8347,4,14],[-16333,-8988,4,14],[-16433,-8988,4,13],[-16433,-8988,4,15],[-15933,-8988,4,25],[-13710,350,4,24],[-15933,-8988,4,25],[-14839,-8597,4,16],[-14839,-9847,4,14],[-14839,-9947,4,14],[-14839,-9847,4,24],[-14839,-9647,4,13],[-14839,-9447,4,14],[-14839,-9347,4,15],[-14839,-9547,4,15],[-15449,-9997,4,13],[-15349,-10097,4,13],[-15649,-10197,4,24],[-16249,-10247,4,14],[-16349,-10247,5,15],[-14449,-8947,4,14],[-14549,-8047,4,14],[-15810,-690,4,23],[-14649,-7947,4,24],[-15049,-7947,4,14],[-15149,-7947,4,14],[-14519,-8877,4,14],[-15610,-290,4,23],[-14519,-7977,4,14],[-14569,-7927,4,24],[-14869,-7927,4,13],[-15019,-7927,4,14],[-15069,-7927,4,12],[-14919,-7927,4,12],[-15810,-1890,4,23],[-14519,-8877,4,14],[-14519,-7977,4,14],[-14769,-7927,4,14],[-14819,-7927,4,16],[-14810,-1890,4,23],[-14369,-8927,4,13],[-14419,-9227,4,14],[-14419,-9277,4,12],[-14419,-9277,4,16],[-14469,-8927,4,14],[-14210,-2090,4,23],[-14849,-8317,4,14],[-14899,-8267,4,14],[-14949,-8267,4,12],[-14949,-8267,4,16],[-14849,-8417,4,13],[-14849,-8367,4,16],[-14849,-8367,4,14],[-14210,-1890,4,23],[-14624,-8177,4,14],[-14857,-7791,4,24],[-13610,-1490,4,23],[-14624,-9477,4,14],[-14624,-9527,5,15],[-14594,-8107,4,14],[-13610,110,4,23],[-14827,-7721,4,24],[-14594,-9407,4,14],[-14210,110,4,23],[-14594,-9457,5,15],[-14849,-8417,4,14],[-14849,-8467,4,15],[-14829,-8777,4,14],[-14829,-8877,4,13],[-14829,-8827,4,16],[-14829,-8827,4,14],[-14829,-8877,4,14],[-14574,-9587,4,16],[-14582,-9757,4,15],[-14610,110,4,23],[-14582,-9757,4,13],[-14582,-10057,4,14],[-14582,-10157,4,15],[-14582,-9757,4,15],[-14574,-9587,4,14],[-15928,-7359,4,14],[-15978,-7309,4,24],[-16189,-7309,4,13],[-16339,-7309,4,14],[-16389,-7309,4,12],[-16239,-7309,4,12],[-15928,-7359,4,14],[-16089,-7309,4,14],[-16139,-7309,4,16],[-18374,-9068,4,14],[-14210,510,4,23],[-18324,-9018,4,24],[-18324,-8718,4,13],[-18324,-8568,4,14],[-18324,-8518,4,12],[-18324,-8668,4,12],[-18374,-9068,4,14],[-18324,-8818,4,14],[-15210,110,4,23],[-18324,-8768,4,16],[-17466,-8613,4,13],[-17666,-8613,4,14],[-17766,-8613,4,16],[-16469,-10137,5,14],[-16544,-10212,5,13],[-16694,-10212,5,14],[-16610,-690,4,23],[-16769,-10212,4,16],[-16094,-10062,5,14],[-16769,-10212,4,15],[-16390,-8103,4,14],[-16599,-7395,4,14],[-16390,-8103,4,14],[-16599,-7395,4,14],[-14910,-3100,4,23],[-16949,-7345,4,25],[-16949,-7345,4,24],[-16749,-7345,4,13],[-16699,-6877,4,14],[-16699,-6827,4,12],[-14510,-3500,4,23],[-16699,-6827,4,16],[-16649,-7345,4,14],[-16849,-7345,4,14],[-16899,-7345,4,15],[-15149,-9922,4,14],[-14310,-3500,4,23],[-15149,-9922,4,14],[-15099,-9872,4,14],[-15099,-9872,4,14],[-13910,-3100,4,23],[-14310,-3100,4,23],[-18549,-8947,4,14],[-20648,-7390,4,14],[-20548,-7390,4,13],[-14310,-2700,4,23],[-12710,-1500,4,23],[-14210,160,4,24],[-14810,160,4,13],[-15610,-640,4,14],[-16110,-1050,4,13],[-16010,-950,4,14],[-15910,-1850,4,14],[-14610,160,4,24],[-15810,-1950,4,24],[-15010,-1950,4,25],[-15210,160,4,14],[-15610,-1950,4,14],[-15110,-1950,4,15],[-15710,-1050,4,14],[-15710,-1150,4,16],[-15010,160,4,24],[-15410,-950,4,24],[-15310,-540,4,14],[-15060,-1550,4,15],[-15060,-1050,4,25],[-14910,160,4,16],[-15710,-640,4,16],[-13560,160,4,14],[-13660,160,4,24],[-13860,160,4,13],[-15580,-70,4,12],[-13960,160,4,15],[-15910,-850,4,14],[-16010,-1150,4,14],[-13410,-350,4,13],[-15210,-1950,4,13],[-13310,-650,4,24],[-15210,-1950,4,24],[-13260,-1150,4,14],[-13260,-1250,5,16],[-15810,-750,4,14],[-14560,550,4,14],[-15710,-850,4,13],[-15460,450,4,14],[-15560,350,4,24],[-15560,-50,4,14],[-15560,-150,4,14],[-15160,-850,4,14],[-15060,-1450,4,14],[-15580,430,4,24],[-15060,-1550,4,13],[-15580,130,4,13],[-15580,-20,4,14],[-15060,-1050,4,25],[-15580,80,4,12],[-14630,480,4,14],[-13660,160,4,14],[-15580,180,4,16],[-14060,160,4,14],[-14160,160,4,15],[-15530,480,4,14],[-14280,580,4,14],[-15580,230,4,14],[-14580,530,4,14],[-14580,830,4,25],[-11480,-2458,3,16],[-14580,830,4,24],[-15090,150,4,13],[-15140,150,4,14],[-14580,630,4,13],[-13510,-450,4,13],[-14030,375,4,14],[-14230,580,4,12],[-14230,580,4,16],[-15400,405,4,14],[-15450,-445,4,24],[-14100,405,4,14],[-15090,150,4,14],[-15190,150,4,14],[-14730,170,4,14],[-15240,100,4,14],[-14680,170,4,16],[-15240,50,4,12],[-14630,170,4,14],[-15240,50,4,16],[-13750,440,4,15],[-15140,150,4,16],[-13450,440,4,14],[-13350,440,4,15],[-13750,440,4,15],[-13920,450,4,14],[-14710,-1650,4,14],[-15330,375,4,14],[-15870,-1340,4,14],[-15820,-840,4,14],[-15870,-1090,4,14],[-15870,-1140,4,16],[-14388,-3038,4,24],[-15380,-475,4,24],[-14688,-3038,4,13],[-14888,-3038,4,12],[-14738,-3038,4,12],[-13510,50,4,24],[-14588,-3038,4,14],[-14638,-3038,4,16],[-14900,-2340,4,14],[-14800,-2640,4,14],[-13980,375,5,15],[-13370,-1470,5,14],[-13295,-1545,5,13],[-13610,250,4,14],[-13295,-1770,4,16],[-13445,-1095,5,14],[-13295,-1770,4,15],[-15784,-1601,4,14],[-15784,-1601,4,14],[-15834,-1951,4,25],[-14050,405,5,15],[-16184,-1701,4,12],[-16184,-1701,4,16],[-15040,150,4,15],[-15834,-1851,4,14],[-14610,510,4,23],[-15834,-1901,4,15],[-14630,170,4,13],[-14680,170,4,14],[-13920,450,4,16],[-13585,-150,4,14],[-13750,440,4,13],[-13635,-100,4,14],[-13635,-100,4,14],[-13585,-1500,4,14],[-13585,-1500,4,14],[-13985,-1550,4,14],[-13935,-1550,4,14],[-15820,-840,4,14],[-15870,-890,4,24],[-15870,-1190,4,13],[-15870,-1390,4,12],[-15870,-1240,4,12],[-15160,-3650,4,14],[-15260,-3650,4,13],[-15260,-3650,4,15],[-14760,-3650,4,25],[-14760,-3650,4,25],[-14338,-3088,4,14],[-14838,-3038,4,14],[-14338,-3088,4,14],[-14800,-2440,4,13],[-14800,-2740,4,16],[-13295,-1695,5,14],[-11629,-3010,4,24],[-15834,-1951,4,24],[-15834,-1751,4,13],[-16134,-1701,4,14],[-15834,-1651,4,14],[-11529,-3210,4,14],[-11740,-3762,4,14],[-11840,-3762,4,14],[-13585,-150,4,14],[-13985,-1550,4,15],[-13985,-1550,4,14],[-14035,-1550,4,16],[-14035,-1550,4,14],[-14660,-3300,4,24],[-14560,-3550,4,14],[-11740,-3762,4,24],[-11575,-3060,4,13],[-11875,-3060,4,14],[-11975,-3060,4,15],[-11575,-3060,4,15],[-11575,-3060,4,15],[-13470,-2601,4,14],[-12970,-2701,4,13],[-11870,-2698,4,24],[-11670,-2598,4,14],[-13410,-2601,4,23],[-11810,-2601,4,23],[-16260,-4040,4,12],[-13420,-3501,4,23],[-16900,-4076,4,13],[-16851,-3776,4,14],[-11760,-2548,4,14],[-11760,-2648,4,14],[-11760,-2548,4,24],[-15859,-5238,4,15],[-12370,-2701,4,13],[-12270,-2801,4,13],[-12570,-2901,4,24],[-13170,-2951,4,14],[-13270,-2951,5,16],[-11480,-2458,4,13],[-11480,-2758,4,14],[-11480,-2858,4,15],[-13390,-2841,5,14],[-13465,-2916,5,13],[-13615,-2916,5,14],[-13690,-2916,4,16],[-13015,-2766,5,14],[-13690,-2916,4,15],[-12070,-2626,4,14],[-12070,-2626,4,14],[-12020,-2576,4,14],[-12020,-2576,4,14],[-13420,-2626,4,14],[-13420,-2626,4,14],[-17074,-5204,4,13],[-17224,-5204,4,14],[-17274,-5204,4,12],[-17124,-5204,4,12],[-16724,-5254,4,14],[-16974,-5204,4,14],[-17024,-5204,4,16],[-18117,-5278,4,14],[-17523,-5290,4,14],[-18117,-5278,4,14],[-17523,-5290,4,14],[-17873,-5240,4,25],[-17873,-5240,4,24],[-17673,-5240,4,13],[-17623,-4940,4,14],[-17623,-4890,4,12],[-17623,-4890,4,15],[-17573,-5240,4,14],[-17773,-5240,4,14],[-17823,-5240,4,15],[-18126,-5606,4,14],[-18226,-5705,4,13],[-11480,-2458,4,16],[-20213,-10378,4,14],[-19749,-8118,4,14],[-19745,-8118,4,14],[-14630,480,4,14],[-18698,-8632,4,23],[-19416,-10068,4,23],[-19451,-10857,4,23],[-19097,-10857,4,23],[-12821,232,4,27],[-12735,-358,4,28],[-14118,-825,4,29],[-14496,-1122,4,30],[-14030,-3360,4,28],[-12298,-3399,4,30],[-16808,-1342,4,27],[-16574,-1789,4,29],[-16604,-2608,4,30],[-15747,-2612,4,29],[-4667,-8440,4,31],[-16298,-4432,4,29],[-17174,-6831,4,27],[-20672,-8857,4,30],[-19697,-8908,4,28],[-13842,-8876,4,32],[-13379,-8468,4,28],[-13351,-8891,4,27],[-12388,-8806,4,29],[-11482,-10062,4,33],[-11280,-10631,4,29],[-5645,-7665,4,34],[-11782,-10631,4,30],[-9381,-9875,4,35],[-8975,-9715,4,29],[-9788,-9843,4,30],[-3445,-7749,4,32],[-18237,-6972,4,31],[-17737,-4514,4,33],[-4269,-8380,4,27],[-5796,-8608,4,28],[-5289,-8282,4,29],[-4411,-7488,4,30],[-4980,-7472,4,35],[-14621,1514,1,36],[-14621,614,1,36],[-13705,1918,1,36],[-13706,1618,1,36],[-13706,1317,1,36],[-13707,1017,1,36],[-14021,1813,1,36],[-13707,907,1,36],[-14006,907,1,36],[-14306,907,1,36],[-14621,1814,1,36],[-14321,1813,1,36],[-14621,914,2,36],[-14621,1214,2,36],[-14621,1514,2,36],[-14621,614,2,36],[-13705,1918,1,36],[-13706,1618,1,36],[-13706,1317,1,36],[-13707,1017,1,36],[-14021,1813,1,36],[-13707,907,1,36],[-14006,907,1,36],[-14306,907,1,36],[-14621,1814,2,36],[-14321,1813,2,36],[-14621,914,2,36],[-14621,1214,2,36],[-14621,1514,2,36],[-14621,614,2,36],[-13705,1918,2,36],[-13706,1618,2,36],[-13706,1317,2,36],[-13707,1017,2,36],[-14021,1813,2,36],[-13707,907,2,36],[-14006,907,2,36],[-14306,907,2,36],[-14621,1814,2,36],[-14321,1813,2,36],[-14621,914,2,36],[-14621,1214,2,36],[-14621,1514,2,36],[-14621,614,2,36],[-13705,1918,2,36],[-13706,1618,2,36],[-13706,1317,2,36],[-13707,1017,2,36],[-14021,1813,2,36],[-13707,907,2,36],[-14006,907,2,36],[-14306,907,2,36],[-14621,1814,3,36],[-14321,1813,3,36],[-14621,914,3,36],[-14621,1214,3,36],[-14621,1514,3,36],[-13705,1918,2,36],[-13706,1618,2,36],[-13706,1317,2,36],[-13707,1017,2,36],[-14021,1813,3,36],[-13707,907,2,36],[-14006,907,2,36],[-14306,907,2,36],[-14621,1814,4,36],[-14321,1813,4,36],[-14621,914,4,36],[-14621,1214,4,36],[-14621,1514,4,36],[-13705,1918,3,36],[-13706,1618,3,36],[-13706,1317,3,36],[-13707,1017,3,36],[-14021,1813,4,36],[-13707,907,3,36],[-14006,907,3,36],[-13707,907,4,36],[-14006,907,4,36],[-13705,1918,4,36],[-13706,1618,4,36],[-13706,1317,4,36],[-13707,1017,4,36],[-14621,914,0,36],[-14621,1214,0,36],[-14621,1514,0,36],[-14621,1814,0,36],[-14321,1813,0,36],[-14621,614,0,36],[-14621,914,0,36],[-14621,1214,0,36],[-14621,1514,0,36],[-14621,614,0,36],[-13705,1918,0,36],[-13706,1618,0,36],[-14621,1814,0,36],[-14321,1813,0,36],[-14621,914,1,36],[-13706,1317,0,36],[-13707,1017,0,36],[-14021,1813,0,36],[-13707,907,0,36],[-14006,907,0,36],[-14306,907,0,36],[-14621,1214,1,36],[-14621,1514,1,36],[-14621,614,1,36],[-13705,1918,0,36],[-13706,1618,0,36],[-13706,1317,0,36],[-13707,1017,0,36],[-14021,1813,0,36],[-13707,907,0,36],[-14006,907,0,36],[-14306,907,0,36],[-14621,1814,1,36],[-14321,1813,1,36],[-14621,914,1,36],[-14621,1214,1,36]];
+const K = [[-11244,-3135,4,37,0],[-18336,-3861,4,37,0],[-18251,-11012,4,37,0],[-15620,-10049,3,38,0],[-13976,-2723,4,39,-90],[-4095,-11338,3,40,90],[-11421,-3120,3,40,0],[-18332,-4066,3,40,90],[-17997,-11080,3,40,180],[-8323,-8687,3,41,0],[-14346,-8687,3,41,0],[-14263,-234,3,42,25],[-14569,-234,3,42,-25],[-14562,-206,3,43,30],[-14245,-196,3,44,0],[-14537,-219,3,44,0],[-7064,-9230,4,45,80],[-7064,-9185,4,45,95],[-7064,-9145,4,45,85],[-14439,-212,4,45,-10],[-14373,-211,4,45,5],[-14345,-211,4,45,-5],[-13147,-9212,4,45,95],[-13148,-9174,4,45,80],[-13148,-9129,4,45,95],[-13149,-9089,4,45,85],[-7063,-9268,4,45,95],[-14467,-213,4,45,5],[-14162,1361,2,46,0],[-3416,-7688,4,47,0],[-14305,-980,4,48,0],[-18160,-11224,4,48,0],[-15633,-9425,4,48,0],[-3468,-8136,4,48,0],[-9021,-7614,4,48,0],[-9270,-10087,4,48,0],[-16276,-4403,4,48,0],[-19146,-8351,4,48,0],[-12514,-8604,4,48,0],[-11584,-10198,4,48,0],[-5155,-8136,4,48,0],[-11756,-3037,4,48,0],[-18350,-4073,4,48,0],[-14220,-1990,4,49,90],[-17141,-4679,4,49,35],[-16475,-4864,4,49,0],[-18040,-6497,4,49,0],[-18444,-7510,4,49,-90],[-17502,-6817,4,49,0],[-20498,-7093,4,49,-90],[-21301,-7506,4,49,-180],[-20186,-8055,4,49,0],[-19631,-8165,4,49,90],[-20016,-9718,4,49,0],[-14419,-2611,4,49,90],[-20561,-9358,4,49,180],[-20661,-8291,4,49,180],[-20849,-10180,4,49,90],[-21236,-10057,4,49,0],[-19626,-10421,4,49,90],[-17353,-9696,4,49,180],[-15497,-11185,4,49,0],[-16223,-11164,4,49,-90],[-17071,-11000,4,49,90],[-14683,-10192,4,49,175],[-13420,-2496,4,49,90],[-14353,-7401,4,49,90],[-15896,-6990,4,49,-90],[-8623,-9960,4,49,0],[-9890,-11039,4,49,180],[-6080,-8409,4,49,-90],[-3969,-7904,4,49,90],[-3149,-8006,4,49,0],[-3835,-9122,4,49,0],[-5036,-7099,4,49,0],[-12458,-3011,4,49,180],[-12240,-2991,4,49,0],[-13024,-2611,4,49,-180],[-14410,-280,4,49,0],[-12420,250,4,49,90],[-12561,-1347,4,49,0],[-13200,-537,4,49,-90],[-12009,-3282,4,49,-90],[-12886,-3791,4,49,0],[-16015,-5132,4,49,-90],[-16515,-3890,4,49,-90],[-18281,-4854,4,49,0],[-17379,-5054,4,49,-90],[-13715,-1500,4,49,-180],[-17068,-8343,4,49,0],[-16566,-9792,4,49,90],[-15022,-10287,4,49,90],[-14353,-9427,4,49,90],[-14734,-8422,4,49,0],[-16409,-9037,4,49,-180],[-16989,-9287,4,49,0],[-14871,-7904,4,49,-180],[-16498,-7360,4,49,180],[-16169,-8523,4,49,0],[-17482,-9088,4,49,0],[-16420,-10576,4,49,90],[-17987,-11199,4,49,-90],[-21303,-8185,4,49,-90],[-18668,-10326,4,49,-90],[-19294,-7003,4,49,90],[-20540,-10208,4,49,-90],[-20834,-10439,4,49,-180],[-19029,-8622,4,49,0],[-19220,-8642,4,49,-180],[-13220,-320,4,49,90],[-14080,500,4,49,-180],[-20692,-7465,4,49,90],[-18049,-8559,4,49,0],[-18037,-9525,4,49,0],[-11814,-8629,4,49,0],[-11814,-7229,4,49,0],[-13636,-6919,4,49,0],[-13805,-7573,4,49,0],[-13238,-9543,4,49,0],[-13631,-10486,4,49,0],[-12914,-8629,4,49,0],[-15085,265,4,49,90],[-14067,-8591,4,49,0],[-13463,-8591,4,49,0],[-14067,-9187,4,49,0],[-13463,-9187,4,49,0],[-14067,-9890,4,49,0],[-13238,-10197,4,49,0],[-12538,-9884,4,49,0],[-8981,-8713,4,49,0],[-7253,-8614,4,49,0],[-6394,-7794,4,49,0],[-4964,-5465,4,49,0],[-3385,-9131,4,49,0],[-4430,-9531,4,49,0],[-8352,-10744,4,49,0],[-13010,-11141,4,49,0],[-11704,-9936,4,49,0],[-10725,-9265,4,49,0],[-11173,-10573,4,49,0],[-9446,-9585,4,49,0],[-8268,-10294,4,49,0],[-15220,-410,4,49,90],[-7942,-10050,4,49,0],[-6491,-8250,4,49,0],[-11927,-11046,4,49,0],[-5878,-7444,4,49,0],[-4508,-8863,4,49,0],[-4207,-6813,4,49,0],[-5941,-6813,4,49,0],[-6959,-7348,4,49,0],[-3426,-9813,4,49,0],[-4079,-10786,4,49,0],[-15380,-1170,4,49,90],[-15770,-2025,4,49,90],[-3124,-8658,4,49,0],[-3719,-7584,4,49,0],[-9943,-7157,4,49,0],[-9054,-7413,4,49,0],[-8755,-8380,4,49,0],[-10373,-8109,4,49,0],[-11082,-7397,4,49,0],[-12353,-9220,4,49,0],[-12338,-7879,4,49,0],[-10363,-10752,4,49,0],[-16020,-1495,4,49,0],[-5211,-7847,4,49,0],[-16610,-300,4,49,-180],[-16799,-1054,4,49,0],[-16200,-2798,4,49,-90],[-16603,-2607,4,49,0],[-16220,-2017,4,49,90],[-14409,-3490,4,49,0],[-13430,-3341,4,49,90],[-15300,-3147,4,49,-90],[-15600,-4092,4,49,0],[-14410,-1500,4,49,-180],[-14407,-549,4,50,90],[-9524,-7502,4,50,-180],[-9909,-10402,4,50,-90],[-15667,-9383,4,50,90],[-11522,-9613,4,50,90],[-6018,-8340,4,50,-180],[-15871,-4400,4,50,0],[-19512,-8437,4,50,-180],[-12389,-9272,4,50,-90],[-3494,-7152,4,50,90],[-18264,-4648,4,51,0],[-18103,-9581,4,51,0],[-10779,-9406,4,51,0],[-6549,-7499,4,51,0],[-12562,-1235,4,51,0],[-14406,-213,4,52,15],[-13258,-1322,4,53,0],[-13330,-7126,4,53,90],[-4550,-6651,4,53,90],[-2787,-8526,4,53,0],[-3223,-9554,4,53,0],[-17149,-3752,4,53,90],[-16394,-4067,4,53,-90],[-17725,-9903,4,53,0],[-13919,-9596,4,53,90],[-10560,-10262,4,53,-180],[-10206,-8928,4,53,90],[-6999,-8663,4,53,90],[-8143,-9635,4,53,90],[-9143,-6833,4,53,90],[-10314,-915,3,54,0],[-13288,-7192,4,55,-180],[-4508,-6717,4,55,-180],[-2853,-8568,4,55,90],[-3289,-9596,4,55,90],[-17107,-3818,4,55,-180],[-16436,-4001,4,55,0],[-17791,-9944,4,55,90],[-13877,-9662,4,55,-180],[-10494,-10220,4,55,-90],[-10165,-8994,4,55,-180],[-6957,-8729,4,55,-180],[-8101,-9701,4,55,-180],[-9102,-6899,4,55,-180],[-13324,-1363,4,55,90],[-15797,-3911,4,56,0],[-14110,-1200,3,57,0],[-19190,-8780,3,57,180],[-10275,-10680,3,57,180],[-14310,-2170,3,57,0],[-19420,-7050,3,57,180],[-17460,-9855,3,57,0],[-3300,-8315,3,57,180],[-16823,-1339,4,58,125],[0,0,3,59,0],[-18109,-4898,5,60,0],[-11469,-5365,4,61,0],[-10832,-6645,3,62,0],[-4106,-11664,4,63,0],[-7622,-9290,4,64,0],[-7679,-8940,4,64,0],[-8009,-8853,4,64,0],[-4067,-11145,4,64,90],[-4067,-10776,4,64,90],[-4344,-10262,4,64,0],[-4344,-9985,4,64,0],[-14318,687,4,64,-90],[-14318,423,4,64,-90],[-14463,423,4,64,-90],[-13678,-9363,4,64,90],[-13471,-9354,4,64,90],[-13282,-9350,4,64,90],[-13858,-9350,4,64,90],[-7998,-9301,4,64,0],[-14458,687,4,64,-90],[-14709,-9837,4,65,-90],[-4071,-11306,4,65,90],[-11630,-2541,4,65,-90],[-15300,250,4,66,0],[0,0,3,67,0],[0,0,3,67,0],[-12018,-3128,4,68,180],[-17169,-8055,4,68,-90],[-16797,-8704,4,68,-90],[-16047,-10122,4,68,-90],[-14770,-10126,4,68,-90],[-14716,-8200,4,68,-90],[-15472,-8582,4,68,-90],[-16252,-8469,4,68,-90],[-17824,-10539,4,68,-180],[-21126,-7343,4,68,-90],[-14532,-1934,4,68,0],[-13671,-10840,4,68,-90],[-20378,-10757,4,68,-180],[-20680,-10430,4,68,90],[-18970,-8284,4,68,-90],[-19297,-8585,4,68,180],[-13671,-9835,4,68,-90],[-13761,-8845,4,68,-90],[-13661,-7620,4,68,-90],[-11406,-10290,4,68,-90],[-10711,-7675,4,68,-90],[-13385,-1049,4,68,0],[-10411,-10260,4,68,-90],[-8721,-8080,4,68,-90],[-7386,-9070,4,68,-90],[-5056,-7965,4,68,-90],[-3941,-10075,4,68,-90],[-3941,-8453,4,68,-90],[-3201,-7831,4,68,-90],[-11406,-9195,4,68,-90],[-11406,-8294,4,68,-90],[-9841,-9011,4,68,-90],[-13381,228,4,68,0],[-9841,-10671,4,68,-90],[-12428,-8294,4,68,-90],[-12428,-9943,4,68,-90],[-8721,-9196,4,68,-90],[-8721,-10916,4,68,-90],[-7386,-7797,4,68,-90],[-7386,-10485,4,68,-90],[-7386,-12471,4,68,-90],[-7386,-6077,4,68,-90],[-5894,-7965,4,68,-90],[-15307,282,4,68,0],[-5650,-6237,4,68,-90],[-4287,-6237,4,68,-90],[-15520,-473,4,68,0],[-15434,-1253,4,68,0],[-12968,-2826,4,68,-90],[-11691,-2827,4,68,-90],[-15908,-2095,4,68,0]];
+const V = [[-13976,-2723,4,39,"b",5800,6800,-90.0],[-8323,-8687,3,41,"b",90,7256,0.0],[-14346,-8687,3,41,"b",90,7256,0.0],[-14305,-980,4,48,"b",1102,1035,0.0],[-18160,-11224,4,48,"b",1356,1720,0.0],[-15633,-9425,4,48,"b",1319,1024,0.0],[-3468,-8136,4,48,"b",1685,1957,0.0],[-9021,-7614,4,48,"b",1685,1957,0.0],[-9270,-10087,4,48,"b",1587,1699,0.0],[-16276,-4403,4,48,"b",1216,1410,0.0],[-19146,-8351,4,48,"b",1708,1089,0.0],[-12514,-8604,4,48,"b",1040,1347,0.0],[-11584,-10198,4,48,"b",1824,1672,0.0],[-5155,-8136,4,48,"b",1685,1957,0.0],[-11756,-3037,4,48,"b",2142,1587,0.0],[-18350,-4073,4,48,"b",967,1586,0.0],[-17149,-3752,4,53,"b",1619,104,90.0]];
+const LBL = ["z ≈ -2002  (28 pièces)","z ≈ -1702  (32 pièces)","z ≈ -1104  (45 pièces)","z ≈ -372  (16 pièces)","z ≈ +26  (1141 pièces)","z ≈ +425  (76 pièces)"];
+const LZ = [-2002,-1702,-1104,-372,26,425];
+
+const Q = new URLSearchParams(location.search);
+
+const SRC =
+    Q.get('src') ||
+    (
+        location.protocol == 'file:'
+            ? 'http://127.0.0.1:8765/pos'
+            : '/pos'
+    );
+
+const POLL = 50;
+const ZOFF = +(Q.get('zoff') || 90);
+
+const cv = document.getElementById('cv');
+const cx = cv.getContext('2d');
+
+const $ = id => document.getElementById(id);
+
+const EMBEDDED = window.__ETB_EMBEDDED_STATE__ || {};
+
+let s = .05;
+let ox = 0;
+let oy = 0;
+let w = 0;
+let h = 0;
+
+let dr = null;
+let pl = null;
+let tr = [];
+let last = 0;
+
+let layer = LIVE ? 0 : -1;
+let ON = CATS.map(c => (c.g === 3 || c.g === 12) ? 1 : 0);
+let raf = 0;
+
+if (EMBEDDED.player) {
+    pl = { ...EMBEDDED.player };
+}
+
+const fy = () => $('o').value == '1' ? -1 : 1;
+
+const P = (x, y) => [
+    ox + x*s,
+    oy + fy()*y*s
+];
+
+const vis = l => layer < 0 || l == layer;
+
+
+// ======================================================
+// COORDONNÉES SOURIS -> COORDONNÉES CARTE
+// ======================================================
+
+function canvasToWorld(clientX, clientY) {
+    const rect = cv.getBoundingClientRect();
+
+    const canvasX =
+        (clientX - rect.left) * (w / rect.width);
+
+    const canvasY =
+        (clientY - rect.top) * (h / rect.height);
+
+    return {
+        x: (canvasX - ox) / s,
+        y: fy() * (canvasY - oy) / s
+    };
+}
+
+
+// ======================================================
+// TRACÉ MANUEL
+// ======================================================
+
+let pathSegments = [];
+let pathPoints = [];
+
+let pathDrawing = false;
+let selectedPathSegment = -1;
+let pathColor = '#ff5252';
+
+let pathDraftStart = -1;
+
+let lastTracePointer = null;
+
+const PATH_STORAGE_KEY =
+    'etb-manual-traces:' +
+    location.pathname +
+    ':' +
+    document.title;
+
+
+// ------------------------------------------------------
+// SAUVEGARDE ET CHARGEMENT
+
+function saveManualPath() {
+    try {
+        localStorage.setItem(
+            PATH_STORAGE_KEY,
+            JSON.stringify(pathSegments)
+        );
+    } catch (error) {
+        console.warn(
+            'Impossible de sauvegarder le tracé :',
+            error
+        );
+    }
+}
+
+
+function loadManualPath() {
+    const embedded = EMBEDDED.manual;
+
+    if (
+        embedded &&
+        Array.isArray(embedded.segments)
+    ) {
+        pathSegments = embedded.segments.map(s => ({ ...s }));
+
+        if (
+            typeof embedded.color === 'string' &&
+            /^#[0-9a-f]{6}$/i.test(embedded.color)
+        ) {
+            pathColor = embedded.color;
+        }
+
+        return;
+    }
+
+    try {
+        const saved = JSON.parse(
+            localStorage.getItem(PATH_STORAGE_KEY) || '[]'
+        );
+
+        if (!Array.isArray(saved)) return;
+
+        pathSegments = saved.filter(seg =>
+            Number.isFinite(seg.x1) &&
+            Number.isFinite(seg.y1) &&
+            Number.isFinite(seg.x2) &&
+            Number.isFinite(seg.y2) &&
+            typeof seg.color === 'string'
+        );
+
+    } catch (error) {
+        console.warn(
+            'Impossible de charger les tracés :',
+            error
+        );
+
+        pathSegments = [];
+    }
+}
+
+// Les anciens tracés ne sont plus chargés dans les cartes de jeu.
+
+$('pathColor').value = pathColor;
+
+
+// ------------------------------------------------------
+// ÉTAT EXPORTABLE
+
+window.__ETB_GET_MANUAL_TRACE__ = () => ({
+    segments: pathSegments.map(s => ({ ...s })),
+    color: pathColor
+});
+
+
+// ------------------------------------------------------
+// INTERFACE
+
+function updatePathUI() {
+    $('pathToggle').textContent = pathDrawing
+        ? 'Terminer (Échap)'
+        : 'Tracer (T)';
+
+    $('pathToggle').classList.toggle(
+        'active',
+        pathDrawing
+    );
+
+    $('pathFinish').disabled =
+        !pathDrawing || pathPoints.length < 2;
+
+    $('pathUndo').disabled =
+        !pathDrawing || pathPoints.length === 0;
+
+    $('pathDelete').disabled =
+        selectedPathSegment < 0;
+
+    if (pathDrawing) {
+        $('pathHelp').textContent =
+            'T ajoute un segment · clic gauche ajoute un point · Échap termine.';
+
+    } else if (selectedPathSegment >= 0) {
+        $('pathHelp').textContent =
+            'Segment ' +
+            (selectedPathSegment + 1) +
+            ' sélectionné : modifie sa couleur.';
+
+    } else {
+        $('pathHelp').textContent =
+            'T pour commencer · sélectionne un segment pour le recolorer.';
+    }
+}
+
+
+// ------------------------------------------------------
+// DÉMARRAGE ET FIN DU TRACÉ
+
+function startPathDrawing() {
+    pathDrawing = true;
+    pathPoints = [];
+    pathDraftStart = pathSegments.length;
+
+    selectedPathSegment = -1;
+
+    // Ne pas dessiner simultanément un itinéraire.
+    routeSelecting = false;
+
+    updatePathUI();
+    routeUpdateUI();
+
+    draw();
+}
+
+
+function finishPathDrawing() {
+    if (!pathDrawing) return;
+
+    pathDrawing = false;
+    pathPoints = [];
+    pathDraftStart = -1;
+
+    saveManualPath();
+
+    updatePathUI();
+    draw();
+}
+
+
+// Annule uniquement le tracé en cours.
+
+function cancelPathDrawing() {
+    if (!pathDrawing) return;
+
+    if (pathDraftStart >= 0) {
+        pathSegments.splice(pathDraftStart);
+    }
+
+    pathDrawing = false;
+    pathPoints = [];
+    pathDraftStart = -1;
+
+    saveManualPath();
+
+    updatePathUI();
+    draw();
+}
+
+
+// ------------------------------------------------------
+// AJOUT DES POINTS
+
+function addPathPointAtClient(clientX, clientY) {
+    const point = canvasToWorld(clientX, clientY);
+
+    if (pathPoints.length > 0) {
+        const previous =
+            pathPoints[pathPoints.length - 1];
+
+        if (
+            Math.hypot(
+                point.x - previous.x,
+                point.y - previous.y
+            ) < 1
+        ) {
+            return;
+        }
+
+        pathSegments.push({
+            x1: previous.x,
+            y1: previous.y,
+            x2: point.x,
+            y2: point.y,
+            color: pathColor,
+            width: 5
+        });
+    }
+
+    pathPoints.push(point);
+
+    selectedPathSegment = -1;
+
+    saveManualPath();
+
+    updatePathUI();
+    draw();
+}
+
+
+function addPathPoint(event) {
+    addPathPointAtClient(
+        event.clientX,
+        event.clientY
+    );
+}
+
+
+// ------------------------------------------------------
+// ANNULER UN POINT
+
+function undoPathPoint() {
+    if (!pathDrawing || pathPoints.length === 0) return;
+
+    if (pathPoints.length >= 2) {
+        pathSegments.pop();
+    }
+
+    pathPoints.pop();
+
+    selectedPathSegment = -1;
+
+    saveManualPath();
+
+    updatePathUI();
+    draw();
+}
+
+
+// ------------------------------------------------------
+// SÉLECTION DES SEGMENTS
+
+function pointSegmentDistance(
+    px, py, ax, ay, bx, by
+) {
+    const dx = bx - ax;
+    const dy = by - ay;
+
+    const lengthSquared = dx*dx + dy*dy;
+
+    if (lengthSquared === 0) {
+        return Math.hypot(px - ax, py - ay);
+    }
+
+    let t = (
+        (px - ax)*dx +
+        (py - ay)*dy
+    ) / lengthSquared;
+
+    t = Math.max(0, Math.min(1, t));
+
+    const nearestX = ax + t*dx;
+    const nearestY = ay + t*dy;
+
+    return Math.hypot(
+        px - nearestX,
+        py - nearestY
+    );
+}
+
+
+function findPathSegment(mx, my) {
+    let best = -1;
+    let bestDistance = 10;
+
+    for (
+        let i = pathSegments.length - 1;
+        i >= 0;
+        i--
+    ) {
+        const seg = pathSegments[i];
+
+        const a = P(seg.x1, seg.y1);
+        const b = P(seg.x2, seg.y2);
+
+        const distance = pointSegmentDistance(
+            mx, my,
+            a[0], a[1],
+            b[0], b[1]
+        );
+
+        if (distance < bestDistance) {
+            bestDistance = distance;
+            best = i;
+        }
+    }
+
+    return best;
+}
+
+
+function selectPathSegment(index) {
+    selectedPathSegment = index;
+
+    if (index >= 0) {
+        pathColor = pathSegments[index].color;
+
+        $('pathColor').value = pathColor;
+
+        window.dispatchEvent(
+            new CustomEvent('etb-trace-color-change', {
+                detail: {
+                    color: pathColor,
+                    source: 'manual'
+                }
+            })
+        );
+    }
+
+    updatePathUI();
+    draw();
+}
+
+
+// ------------------------------------------------------
+// COULEURS SYNCHRONISÉES
+
+function changePathColor(color) {
+    pathColor = color;
+
+    if (
+        selectedPathSegment >= 0 &&
+        pathSegments[selectedPathSegment]
+    ) {
+        pathSegments[selectedPathSegment].color = color;
+        saveManualPath();
+    }
+
+    window.dispatchEvent(
+        new CustomEvent('etb-trace-color-change', {
+            detail: {
+                color: color,
+                source: 'manual'
+            }
+        })
+    );
+
+    updatePathUI();
+    draw();
+}
+
+
+window.addEventListener(
+    'etb-trace-color-change',
+    event => {
+        if (event.detail?.source !== 'route') return;
+
+        const color = event.detail.color;
+
+        pathColor = color;
+
+        $('pathColor').value = color;
+
+        if (
+            selectedPathSegment >= 0 &&
+            pathSegments[selectedPathSegment]
+        ) {
+            pathSegments[selectedPathSegment].color = color;
+            saveManualPath();
+        }
+
+        updatePathUI();
+        draw();
+    }
+);
+
+
+$('pathColor').addEventListener('input', event => {
+    changePathColor(event.target.value);
+});
+
+
+// ------------------------------------------------------
+// SUPPRESSION
+
+function deleteSelectedPathSegment() {
+    if (selectedPathSegment < 0) return;
+
+    pathSegments.splice(selectedPathSegment, 1);
+
+    selectedPathSegment = -1;
+
+    saveManualPath();
+
+    updatePathUI();
+    draw();
+}
+
+
+function clearManualPath() {
+    if (pathSegments.length === 0) return;
+
+    if (!confirm('Effacer tous les tracés manuels ?')) {
+        return;
+    }
+
+    pathSegments = [];
+    pathPoints = [];
+
+    pathDrawing = false;
+    selectedPathSegment = -1;
+    pathDraftStart = -1;
+
+    saveManualPath();
+
+    updatePathUI();
+    draw();
+}
+
+
+// ------------------------------------------------------
+// EXPORT JSON DU TRACÉ
+
+function exportManualPath() {
+    const data = {
+        title: document.title,
+        segments: pathSegments
+    };
+
+    const blob = new Blob(
+        [JSON.stringify(data, null, 2)],
+        { type: 'application/json' }
+    );
+
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement('a');
+
+    a.href = url;
+    a.download = 'carte_traces.json';
+
+    a.click();
+
+    URL.revokeObjectURL(url);
+}
+
+
+// ------------------------------------------------------
+// DESSIN DES TRACÉS MANUELS
+
+function drawManualPath() {
+    cx.save();
+
+    cx.lineCap = 'round';
+    cx.lineJoin = 'round';
+
+    pathSegments.forEach((seg, index) => {
+        const a = P(seg.x1, seg.y1);
+        const b = P(seg.x2, seg.y2);
+
+        if (index === selectedPathSegment) {
+            cx.strokeStyle = '#ffffff';
+            cx.lineWidth = 11;
+
+            cx.beginPath();
+            cx.moveTo(a[0], a[1]);
+            cx.lineTo(b[0], b[1]);
+            cx.stroke();
+        }
+
+        cx.strokeStyle = seg.color;
+        cx.lineWidth = seg.width || 5;
+
+        cx.beginPath();
+        cx.moveTo(a[0], a[1]);
+        cx.lineTo(b[0], b[1]);
+        cx.stroke();
+
+        cx.fillStyle = seg.color;
+
+        cx.beginPath();
+        cx.arc(a[0], a[1], 3, 0, Math.PI*2);
+        cx.fill();
+    });
+
+    if (pathDrawing && pathPoints.length > 0) {
+        const p = pathPoints[pathPoints.length - 1];
+        const screen = P(p.x, p.y);
+
+        cx.fillStyle = pathColor;
+
+        cx.beginPath();
+        cx.arc(
+            screen[0],
+            screen[1],
+            6,
+            0,
+            Math.PI*2
+        );
+
+        cx.fill();
+
+        cx.strokeStyle = '#ffffff';
+        cx.lineWidth = 2;
+        cx.stroke();
+    }
+
+    cx.restore();
+}
+
+
+// ======================================================
+// RESTE DU MOTEUR DE CARTE
+// ======================================================
+
+const lay = z => {
+    let b = 0;
+
+    for (let i = 0; i < LZ.length; i++) {
+        if (LZ[i] <= z + 50) b = i;
+    }
+
+    return b;
+};
+
+
+const pts = [...L, ...R, ...D].map(a => [a[0], a[1]]);
+
+const q = (a, p) =>
+    a[Math.min(a.length - 1, Math.floor(a.length*p))];
+
+const XS = pts.map(p => p[0]).sort((a,b) => a-b);
+const YS = pts.map(p => p[1]).sort((a,b) => a-b);
+
+const bx0 = XS.length ? q(XS, .005) : -1000;
+const bx1 = XS.length ? q(XS, .995) : 1000;
+const by0 = YS.length ? q(YS, .005) : -1000;
+const by1 = YS.length ? q(YS, .995) : 1000;
+
+
+$('ly').innerHTML =
+    '<option value="-1">Tous</option>' +
+    LBL.map((t,i) =>
+        '<option value="' + i + '">' + t + '</option>'
+    ).join('');
+
+$('ly').value = layer;
+
+
+if (!LIVE) {
+    document.querySelectorAll('.lv').forEach(e => e.hidden = true);
+
+    $('pn').hidden = true;
+    $('st').hidden = true;
+}
+
+
+// ------------------------------------------------------
+// PANNEAU DES CATÉGORIES
+
+const esc = t =>
+    String(t).replace(/[&<>"]/g, c => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;'
+    }[c]));
+
+
+function buildCats(filter) {
+    const f = (filter || '').toLowerCase();
+
+    let html =
+        '<input type="search" id="sq" placeholder="Filtrer…" value="' +
+        esc(filter || '') +
+        '">' +
+        '<div style="display:flex;gap:6px;margin-bottom:6px">' +
+        '<button id="ca">Tout</button>' +
+        '<button id="cn">Aucun</button>' +
+        '<button id="cd">Défaut</button>' +
+        '</div>';
+
+    GR.forEach((g, gi) => {
+        const ids = CATS.map((c, i) => i).filter(i =>
+            CATS[i].g == gi &&
+            (
+                !f ||
+                CATS[i].n.toLowerCase().includes(f) ||
+                g.toLowerCase().includes(f)
+            )
+        );
+
+        if (!ids.length) return;
+
+        const all = ids.every(i => ON[i]);
+        const none = ids.every(i => !ON[i]);
+
+        html +=
+            '<details' +
+            (f || gi < 5 ? ' open' : '') +
+            '><summary>' +
+            '<input type="checkbox" data-g="' + gi + '"' +
+            (all ? ' checked' : '') +
+            ' data-ind="' + (!all && !none ? 1 : 0) +
+            '"> ' + esc(g) +
+            '<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">' +
+            ids.reduce((a,i) => a + CATS[i].cnt, 0) +
+            '</span></summary>' +
+
+            ids.map(i =>
+                '<label class="row">' +
+                '<input type="checkbox" data-c="' + i + '"' +
+                (ON[i] ? ' checked' : '') +
+                '><span class="sw" style="background:' +
+                CATS[i].c +
+                '"></span><span class="nm" title="' +
+                esc(CATS[i].n) +
+                '">' +
+                esc(CATS[i].n) +
+                '</span><span class="n">' +
+                CATS[i].cnt +
+                '</span></label>'
+            ).join('') +
+
+            '</details>';
+    });
+
+    $('cats').innerHTML = html;
+
+    $('cats').querySelectorAll('input[data-ind="1"]').forEach(e => {
+        e.indeterminate = true;
+    });
+
+    $('sq').oninput = e => {
+        const value = e.target.value;
+
+        buildCats(value);
+
+        $('sq').focus();
+        $('sq').setSelectionRange(1e6, 1e6);
+    };
+
+    $('ca').onclick = () => {
+        ON = ON.map(_ => 1);
+        buildCats($('sq').value);
+        draw();
+    };
+
+    $('cn').onclick = () => {
+        ON = ON.map(_ => 0);
+        buildCats($('sq').value);
+        draw();
+    };
+
+    $('cd').onclick = () => {
+        ON = CATS.map(c => (c.g === 3 || c.g === 12) ? 1 : 0);
+        buildCats($('sq').value);
+        draw();
+    };
+
+    $('cats').querySelectorAll('input[data-c]').forEach(e => {
+        e.onchange = () => {
+            ON[+e.dataset.c] = e.checked ? 1 : 0;
+
+            buildCats($('sq').value);
+            draw();
+        };
+    });
+
+    $('cats').querySelectorAll('input[data-g]').forEach(e => {
+        e.onchange = () => {
+            CATS.forEach((c, i) => {
+                if (c.g == +e.dataset.g) {
+                    ON[i] = e.checked ? 1 : 0;
+                }
+            });
+
+            buildCats($('sq').value);
+            draw();
+        };
+    });
+}
+
+
+buildCats('');
+$('filtersToggle').onclick = () => {
+    const open = $('cats').classList.toggle('open');
+    $('filtersToggle').setAttribute('aria-expanded', String(open));
+};
+document.addEventListener('pointerdown', event => {
+    if (!$('cats').contains(event.target) && event.target !== $('filtersToggle')) {
+        $('cats').classList.remove('open');
+        $('filtersToggle').setAttribute('aria-expanded', 'false');
+    }
+});
+
+
+// ------------------------------------------------------
+// DESSIN DE LA CARTE
+
+function fit() {
+    const r = cv.getBoundingClientRect();
+    const k = devicePixelRatio || 1;
+
+    cv.width = r.width*k;
+    cv.height = r.height*k;
+
+    w = r.width;
+    h = r.height;
+
+    s = Math.min(
+        w/(bx1-bx0+1500),
+        h/(by1-by0+1500)
+    );
+
+    ox = w/2 - s*(bx0+bx1)/2;
+    oy = h/2 - fy()*s*(by0+by1)/2;
+
+    draw();
+}
+
+
+function center() {
+    if (!pl) return;
+
+    ox = w/2 - pl.x*s;
+    oy = h/2 - fy()*pl.y*s;
+}
+
+
+function draw() {
+    const k = devicePixelRatio || 1;
+
+    cx.setTransform(k, 0, 0, k, 0, 0);
+    cx.clearRect(0, 0, w, h);
+
+    const st =
+        [500, 1000, 2000, 5000, 10000].find(v => v*s >= 70)
+        || 10000;
+
+    cx.strokeStyle = '#26313d';
+    cx.lineWidth = 1;
+    cx.fillStyle = '#6b7785';
+    cx.font = '11px sans-serif';
+
+    for (
+        let g = Math.floor(bx0/st)*st-st;
+        g <= bx1+st;
+        g += st
+    ) {
+        const [a] = P(g, 0);
+
+        cx.beginPath();
+        cx.moveTo(a, 0);
+        cx.lineTo(a, h);
+        cx.stroke();
+
+        cx.fillText('X ' + g, a+2, 12);
+    }
+
+    for (
+        let g = Math.floor(by0/st)*st-st;
+        g <= by1+st;
+        g += st
+    ) {
+        const [,b] = P(0, g);
+
+        cx.beginPath();
+        cx.moveTo(0, b);
+        cx.lineTo(w, b);
+        cx.stroke();
+
+        cx.fillText('Y ' + g, 2, b-2);
+    }
+
+    // Tuiles
+
+    for (const [x,y,l,fw,fh,an,c] of R) {
+        if (!ON[c] || !vis(l)) continue;
+
+        const [px,py] = P(x,y);
+
+        cx.save();
+        cx.translate(px,py);
+        cx.rotate(fy()*an*Math.PI/180);
+
+        cx.fillStyle = CATS[c].c + '22';
+        cx.fillRect(
+            -fw*s/2,
+            -fh*s/2,
+            fw*s,
+            fh*s
+        );
+
+        cx.restore();
+    }
+
+    // Segments
+
+    cx.lineCap = 'butt';
+
+    for (const [x,y,an,ln,l,c] of L) {
+        if (!ON[c] || !vis(l)) continue;
+
+        const [px,py] = P(x,y);
+
+        const r = an*Math.PI/180;
+        const dx = Math.cos(r)*ln/2*s;
+        const dy = fy()*Math.sin(r)*ln/2*s;
+
+        cx.strokeStyle = CATS[c].c;
+        cx.lineWidth = Math.max(1.2, CATS[c].lw*s);
+
+        cx.beginPath();
+        cx.moveTo(px-dx, py-dy);
+        cx.lineTo(px+dx, py+dy);
+        cx.stroke();
+    }
+
+    // Points
+
+    for (const [x,y,l,c] of D) {
+        if (!ON[c] || !vis(l)) continue;
+
+        const [px,py] = P(x,y);
+
+        cx.fillStyle = CATS[c].c;
+        cx.fillRect(px-1.5, py-1.5, 3, 3);
+    }
+
+    // Volumes
+
+    if ($('vo').checked) {
+        for (const [x,y,l,c,t,a,b,an] of V) {
+            if (!ON[c] || !vis(l)) continue;
+
+            const [px,py] = P(x,y);
+
+            cx.strokeStyle = CATS[c].c;
+            cx.fillStyle = CATS[c].c + '18';
+            cx.lineWidth = 1.2;
+
+            if (t == 'c') {
+                cx.beginPath();
+                cx.arc(px, py, a*s, 0, 7);
+                cx.fill();
+                cx.stroke();
+            } else {
+                cx.save();
+
+                cx.translate(px,py);
+                cx.rotate(fy()*an*Math.PI/180);
+
+                cx.fillRect(
+                    -a*s/2,
+                    -b*s/2,
+                    a*s,
+                    b*s
+                );
+
+                cx.strokeRect(
+                    -a*s/2,
+                    -b*s/2,
+                    a*s,
+                    b*s
+                );
+
+                cx.restore();
+            }
+        }
+    }
+
+    // Objets
+
+    for (const [x,y,l,c] of K) {
+        if (!ON[c] || !vis(l)) continue;
+
+        const [px,py] = P(x,y);
+        const d = CATS[c];
+
+        cx.fillStyle = cx.strokeStyle = d.c;
+
+        if (d.s == 'd') {
+            cx.beginPath();
+            cx.moveTo(px,py-6);
+            cx.lineTo(px+6,py);
+            cx.lineTo(px,py+6);
+            cx.lineTo(px-6,py);
+            cx.closePath();
+            cx.fill();
+        }
+
+        else if (d.s == 's') {
+            cx.fillRect(px-4,py-4,8,8);
+        }
+
+        else if (d.s == 'r') {
+            cx.lineWidth = 2;
+            cx.beginPath();
+            cx.arc(px,py,7,0,7);
+            cx.stroke();
+        }
+
+        else {
+            cx.beginPath();
+            cx.arc(px,py,3,0,7);
+            cx.fill();
+        }
+    }
+
+    // Trace du joueur
+
+    if (LIVE && $('tr').checked && tr.length > 1) {
+        cx.strokeStyle = '#35b7ff88';
+        cx.lineWidth = 2;
+
+        cx.beginPath();
+
+        tr.forEach((p,i) => {
+            const [px,py] = P(p[0], p[1]);
+
+            i
+                ? cx.lineTo(px,py)
+                : cx.moveTo(px,py);
+        });
+
+        cx.stroke();
+    }
+
+    // Tracé manuel
+
+    drawManualPath();
+
+    // Joueur
+
+    if (pl) {
+        const [px,py] = P(pl.x,pl.y);
+
+        const r = pl.yaw*Math.PI/180;
+
+        const dx = Math.cos(r);
+        const dy = fy()*Math.sin(r);
+
+        cx.strokeStyle = '#35b7ff99';
+        cx.lineWidth = 3;
+
+        cx.beginPath();
+        cx.arc(px,py,20,0,7);
+        cx.stroke();
+
+        cx.fillStyle = '#35b7ff';
+        cx.strokeStyle = '#fff';
+        cx.lineWidth = 2;
+
+        cx.beginPath();
+
+        cx.moveTo(px+dx*13,py+dy*13);
+        cx.lineTo(px-dx*8-dy*8,py-dy*8+dx*8);
+        cx.lineTo(px-dx*3,py-dy*3);
+        cx.lineTo(px-dx*8+dy*8,py-dy*8-dx*8);
+
+        cx.closePath();
+        cx.fill();
+        cx.stroke();
+    }
+}
+
+
+// ------------------------------------------------------
+// INFOS AU SURVOL
+
+function nearest(mx,my) {
+    let best = null;
+    let bd = 14;
+
+    const chk = (x,y,l,c) => {
+        if (!ON[c] || !vis(l)) return;
+
+        const [px,py] = P(x,y);
+
+        const d = Math.hypot(px-mx,py-my);
+
+        if (d < bd) {
+            bd = d;
+            best =
+                CATS[c].n +
+                '  (' +
+                Math.round(x) +
+                ', ' +
+                Math.round(y) +
+                ')';
+        }
+    };
+
+    for (const a of K) chk(a[0],a[1],a[2],a[3]);
+    for (const a of D) chk(a[0],a[1],a[2],a[3]);
+    for (const a of L) chk(a[0],a[1],a[4],a[5]);
+    for (const a of V) chk(a[0],a[1],a[2],a[3]);
+
+    return best;
+}
+
+
+// ------------------------------------------------------
+// POSITION LIVE
+
+function setPos(p) {
+    pl = p;
+
+    if ($('au').checked) {
+        layer = lay((p.z||0)-ZOFF);
+        $('ly').value = layer;
+    }
+
+    const l = tr[tr.length-1];
+
+    if (
+        !l ||
+        Math.hypot(l[0]-p.x,l[1]-p.y) > 40
+    ) {
+        tr.push([p.x,p.y]);
+
+        if (tr.length > 2000) {
+            tr.shift();
+        }
+    }
+
+    if ($('fo').checked) {
+        center();
+    }
+
+    $('tx').textContent =
+        `X ${p.x.toFixed(0)}  Y ${p.y.toFixed(0)}  ` +
+        `Z ${(p.z||0).toFixed(0)}  yaw ${(p.yaw||0).toFixed(0)}°  ` +
+        `calque ${layer}`;
+
+    draw();
+}
+
+
+// ------------------------------------------------------
+// PANNEAU LIVE
+
+const f3 = v =>
+    v
+        ? `X ${v[0].toFixed(1)} · Y ${v[1].toFixed(1)} · Z ${v[2].toFixed(1)}`
+        : 'indisponible';
+
+const nu = (v,u) =>
+    v == null
+        ? 'indisponible'
+        : v.toFixed(3) + (u||'');
+
+let pnHtml = '';
+
+
+function panel(p) {
+    const d = (p && p.d) || {};
+
+    let msg;
+    let ok = false;
+
+    if (!p) {
+        msg =
+            'Relais injoignable : lance etb_live_map.py puis ouvre http://127.0.0.1:8765/';
+    }
+
+    else {
+        msg = p.status || '—';
+
+        ok = !!p.ok && (p.age == null || p.age < 1.5);
+
+        if (p.ok && p.age >= 1.5) {
+            msg += ' (données périmées)';
+        }
+    }
+
+    const rows = [
+        ['Position réelle du personnage',f3(d.player_position)],
+        ['Position de la caméra',f3(d.camera_location)],
+        ['Pitch caméra',nu(d.pitch,'°')],
+        ['Yaw caméra (orientation horizontale)',nu(d.yaw,'°')],
+        ['Roll caméra',nu(d.roll,'°')],
+        ['Champ de vision (FOV)',nu(d.fov)],
+        ['Pawn',d.pawn||'indisponible'],
+        ['RootComponent',d.root_component||'indisponible'],
+        ['PlayerCameraManager',d.camera_manager||'indisponible'],
+        ['Processus',d.pid ? `PID ${d.pid} · module ${d.module} · GWorld ${d.slot}` : '—'],
+        ['Calque affiché',layer<0?'tous':LBL[layer]],
+        ['Âge de la donnée',p && p.age != null ? p.age+' s' : '—']
+    ];
+
+    const html =
+        '<h3>Données du joueur</h3>' +
+        '<div style="color:' +
+        (ok?'#5fd0a0':'#ffb86b') +
+        '">' +
+        esc(msg) +
+        '</div>' +
+
+        rows.map(([k,v]) =>
+            '<div class="k">' +
+            esc(k) +
+            '</div><div class="v">' +
+            esc(v) +
+            '</div>'
+        ).join('');
+
+    if (html !== pnHtml) {
+        pnHtml = html;
+        $('pn').innerHTML = html;
+    }
+}
+
+
+async function poll() {
+    let p = null;
+
+    try {
+        const r = await fetch(SRC, { cache:'no-store' });
+
+        if (r.ok) {
+            p = await r.json();
+        }
+    } catch(e) {}
+
+    if (
+        p &&
+        typeof p.x == 'number' &&
+        (p.age === undefined || p.age < 1.5)
+    ) {
+        last = Date.now();
+
+        setPos({
+            x:p.x,
+            y:p.y,
+            z:p.z||0,
+            yaw:p.yaw||0
+        });
+    }
+
+    $('st').style.background =
+        Date.now()-last < 1500
+            ? '#5fd0a0'
+            : '#e55';
+
+    panel(p);
+
+    setTimeout(poll, POLL);
+}
+
+
+// ======================================================
+// CHEMIN LE PLUS COURT
+// FONCTIONNEMENT DE CALCUL CONSERVÉ
+// ======================================================
+
+const ROUTE_CELL = 50;
+const ROUTE_CLEARANCE = 40;
+const ROUTE_MAX_CELLS = 1200000;
+const ROUTE_MAX_TARGETS = 10;
+
+const ROUTE_STORAGE_KEY =
+    'etb-route-points:' +
+    location.pathname +
+    ':' +
+    document.title;
+
+let routeWaypoints = [];
+let routePath = [];
+let routeVisitOrder = [];
+let routeStart = null;
+let routeStartsFromPlayer = false;
+let routeSelecting = false;
+let routeColor = '#00d5ff';
+let routeDistance = 0;
+
+
+const routeStatus = message => {
+    $('routeStatus').textContent = message;
+};
+
+
+const routePoint = (x,y) => ({
+    x:Number(x),
+    y:Number(y)
+});
+
+
+const routeDistance2D = (a,b) =>
+    Math.hypot(a.x-b.x,a.y-b.y);
+
+
+// ------------------------------------------------------
+// SAUVEGARDE
+
+function routeSave() {
+    try {
+        localStorage.setItem(
+            ROUTE_STORAGE_KEY,
+            JSON.stringify({
+                points:routeWaypoints,
+                color:routeColor
+            })
+        );
+    } catch(e) {
+        console.warn(
+            'Sauvegarde du parcours impossible :',
+            e
+        );
+    }
+}
+
+
+// ------------------------------------------------------
+// CHARGEMENT
+
+function routeLoad() {
+    const embedded = EMBEDDED.route;
+
+    if (
+        embedded &&
+        Array.isArray(embedded.waypoints)
+    ) {
+        routeWaypoints =
+            embedded.waypoints.map(p => ({...p}));
+
+        routePath =
+            Array.isArray(embedded.path)
+                ? embedded.path.map(p => ({...p}))
+                : [];
+
+        routeVisitOrder =
+            Array.isArray(embedded.visitOrder)
+                ? [...embedded.visitOrder]
+                : [];
+
+        routeStart =
+            embedded.start
+                ? {...embedded.start}
+                : null;
+
+        routeStartsFromPlayer = !!embedded.startsFromPlayer;
+        routeDistance = Number(embedded.distance) || 0;
+
+        if (
+            typeof embedded.color === 'string' &&
+            /^#[0-9a-f]{6}$/i.test(embedded.color)
+        ) {
+            routeColor = embedded.color;
+        }
+
+        $('routeColor').value = routeColor;
+
+        return;
+    }
+
+    try {
+        const saved = JSON.parse(
+            localStorage.getItem(ROUTE_STORAGE_KEY) || 'null'
+        );
+
+        if (
+            saved &&
+            Array.isArray(saved.points)
+        ) {
+            routeWaypoints = saved.points.filter(p =>
+                Number.isFinite(p.x) &&
+                Number.isFinite(p.y)
+            );
+
+            if (
+                typeof saved.color === 'string' &&
+                /^#[0-9a-f]{6}$/i.test(saved.color)
+            ) {
+                routeColor = saved.color;
+            }
+        }
+
+    } catch(e) {
+        console.warn(
+            'Chargement du parcours impossible :',
+            e
+        );
+    }
+
+    $('routeColor').value = routeColor;
+}
+
+
+// ------------------------------------------------------
+// INTERFACE
+
+function routeUpdateUI() {
+    $('routeSelect').classList.toggle(
+        'active',
+        routeSelecting
+    );
+
+    $('routeSelect').textContent = routeSelecting
+        ? 'Terminer les points'
+        : 'Ajouter des points';
+
+    $('routeUndo').disabled =
+        routeWaypoints.length === 0;
+
+    $('routeCalculate').disabled =
+        routeWaypoints.length < (LIVE ? 1 : 2);
+
+    routeStatus(
+        routeSelecting
+            ? `Clique sur la carte pour ajouter des destinations (${routeWaypoints.length}/${ROUTE_MAX_TARGETS}).`
+            : `${routeWaypoints.length} point(s) sélectionné(s). ${
+                routePath.length
+                    ? `Trajet : ${(routeDistance/100).toFixed(1)} m.`
+                    : 'Calcule le parcours.'
+            }`
+    );
+}
+
+
+// ------------------------------------------------------
+// AJOUT D'UNE DESTINATION
+
+function routeAddWaypoint(event) {
+    if (routeWaypoints.length >= ROUTE_MAX_TARGETS) {
+        routeStatus(
+            `Limite de ${ROUTE_MAX_TARGETS} destinations atteinte.`
+        );
+
+        return;
+    }
+
+    const point = canvasToWorld(
+        event.clientX,
+        event.clientY
+    );
+
+    routeWaypoints.push(point);
+
+    routePath = [];
+    routeVisitOrder = [];
+    routeDistance = 0;
+
+    routeSave();
+    routeUpdateUI();
+    draw();
+}
+
+
+function routeToggleSelection() {
+    routeSelecting = !routeSelecting;
+
+    if (!routeSelecting) {
+        routeStatus('Sélection des points terminée.');
+    }
+
+    if (routeSelecting && pathDrawing) {
+        finishPathDrawing();
+    }
+
+    routeUpdateUI();
+}
+
+
+function routeUndo() {
+    if (!routeWaypoints.length) return;
+
+    routeWaypoints.pop();
+
+    routePath = [];
+    routeVisitOrder = [];
+    routeDistance = 0;
+
+    routeSave();
+    routeUpdateUI();
+    draw();
+}
+
+
+function routeClear() {
+    if (!routeWaypoints.length && !routePath.length) return;
+
+    routeWaypoints = [];
+    routePath = [];
+    routeVisitOrder = [];
+
+    routeStart = null;
+    routeStartsFromPlayer = false;
+    routeDistance = 0;
+    routeSelecting = false;
+
+    routeSave();
+    routeUpdateUI();
+    draw();
+}
+
+
+// ------------------------------------------------------
+// DISTANCE POINT / SEGMENT
+
+function routePointSegmentDistance(
+    px,py,ax,ay,bx,by
+) {
+    const dx = bx-ax;
+    const dy = by-ay;
+
+    const len2 = dx*dx + dy*dy;
+
+    if (!len2) {
+        return Math.hypot(px-ax,py-ay);
+    }
+
+    const t = Math.max(
+        0,
+        Math.min(
+            1,
+            ((px-ax)*dx+(py-ay)*dy)/len2
+        )
+    );
+
+    return Math.hypot(
+        px-(ax+t*dx),
+        py-(ay+t*dy)
+    );
+}
+
+
+// ------------------------------------------------------
+// RÉCUPÉRATION DES MURS
+
+function routeGetWalls() {
+    const activeLayer =
+        layer >= 0
+            ? layer
+            : (LIVE && pl ? lay((pl.z||0)-ZOFF) : 0);
+
+    const blockedGroups = new Set([
+        'Murs',
+        'Clôtures / barrières'
+    ]);
+
+    const walls = [];
+
+    for (const item of L) {
+        const [
+            x,y,angle,length,itemLayer,category
+        ] = item;
+
+        const groupName = GR[CATS[category]?.g];
+
+        if (!blockedGroups.has(groupName)) continue;
+        if (itemLayer !== activeLayer) continue;
+
+        const radians = angle*Math.PI/180;
+
+        const dx = Math.cos(radians)*length/2;
+        const dy = Math.sin(radians)*length/2;
+
+        const halfWidth = Math.max(
+            10,
+            (CATS[category]?.lw||0)/2
+        );
+
+        walls.push({
+            ax:x-dx,
+            ay:y-dy,
+            bx:x+dx,
+            by:y+dy,
+            radius:halfWidth+ROUTE_CLEARANCE
+        });
+    }
+
+    return {walls,activeLayer};
+}
+
+
+// ------------------------------------------------------
+// CONSTRUCTION DE LA GRILLE
+
+function routeBuildGrid(points) {
+    const {walls,activeLayer} = routeGetWalls();
+
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    const include = p => {
+        minX = Math.min(minX,p.x);
+        minY = Math.min(minY,p.y);
+        maxX = Math.max(maxX,p.x);
+        maxY = Math.max(maxY,p.y);
+    };
+
+    points.forEach(include);
+
+    walls.forEach(w => {
+        include({x:w.ax,y:w.ay});
+        include({x:w.bx,y:w.by});
+    });
+
+    if (!Number.isFinite(minX)) {
+        throw new Error(
+            'Aucune coordonnée valide pour construire la carte de navigation.'
+        );
+    }
+
+    const margin = 1000;
+
+    minX -= margin;
+    minY -= margin;
+    maxX += margin;
+    maxY += margin;
+
+    const spanX = maxX-minX;
+    const spanY = maxY-minY;
+
+    let cell = ROUTE_CELL;
+
+    while (
+        Math.ceil(spanX/cell)*
+        Math.ceil(spanY/cell) > ROUTE_MAX_CELLS &&
+        cell < 250
+    ) {
+        cell += 10;
+    }
+
+    const width = Math.ceil(spanX/cell)+1;
+    const height = Math.ceil(spanY/cell)+1;
+    const size = width*height;
+
+    if (size > ROUTE_MAX_CELLS*1.2) {
+        throw new Error(
+            'La carte est trop grande pour le calcul.'
+        );
+    }
+
+    const blocked = new Uint8Array(size);
+
+    const toCell = p => ({
+        x:Math.max(
+            0,
+            Math.min(width-1,Math.floor((p.x-minX)/cell))
+        ),
+        y:Math.max(
+            0,
+            Math.min(height-1,Math.floor((p.y-minY)/cell))
+        )
+    });
+
+    const toWorld = (x,y) => ({
+        x:minX+(x+.5)*cell,
+        y:minY+(y+.5)*cell
+    });
+
+    const index = (x,y) => y*width+x;
+
+    for (const wall of walls) {
+        const r = wall.radius+cell*.45;
+
+        const x0 = Math.max(
+            0,
+            Math.floor(
+                (Math.min(wall.ax,wall.bx)-r-minX)/cell
+            )
+        );
+
+        const x1 = Math.min(
+            width-1,
+            Math.ceil(
+                (Math.max(wall.ax,wall.bx)+r-minX)/cell
+            )
+        );
+
+        const y0 = Math.max(
+            0,
+            Math.floor(
+                (Math.min(wall.ay,wall.by)-r-minY)/cell
+            )
+        );
+
+        const y1 = Math.min(
+            height-1,
+            Math.ceil(
+                (Math.max(wall.ay,wall.by)+r-minY)/cell
+            )
+        );
+
+        for (let gy=y0; gy<=y1; gy++) {
+            for (let gx=x0; gx<=x1; gx++) {
+                const p = toWorld(gx,gy);
+
+                if (
+                    routePointSegmentDistance(
+                        p.x,p.y,
+                        wall.ax,wall.ay,
+                        wall.bx,wall.by
+                    ) <= r
+                ) {
+                    blocked[index(gx,gy)] = 1;
+                }
+            }
+        }
+    }
+
+    return {
+        minX,minY,
+        width,height,
+        cell,size,
+        blocked,
+        toCell,
+        toWorld,
+        index,
+        activeLayer
+    };
+}
+
+
+// ------------------------------------------------------
+// CELLULE LIBRE
+
+function routeNearestFree(grid,point) {
+    const c = grid.toCell(point);
+
+    const valid = (x,y) =>
+        x>=0 &&
+        y>=0 &&
+        x<grid.width &&
+        y<grid.height &&
+        !grid.blocked[grid.index(x,y)];
+
+    if (valid(c.x,c.y)) {
+        return grid.index(c.x,c.y);
+    }
+
+    for (let radius=1; radius<=16; radius++) {
+        let best=-1;
+        let bestD=Infinity;
+
+        for (let dy=-radius; dy<=radius; dy++) {
+            for (let dx=-radius; dx<=radius; dx++) {
+                if (
+                    Math.max(Math.abs(dx),Math.abs(dy)) !== radius
+                ) {
+                    continue;
+                }
+
+                const x=c.x+dx;
+                const y=c.y+dy;
+
+                if (!valid(x,y)) continue;
+
+                const d=dx*dx+dy*dy;
+
+                if (d<bestD) {
+                    bestD=d;
+                    best=grid.index(x,y);
+                }
+            }
+        }
+
+        if (best>=0) return best;
+    }
+
+    return -1;
+}
+
+
+// ------------------------------------------------------
+// FILE DE PRIORITÉ
+
+class RouteMinHeap {
+    constructor() {
+        this.items=[];
+    }
+
+    push(node,score) {
+        const a=this.items;
+        let i=a.length;
+
+        a.push({node,score});
+
+        while (i>0) {
+            const p=(i-1)>>1;
+
+            if (a[p].score<=score) break;
+
+            a[i]=a[p];
+            i=p;
+        }
+
+        a[i]={node,score};
+    }
+
+    pop() {
+        const a=this.items;
+
+        if (!a.length) return null;
+
+        const root=a[0];
+        const last=a.pop();
+
+        if (a.length) {
+            let i=0;
+
+            while (true) {
+                const l=i*2+1;
+                const r=l+1;
+
+                if (l>=a.length) break;
+
+                const c =
+                    (r<a.length && a[r].score<a[l].score)
+                        ? r
+                        : l;
+
+                if (a[c].score>=last.score) break;
+
+                a[i]=a[c];
+                i=c;
+            }
+
+            a[i]=last;
+        }
+
+        return root;
+    }
+
+    get length() {
+        return this.items.length;
+    }
+}
+
+
+// ------------------------------------------------------
+// A* : CHEMIN ENTRE DEUX POINTS
+
+function routeAStar(grid,startPoint,endPoint) {
+    const start=routeNearestFree(grid,startPoint);
+    const goal=routeNearestFree(grid,endPoint);
+
+    if (start<0 || goal<0) return null;
+
+    if (start===goal) {
+        return [
+            routePoint(startPoint.x,startPoint.y),
+            routePoint(endPoint.x,endPoint.y)
+        ];
+    }
+
+    const gScore=new Float32Array(grid.size);
+    gScore.fill(Infinity);
+
+    const parent=new Int32Array(grid.size);
+    parent.fill(-1);
+
+    const closed=new Uint8Array(grid.size);
+
+    const heap=new RouteMinHeap();
+
+    const sx=start%grid.width;
+    const sy=Math.floor(start/grid.width);
+
+    const gx=goal%grid.width;
+    const gy=Math.floor(goal/grid.width);
+
+    const heuristic=(x,y)=>{
+        const dx=Math.abs(x-gx);
+        const dy=Math.abs(y-gy);
+
+        return (
+            dx+dy+
+            (Math.SQRT2-2)*Math.min(dx,dy)
+        );
+    };
+
+    const neighbors=[
+        [-1,-1,Math.SQRT2],
+        [0,-1,1],
+        [1,-1,Math.SQRT2],
+        [-1,0,1],
+        [1,0,1],
+        [-1,1,Math.SQRT2],
+        [0,1,1],
+        [1,1,Math.SQRT2]
+    ];
+
+    gScore[start]=0;
+    heap.push(start,heuristic(sx,sy));
+
+    let found=false;
+    let expanded=0;
+
+    while (heap.length) {
+        const item=heap.pop();
+        const current=item.node;
+
+        if (closed[current]) continue;
+
+        if (current===goal) {
+            found=true;
+            break;
+        }
+
+        closed[current]=1;
+        expanded++;
+
+        if (expanded>grid.size) break;
+
+        const x=current%grid.width;
+        const y=Math.floor(current/grid.width);
+
+        for (const [dx,dy,cost] of neighbors) {
+            const nx=x+dx;
+            const ny=y+dy;
+
+            if (
+                nx<0 ||
+                ny<0 ||
+                nx>=grid.width ||
+                ny>=grid.height
+            ) {
+                continue;
+            }
+
+            const ni=grid.index(nx,ny);
+
+            if (grid.blocked[ni] || closed[ni]) continue;
+
+            if (
+                dx!==0 &&
+                dy!==0 &&
+                (
+                    grid.blocked[grid.index(x+dx,y)] ||
+                    grid.blocked[grid.index(x,y+dy)]
+                )
+            ) {
+                continue;
+            }
+
+            const tentative=gScore[current]+cost;
+
+            if (tentative<gScore[ni]) {
+                gScore[ni]=tentative;
+                parent[ni]=current;
+
+                heap.push(
+                    ni,
+                    tentative+heuristic(nx,ny)
+                );
+            }
+        }
+    }
+
+    if (!found) return null;
+
+    const reversed=[];
+    let cursor=goal;
+
+    while (cursor!==-1) {
+        reversed.push(cursor);
+
+        if (cursor===start) break;
+
+        cursor=parent[cursor];
+    }
+
+    if (reversed[reversed.length-1]!==start) {
+        return null;
+    }
+
+    reversed.reverse();
+
+    const raw=[
+        routePoint(startPoint.x,startPoint.y)
+    ];
+
+    for (let i=0; i<reversed.length; i++) {
+        const node=reversed[i];
+
+        const x=node%grid.width;
+        const y=Math.floor(node/grid.width);
+
+        const p=grid.toWorld(x,y);
+
+        if (
+            routeDistance2D(
+                raw[raw.length-1],
+                p
+            ) > grid.cell*.25
+        ) {
+            raw.push(p);
+        }
+    }
+
+    raw.push(
+        routePoint(endPoint.x,endPoint.y)
+    );
+
+    const clearLine=(a,b)=>{
+        const distance=routeDistance2D(a,b);
+
+        const steps=Math.max(
+            1,
+            Math.ceil(distance/(grid.cell*.35))
+        );
+
+        for (let i=0;i<=steps;i++) {
+            const t=i/steps;
+
+            const p={
+                x:a.x+(b.x-a.x)*t,
+                y:a.y+(b.y-a.y)*t
+            };
+
+            const c=grid.toCell(p);
+
+            if (grid.blocked[grid.index(c.x,c.y)]) {
+                return false;
+            }
+        }
+
+        return true;
+    };
+
+    const smooth=[raw[0]];
+    let anchor=0;
+
+    while (anchor<raw.length-1) {
+        let next=raw.length-1;
+
+        while (
+            next>anchor+1 &&
+            !clearLine(raw[anchor],raw[next])
+        ) {
+            next--;
+        }
+
+        smooth.push(raw[next]);
+        anchor=next;
+    }
+
+    return smooth;
+}
+
+
+// ------------------------------------------------------
+// LONGUEUR ET OPTIMISATION DE L'ORDRE
+
+function routePolylineLength(points) {
+    let total=0;
+
+    for (let i=1;i<points.length;i++) {
+        total+=routeDistance2D(
+            points[i-1],
+            points[i]
+        );
+    }
+
+    return total;
+}
+
+
+function routeOptimizeOrder(distanceMatrix) {
+    const n=distanceMatrix.length-1;
+
+    if (n<=0) return [];
+
+    const states=1<<n;
+
+    const dp=Array.from(
+        {length:states},
+        ()=>{
+            const row=new Float64Array(n);
+            row.fill(Infinity);
+            return row;
+        }
+    );
+
+    const prev=Array.from(
+        {length:states},
+        ()=>{
+            const row=new Int16Array(n);
+            row.fill(-1);
+            return row;
+        }
+    );
+
+    for (let j=0;j<n;j++) {
+        dp[1<<j][j]=distanceMatrix[0][j+1];
+    }
+
+    for (let mask=1;mask<states;mask++) {
+        for (let last=0;last<n;last++) {
+            const current=dp[mask][last];
+
+            if (!Number.isFinite(current)) continue;
+
+            for (let next=0;next<n;next++) {
+                if (mask&(1<<next)) continue;
+
+                const nextMask=mask|(1<<next);
+
+                const candidate =
+                    current+
+                    distanceMatrix[last+1][next+1];
+
+                if (candidate<dp[nextMask][next]) {
+                    dp[nextMask][next]=candidate;
+                    prev[nextMask][next]=last;
+                }
+            }
+        }
+    }
+
+    const full=states-1;
+
+    let last=-1;
+    let best=Infinity;
+
+    for (let j=0;j<n;j++) {
+        if (dp[full][j]<best) {
+            best=dp[full][j];
+            last=j;
+        }
+    }
+
+    if (last<0 || !Number.isFinite(best)) {
+        return null;
+    }
+
+    const order=[];
+    let mask=full;
+
+    while (last>=0) {
+        order.push(last);
+
+        const previous=prev[mask][last];
+
+        mask^=1<<last;
+        last=previous;
+    }
+
+    return order.reverse();
+}
+
+
+// ------------------------------------------------------
+// CALCUL DU TRAJET COMPLET
+
+function routeCalculate() {
+    routeSelecting=false;
+
+    if (routeWaypoints.length===0) {
+        routeStatus('Ajoute au moins un point de destination.');
+        routeUpdateUI();
+        return;
+    }
+
+    let start;
+    let targets;
+
+    if (LIVE && pl) {
+        start=routePoint(pl.x,pl.y);
+        targets=routeWaypoints.slice();
+        routeStartsFromPlayer=true;
+
+    } else {
+        if (routeWaypoints.length<2) {
+            routeStatus(
+                'Sur une carte statique, choisis au moins deux points : départ puis destinations.'
+            );
+
+            routeUpdateUI();
+            return;
+        }
+
+        start=routeWaypoints[0];
+        targets=routeWaypoints.slice(1);
+        routeStartsFromPlayer=false;
+    }
+
+    if (targets.length>ROUTE_MAX_TARGETS) {
+        routeStatus(
+            `Maximum ${ROUTE_MAX_TARGETS} destinations pour le calcul exact.`
+        );
+
+        routeUpdateUI();
+        return;
+    }
+
+    routeStatus(
+        'Construction du parcours et calcul des chemins…'
+    );
+
+    $('routeCalculate').disabled=true;
+
+    setTimeout(()=>{
+        try {
+            const allPoints=[start,...targets];
+
+            const grid=routeBuildGrid(allPoints);
+
+            const count=allPoints.length;
+
+            const paths=Array.from(
+                {length:count},
+                ()=>Array(count).fill(null)
+            );
+
+            const distances=Array.from(
+                {length:count},
+                ()=>Array(count).fill(Infinity)
+            );
+
+            for (let i=0;i<count;i++) {
+                distances[i][i]=0;
+            }
+
+            for (let i=0;i<count;i++) {
+                for (let j=i+1;j<count;j++) {
+                    const path=routeAStar(
+                        grid,
+                        allPoints[i],
+                        allPoints[j]
+                    );
+
+                    if (!path) {
+                        throw new Error(
+                            `Aucun passage trouvé entre le point ${i===0?'de départ':i} et le point ${j}. Vérifie les points et les murs de ce calque.`
+                        );
+                    }
+
+                    const distance=routePolylineLength(path);
+
+                    paths[i][j]=path;
+                    paths[j][i]=path.slice().reverse();
+
+                    distances[i][j]=distance;
+                    distances[j][i]=distance;
+                }
+            }
+
+            const order=routeOptimizeOrder(distances);
+
+            if (!order) {
+                throw new Error(
+                    'Impossible de déterminer un ordre de visite complet.'
+                );
+            }
+
+            const combined=[];
+            let current=0;
+
+            for (const targetIndex of order) {
+                const segment=paths[current][targetIndex+1];
+
+                if (!segment) {
+                    throw new Error(
+                        'Un segment du parcours est manquant.'
+                    );
+                }
+
+                for (let p=0;p<segment.length;p++) {
+                    if (combined.length && p===0) continue;
+                    combined.push(segment[p]);
+                }
+
+                current=targetIndex+1;
+            }
+
+            routePath=combined;
+
+            routeVisitOrder=order.map(i=>
+                routeStartsFromPlayer ? i : i+1
+            );
+
+            routeStart=start;
+
+            routeDistance=routePolylineLength(routePath);
+
+            routeSave();
+
+            routeStatus(
+                `Trajet calculé : ${(routeDistance/100).toFixed(1)} m · ${targets.length} destination(s) · calque ${grid.activeLayer+1} · grille ${grid.cell} cm.`
+            );
+
+            routeUpdateUI();
+            draw();
+
+        } catch(error) {
+            routePath=[];
+            routeVisitOrder=[];
+            routeDistance=0;
+
+            routeStatus(
+                error.message ||
+                'Erreur pendant le calcul du trajet.'
+            );
+
+            console.error(error);
+
+            routeUpdateUI();
+            draw();
+
+        } finally {
+            $('routeCalculate').disabled =
+                routeWaypoints.length<(LIVE?1:2);
+        }
+    },20);
+}
+
+
+// ------------------------------------------------------
+// DESSIN DU TRAJET
+
+function routeDrawOverlay() {
+    if (!routePath.length && !routeWaypoints.length) {
+        return;
+    }
+
+    cx.save();
+
+    if (routePath.length>1) {
+        cx.lineCap='round';
+        cx.lineJoin='round';
+
+        cx.beginPath();
+
+        routePath.forEach((p,i)=>{
+            const q=P(p.x,p.y);
+
+            if (i===0) {
+                cx.moveTo(q[0],q[1]);
+            } else {
+                cx.lineTo(q[0],q[1]);
+            }
+        });
+
+        cx.strokeStyle='#101820';
+        cx.lineWidth=10;
+        cx.stroke();
+
+        cx.strokeStyle=routeColor;
+        cx.lineWidth=5;
+        cx.stroke();
+    }
+
+    if (routeStart && routeStartsFromPlayer) {
+        const p=P(routeStart.x,routeStart.y);
+
+        cx.fillStyle='#16a34a';
+        cx.strokeStyle='#fff';
+        cx.lineWidth=2;
+
+        cx.beginPath();
+        cx.arc(p[0],p[1],8,0,Math.PI*2);
+        cx.fill();
+        cx.stroke();
+
+        cx.fillStyle='#fff';
+        cx.font='bold 10px sans-serif';
+        cx.textAlign='center';
+        cx.textBaseline='middle';
+        cx.fillText('D',p[0],p[1]);
+    }
+
+    routeWaypoints.forEach((point,index)=>{
+        const p=P(point.x,point.y);
+
+        let order=index+1;
+
+        if (routeVisitOrder.length) {
+            const found=routeVisitOrder.indexOf(index);
+
+            if (found>=0) {
+                order=found+1;
+            } else if (!routeStartsFromPlayer && index===0) {
+                order='D';
+            }
+        }
+
+        cx.fillStyle=routeColor;
+        cx.strokeStyle='#fff';
+        cx.lineWidth=2;
+
+        cx.beginPath();
+        cx.arc(p[0],p[1],9,0,Math.PI*2);
+        cx.fill();
+        cx.stroke();
+
+        cx.fillStyle='#101820';
+        cx.font='bold 10px sans-serif';
+        cx.textAlign='center';
+        cx.textBaseline='middle';
+        cx.fillText(String(order),p[0],p[1]);
+    });
+
+    cx.restore();
+}
+
+
+// ------------------------------------------------------
+// EXPORT JSON DU CHEMIN
+
+function routeExport() {
+    const payload = {
+        mapTitle:document.title,
+        start:routeStart,
+        startsFromPlayer:routeStartsFromPlayer,
+        waypoints:routeWaypoints,
+        visitOrder:routeVisitOrder,
+        path:routePath,
+        distanceUE:routeDistance,
+        distanceMeters:routeDistance/100,
+        obstacleGroups:[
+            'Murs',
+            'Clôtures / barrières'
+        ],
+        gridCellCm:ROUTE_CELL
+    };
+
+    const blob=new Blob(
+        [JSON.stringify(payload,null,2)],
+        {type:'application/json'}
+    );
+
+    const url=URL.createObjectURL(blob);
+
+    const a=document.createElement('a');
+
+    a.href=url;
+    a.download='itineraire_carte.json';
+
+    a.click();
+
+    URL.revokeObjectURL(url);
+}
+
+
+// ------------------------------------------------------
+// ÉTAT DU CHEMIN EXPORTABLE
+
+routeLoad();
+routeUpdateUI();
+
+window.__ETB_GET_ROUTE_STATE__ = () => ({
+    waypoints:routeWaypoints.map(p=>({...p})),
+    path:routePath.map(p=>({...p})),
+    visitOrder:[...routeVisitOrder],
+    start:routeStart ? {...routeStart} : null,
+    startsFromPlayer:routeStartsFromPlayer,
+    distance:routeDistance,
+    color:routeColor
+});
+
+
+// ------------------------------------------------------
+// SYNCHRONISATION DES COULEURS
+
+window.addEventListener(
+    'etb-trace-color-change',
+    event => {
+        if (event.detail?.source!=='manual') return;
+
+        routeColor=event.detail.color;
+
+        $('routeColor').value=routeColor;
+
+        routeSave();
+        draw();
+    }
+);
+
+
+$('routeColor').addEventListener('input',event=>{
+    routeColor=event.target.value;
+
+    routeSave();
+
+    window.dispatchEvent(
+        new CustomEvent('etb-trace-color-change',{
+            detail:{
+                color:routeColor,
+                source:'route'
+            }
+        })
+    );
+
+    draw();
+});
+
+
+// ======================================================
+// EXPORT HTML COMPLET
+// ======================================================
+
+function exportCompleteHTML() {
+    const manualState =
+        window.__ETB_GET_MANUAL_TRACE__?.() || {
+            segments:[],
+            color:'#ff5252'
+        };
+
+    const routeState =
+        window.__ETB_GET_ROUTE_STATE__?.() || {
+            waypoints:[],
+            path:[],
+            visitOrder:[],
+            start:null,
+            startsFromPlayer:false,
+            distance:0,
+            color:'#00d5ff'
+        };
+
+    const playerState=pl
+        ? {
+            x:pl.x,
+            y:pl.y,
+            z:pl.z,
+            yaw:pl.yaw
+        }
+        : null;
+
+    const viewCenter={
+        x:(w/2-ox)/s,
+        y:fy()*(h/2-oy)/s
+    };
+
+    const exportState={
+        version:1,
+        manual:manualState,
+        route:routeState,
+        player:playerState,
+
+        view:{
+            center:viewCenter,
+            zoom:s,
+            layer:layer,
+            orientation:$('o').value,
+            follow:$('fo').checked,
+            autoLayer:$('au').checked,
+            showTrace:$('tr').checked,
+            showVolumes:$('vo').checked,
+            categories:ON.map(Boolean)
+        }
+    };
+
+    const clone=document.documentElement.cloneNode(true);
+
+    clone.querySelectorAll('#etb-export-state').forEach(el=>{
+        el.remove();
+    });
+
+    const bootstrap=document.createElement('script');
+
+    bootstrap.id='etb-export-state';
+
+    const json=JSON.stringify(exportState)
+        .replace(/</g,'\\u003c');
+
+    bootstrap.textContent=
+        'window.__ETB_EMBEDDED_STATE__ = '+json+';';
+
+    clone.querySelector('head').prepend(bootstrap);
+
+    const html='<!doctype html>\n'+clone.outerHTML;
+
+    const blob=new Blob(
+        [html],
+        {type:'text/html;charset=utf-8'}
+    );
+
+    const url=URL.createObjectURL(blob);
+
+    const link=document.createElement('a');
+
+    const filename=(document.title||'carte')
+        .replace(/[^\w-]+/g,'_');
+
+    link.href=url;
+    link.download=filename+'_complete.html';
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    setTimeout(()=>{
+        URL.revokeObjectURL(url);
+    },2000);
+}
+
+
+// ======================================================
+// DESSIN : AJOUT DU CHEMIN AU DESSIN DE BASE
+// ======================================================
+
+const previousDraw=draw;
+
+draw=function() {
+    previousDraw();
+    routeDrawOverlay();
+};
+
+
+// ======================================================
+// SOURIS ET INTERACTIONS
+// ======================================================
+
+cv.onpointerdown=e=>{
+    // Clic droit : déplacement prioritaire.
+    if (e.button===2) {
+        e.preventDefault();
+
+        dr=[
+            e.clientX,
+            e.clientY,
+            ox,
+            oy
+        ];
+
+        cv.setPointerCapture(e.pointerId);
+
+        $('fo').checked=false;
+
+        return;
+    }
+
+    if (e.button!==0) return;
+
+    const rect=cv.getBoundingClientRect();
+
+    const mx=(e.clientX-rect.left)*(w/rect.width);
+    const my=(e.clientY-rect.top)*(h/rect.height);
+
+    // Le mode d'ajout des destinations est prioritaire.
+    if (routeSelecting) {
+        e.preventDefault();
+        routeAddWaypoint(e);
+        return;
+    }
+
+    // Tracé manuel.
+    if (pathDrawing) {
+        addPathPoint(e);
+        return;
+    }
+
+    // Sélection d'un segment manuel.
+    const hit=findPathSegment(mx,my);
+
+    if (hit>=0) {
+        selectPathSegment(hit);
+        return;
+    }
+
+    selectedPathSegment=-1;
+
+    updatePathUI();
+
+    // Simulation de téléportation.
+    if (LIVE && $('sim').checked) {
+        const p=canvasToWorld(
+            e.clientX,
+            e.clientY
+        );
+
+        setPos({
+            x:p.x,
+            y:p.y,
+            z:pl ? pl.z : 0,
+            yaw:pl ? pl.yaw : 0
+        });
+
+        return;
+    }
+
+    // Déplacement normal de la carte.
+    dr=[
+        e.clientX,
+        e.clientY,
+        ox,
+        oy
+    ];
+
+    cv.setPointerCapture(e.pointerId);
+
+    $('fo').checked=false;
+};
+
+
+// Empêche le menu contextuel du navigateur.
+
+cv.oncontextmenu=e=>{
+    e.preventDefault();
+};
+
+
+cv.onpointerup=()=>{
+    dr=null;
+};
+
+cv.onpointercancel=()=>{
+    dr=null;
+};
+
+
+cv.onpointermove=e=>{
+    lastTracePointer={
+        x:e.clientX,
+        y:e.clientY
+    };
+
+    const r=cv.getBoundingClientRect();
+
+    const mx=(e.clientX-r.left)*(w/r.width);
+    const my=(e.clientY-r.top)*(h/r.height);
+
+    if (dr) {
+        ox=dr[2]+e.clientX-dr[0];
+        oy=dr[3]+e.clientY-dr[1];
+
+        draw();
+    }
+
+    if (!LIVE && !raf) {
+        raf=requestAnimationFrame(()=>{
+            raf=0;
+
+            const n=nearest(mx,my);
+
+            $('tx').textContent=
+                'X '+Math.round((mx-ox)/s)+
+                '  Y '+Math.round(fy()*(my-oy)/s)+
+                (n ? '   ›  '+n : '');
+        });
+    }
+};
+
+
+cv.onwheel=e=>{
+    e.preventDefault();
+
+    const r=cv.getBoundingClientRect();
+
+    const f=$('fo').checked&&pl;
+
+    const mx=f
+        ? w/2
+        : (e.clientX-r.left)*(w/r.width);
+
+    const my=f
+        ? h/2
+        : (e.clientY-r.top)*(h/r.height);
+
+    const z=e.deltaY<0 ? 1.2 : 1/1.2;
+
+    ox=mx-(mx-ox)*z;
+    oy=my-(my-oy)*z;
+
+    s*=z;
+
+    draw();
+};
+
+
+// ======================================================
+// COMMANDES DES BARRES D'OUTILS
+// ======================================================
+
+// Affichage
+
+['fo','au','tr','vo'].forEach(id=>{
+    $(id).onchange=()=>{
+        if (id==='fo' && $('fo').checked) {
+            center();
+        }
+
+        if (id==='au' && $('au').checked && pl) {
+            layer=lay(pl.z-ZOFF);
+            $('ly').value=layer;
+        }
+
+        draw();
+    };
+});
+
+
+$('ly').onchange=()=>{
+    layer=+$('ly').value;
+    $('au').checked=false;
+    draw();
+};
+
+
+$('o').onchange=()=>{
+    fit();
+    center();
+    draw();
+};
+
+
+$('r').onclick=()=>{
+    fit();
+    $('fo').checked=false;
+};
+
+
+$('cl').onclick=()=>{
+    tr=[];
+    draw();
+};
+
+
+// Les outils d'édition et d'export sont réservés au chargeur de cartes.
+
+// RACCOURCIS CLAVIER
+// ======================================================
+
+addEventListener('keydown',event=>{\n    return; // édition de carte désactivée dans les modules de jeu.
+    if (
+        event.target instanceof HTMLInputElement ||
+        event.target instanceof HTMLTextAreaElement ||
+        event.target instanceof HTMLSelectElement
+    ) {
+        return;
+    }
+
+    if (event.repeat) return;
+
+    // T : commence ou ajoute un segment.
+    if (event.key.toLowerCase()==='t') {
+        event.preventDefault();
+
+        if (!pathDrawing) {
+            startPathDrawing();
+        }
+
+        if (lastTracePointer) {
+            addPathPointAtClient(
+                lastTracePointer.x,
+                lastTracePointer.y
+            );
+        }
+
+        return;
+    }
+
+    // Échap : termine le tracé manuel.
+    if (event.key==='Escape') {
+        if (pathDrawing) {
+            event.preventDefault();
+            finishPathDrawing();
+            return;
+        }
+
+        if (routeSelecting) {
+            event.preventDefault();
+            routeSelecting=false;
+            routeUpdateUI();
+        }
+    }
+
+    // Retour arrière : annule un point manuel.
+    if (
+        event.key==='Backspace' &&
+        pathDrawing
+    ) {
+        event.preventDefault();
+        undoPathPoint();
+    }
+
+    // Entrée : termine la sélection des destinations.
+    if (
+        event.key==='Enter' &&
+        routeSelecting
+    ) {
+        event.preventDefault();
+
+        routeSelecting=false;
+        routeUpdateUI();
+    }
+});
+
+
+// ======================================================
+// RESTAURATION D'UN HTML EXPORTÉ
+// ======================================================
+
+function restoreEmbeddedView() {
+    const view=EMBEDDED.view;
+
+    if (!view) return;
+
+    if (view.orientation!=null) {
+        $('o').value=String(view.orientation);
+    }
+
+    if (typeof view.follow==='boolean') {
+        $('fo').checked=view.follow;
+    }
+
+    if (typeof view.autoLayer==='boolean') {
+        $('au').checked=view.autoLayer;
+    }
+
+    if (typeof view.showTrace==='boolean') {
+        $('tr').checked=view.showTrace;
+    }
+
+    if (typeof view.showVolumes==='boolean') {
+        $('vo').checked=view.showVolumes;
+    }
+
+    if (
+        Number.isInteger(view.layer) &&
+        view.layer>=-1 &&
+        view.layer<LBL.length
+    ) {
+        layer=view.layer;
+        $('ly').value=String(layer);
+    }
+
+    if (
+        Array.isArray(view.categories) &&
+        view.categories.length===ON.length
+    ) {
+        ON=view.categories.map(Boolean);
+        buildCats('');
+    }
+
+    if (
+        Number.isFinite(view.zoom) &&
+        view.zoom>0
+    ) {
+        s=view.zoom;
+    }
+
+    if (
+        view.center &&
+        Number.isFinite(view.center.x) &&
+        Number.isFinite(view.center.y)
+    ) {
+        ox=w/2-view.center.x*s;
+        oy=h/2-fy()*view.center.y*s;
+    }
+
+    draw();
+}
+
+
+// ======================================================
+// INITIALISATION
+// ======================================================
+
+addEventListener('resize',()=>{
+    fit();
+});
+
+fit();
+
+restoreEmbeddedView();
+
+updatePathUI();
+routeUpdateUI();
+
+if (LIVE) {
+    poll();
+}
+
+</script>
+
+
+</body></html
 
     <div id="w">
         <canvas id="cv" width="642" height="627"></canvas>
