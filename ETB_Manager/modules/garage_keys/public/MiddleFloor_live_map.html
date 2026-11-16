@@ -1172,6 +1172,7 @@ async function applyMapConfiguration() {
         const localConfig = localResponse.ok ? await localResponse.json() : {};
         const visibility = { ...(globalConfig.visibility || {}), ...(localConfig.visibility || {}) };
         const groups = Array.isArray(visibility.defaultGroups) ? visibility.defaultGroups : [3, 12];
+        volumesVisible = visibility.volumes === true;
         ON = CATS.map(category => groups.includes(Number(category.g)) ? 1 : 0);
         buildCats('');
         draw();
