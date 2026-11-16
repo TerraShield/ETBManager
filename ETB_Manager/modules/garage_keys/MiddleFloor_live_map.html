@@ -3776,6 +3776,13 @@ fit();
 
 restoreEmbeddedView();
 
+// Dans ETB Manager, afficher la carte entière à l'ouverture de l'iframe.
+// Le suivi du joueur est désactivé pour éviter de cadrer uniquement sur lui.
+if (window.parent !== window) {
+    $('fo').checked = false;
+    fit();
+}
+
 updatePathUI();
 routeUpdateUI();
 
