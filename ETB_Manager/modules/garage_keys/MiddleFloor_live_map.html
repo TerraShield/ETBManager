@@ -133,36 +133,13 @@ body {
     opacity: .7;
 }
 
-#pathToggle.active,
-#routeSelect.active {
-    background: #2563a6;
-    color: white;
-    border-color: #2563a6;
-}
-
-#routeCalculate {
-    background: #246d4b;
-    color: white;
-    border-color: #246d4b;
-}
-
-#routeExportHTML {
-    background: #2563a6;
-    color: white;
-    border-color: #2563a6;
-}
-
-#pathHelp,
-#routeStatus {
-    overflow-wrap: anywhere;
-}
-
 /* --------------------------------------------------
    CARTE
 -------------------------------------------------- */
 
-#toolbars {\n    border-top: 1px solid var(--border);\n    border-bottom: none;\n}\n\n#traceToolbar, #routeToolbar, #exportToolbar {\n    display: none !important;\n}\n\n#m {
+#m {
     flex: 1;
+    position: relative;
     min-height: 0;
     display: flex;
 }
@@ -175,12 +152,36 @@ body {
 }
 
 #cats {
-    width: 270px;
+    display: none;
+    position: absolute;
+    z-index: 30;
+    top: 48px;
+    left: 10px;
+    width: min(320px, calc(100% - 20px));
+    max-height: min(72vh, 680px);
     overflow: auto;
     background: var(--bar);
-    padding: 8px 10px;
+    color: var(--fg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 12px 34px #0008;
+    padding: 10px;
     box-sizing: border-box;
     font-size: 13px;
+}
+#cats.open { display: block; }
+#filtersToggle {
+    position: absolute;
+    z-index: 31;
+    top: 10px;
+    left: 10px;
+    padding: 7px 11px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bar);
+    color: var(--fg);
+    font: 600 12px system-ui, sans-serif;
+    cursor: pointer;
 }
 
 #cats input[type=search] {
@@ -325,10 +326,12 @@ canvas {
 ====================================================== -->
 
 <div id="m">
-    <aside id="cats"></aside>
+    
 
     <div id="w">
-        <canvas id="cv"></canvas>
+        <button type="button" id="filtersToggle" aria-expanded="false">☷ Filtres</button>
+<aside id="cats"></aside>
+<canvas id="cv"></canvas>
 
         <div id="hud">
             <span id="st"></span>
@@ -340,7 +343,6 @@ canvas {
 </div>
 
 <div id="toolbars">
-
 <div class="toolbar" id="viewToolbar">
     <span class="toolbar-title">Affichage et navigation</span>
 
@@ -385,93 +387,7 @@ canvas {
     <button id="r">Recentrer</button>
     <button id="cl" class="lv">Effacer trace joueur</button>
 </div>
-
-
-<!-- ======================================================
-     2. TRACÉ MANUEL
-====================================================== -->
-
-<div class="toolbar" id="traceToolbar">
-    <span class="toolbar-title">Tracé manuel</span>
-
-    <button id="pathToggle">Tracer (T)</button>
-
-    <label>
-        Couleur
-        <input type="color" id="pathColor" value="#ff5252">
-    </label>
-
-    <button id="pathFinish" disabled>
-        Terminer (Échap)
-    </button>
-
-    <button id="pathUndo" disabled>
-        Annuler point
-    </button>
-
-    <button id="pathDelete" disabled>
-        Supprimer segment
-    </button>
-
-    <button id="pathClear">
-        Effacer tracé
-    </button>
-
-    <span id="pathHelp" class="toolbar-status">
-        T pour commencer, T pour ajouter un segment, Échap pour terminer.
-    </span>
 </div>
-
-
-<!-- ======================================================
-     3. CHEMIN LE PLUS COURT
-     Fonctionnement de calcul conservé.
-====================================================== -->
-
-<div class="toolbar" id="routeToolbar">
-    <span class="toolbar-title">Chemin le plus court</span>
-
-    <button id="routeSelect">
-        Ajouter des points
-    </button>
-
-    <button id="routeCalculate">
-        Calculer le plus court
-    </button>
-
-    <button id="routeUndo">
-        Annuler point
-    </button>
-
-    <button id="routeClear">
-        Effacer points
-    </button>
-
-    <label>
-        Couleur
-        <input type="color" id="routeColor" value="#00d5ff">
-    </label>
-
-    <span id="routeStatus" class="toolbar-status">
-        Choisis plusieurs points sur la carte.
-    </span>
-</div>
-
-
-<!-- ======================================================
-     4. EXPORTATION
-====================================================== -->
-
-<div class="toolbar" id="exportToolbar">
-    <span class="toolbar-title">Exportation</span>
-
-    <button id="png">Exporter PNG</button>
-    <button id="pathExport">Tracé JSON</button>
-    <button id="routeExport">Itinéraire JSON</button>
-    <button id="routeExportHTML">Exporter HTML complet</button>
-</div>
-
-
 <script>
 
 // ======================================================
@@ -538,7 +454,7 @@ let tr = [];
 let last = 0;
 
 let layer = LIVE ? 0 : -1;
-let ON = CATS.map(c => c.on);
+let ON = CATS.map(c => (c.g === 3 || c.g === 12) ? 1 : 0);
 let raf = 0;
 
 if (EMBEDDED.player) {
@@ -659,9 +575,9 @@ function loadManualPath() {
     }
 }
 
-loadManualPath();
+// Les anciens tracés ne sont pas chargés dans les cartes de jeu.
 
-$('pathColor').value = pathColor;
+
 
 
 // ------------------------------------------------------
@@ -676,40 +592,7 @@ window.__ETB_GET_MANUAL_TRACE__ = () => ({
 // ------------------------------------------------------
 // INTERFACE
 
-function updatePathUI() {
-    $('pathToggle').textContent = pathDrawing
-        ? 'Terminer (Échap)'
-        : 'Tracer (T)';
-
-    $('pathToggle').classList.toggle(
-        'active',
-        pathDrawing
-    );
-
-    $('pathFinish').disabled =
-        !pathDrawing || pathPoints.length < 2;
-
-    $('pathUndo').disabled =
-        !pathDrawing || pathPoints.length === 0;
-
-    $('pathDelete').disabled =
-        selectedPathSegment < 0;
-
-    if (pathDrawing) {
-        $('pathHelp').textContent =
-            'T ajoute un segment · clic gauche ajoute un point · Échap termine.';
-
-    } else if (selectedPathSegment >= 0) {
-        $('pathHelp').textContent =
-            'Segment ' +
-            (selectedPathSegment + 1) +
-            ' sélectionné : modifie sa couleur.';
-
-    } else {
-        $('pathHelp').textContent =
-            'T pour commencer · sélectionne un segment pour le recolorer.';
-    }
-}
+function updatePathUI() { /* éditeur déplacé vers le chargeur de cartes */ }
 
 
 // ------------------------------------------------------
@@ -957,7 +840,7 @@ window.addEventListener(
 
         pathColor = color;
 
-        $('pathColor').value = color;
+        
 
         if (
             selectedPathSegment >= 0 &&
@@ -973,9 +856,7 @@ window.addEventListener(
 );
 
 
-$('pathColor').addEventListener('input', event => {
-    changePathColor(event.target.value);
-});
+
 
 
 // ------------------------------------------------------
@@ -1252,7 +1133,7 @@ function buildCats(filter) {
     };
 
     $('cd').onclick = () => {
-        ON = CATS.map(c => c.on);
+        ON = CATS.map(c => (c.g === 3 || c.g === 12) ? 1 : 0);
         buildCats($('sq').value);
         draw();
     };
@@ -1282,6 +1163,16 @@ function buildCats(filter) {
 
 
 buildCats('');
+$('filtersToggle').onclick = () => {
+    const open = $('cats').classList.toggle('open');
+    $('filtersToggle').setAttribute('aria-expanded', String(open));
+};
+document.addEventListener('pointerdown', event => {
+    if (!$('cats').contains(event.target) && event.target !== $('filtersToggle')) {
+        $('cats').classList.remove('open');
+        $('filtersToggle').setAttribute('aria-expanded', 'false');
+    }
+});
 
 
 // ------------------------------------------------------
@@ -1888,7 +1779,7 @@ function routeLoad() {
             routeColor = embedded.color;
         }
 
-        $('routeColor').value = routeColor;
+        
 
         return;
     }
@@ -1929,32 +1820,7 @@ function routeLoad() {
 // ------------------------------------------------------
 // INTERFACE
 
-function routeUpdateUI() {
-    $('routeSelect').classList.toggle(
-        'active',
-        routeSelecting
-    );
-
-    $('routeSelect').textContent = routeSelecting
-        ? 'Terminer les points'
-        : 'Ajouter des points';
-
-    $('routeUndo').disabled =
-        routeWaypoints.length === 0;
-
-    $('routeCalculate').disabled =
-        routeWaypoints.length < (LIVE ? 1 : 2);
-
-    routeStatus(
-        routeSelecting
-            ? `Clique sur la carte pour ajouter des destinations (${routeWaypoints.length}/${ROUTE_MAX_TARGETS}).`
-            : `${routeWaypoints.length} point(s) sélectionné(s). ${
-                routePath.length
-                    ? `Trajet : ${(routeDistance/100).toFixed(1)} m.`
-                    : 'Calcule le parcours.'
-            }`
-    );
-}
+function routeUpdateUI() { /* calcul d'itinéraire déplacé vers le chargeur de cartes */ }
 
 
 // ------------------------------------------------------
@@ -3216,7 +3082,7 @@ window.addEventListener(
 
         routeColor=event.detail.color;
 
-        $('routeColor').value=routeColor;
+        
 
         routeSave();
         draw();
@@ -3224,22 +3090,7 @@ window.addEventListener(
 );
 
 
-$('routeColor').addEventListener('input',event=>{
-    routeColor=event.target.value;
 
-    routeSave();
-
-    window.dispatchEvent(
-        new CustomEvent('etb-trace-color-change',{
-            detail:{
-                color:routeColor,
-                source:'route'
-            }
-        })
-    );
-
-    draw();
-});
 
 
 // ======================================================
@@ -3563,69 +3414,12 @@ $('cl').onclick=()=>{
 };
 
 
-// Tracé manuel
+// Outils de tracé, itinéraire et export déplacés hors des cartes de jeu.
 
-$('pathToggle').onclick=()=>{
-    if (pathDrawing) {
-        finishPathDrawing();
-    } else {
-        startPathDrawing();
-    }
-};
-
-
-$('pathFinish').onclick=finishPathDrawing;
-
-$('pathUndo').onclick=undoPathPoint;
-
-$('pathDelete').onclick=deleteSelectedPathSegment;
-
-$('pathClear').onclick=clearManualPath;
-
-$('pathExport').onclick=exportManualPath;
-
-
-// Chemin le plus court
-
-$('routeSelect').onclick=routeToggleSelection;
-
-$('routeCalculate').onclick=routeCalculate;
-
-$('routeUndo').onclick=routeUndo;
-
-$('routeClear').onclick=routeClear;
-
-
-// Exports
-
-$('png').onclick=()=>{
-    cv.toBlob(b=>{
-        if (!b) return;
-
-        const a=document.createElement('a');
-
-        const url=URL.createObjectURL(b);
-
-        a.href=url;
-        a.download='carte.png';
-
-        a.click();
-
-        setTimeout(()=>URL.revokeObjectURL(url),2000);
-    });
-};
-
-
-$('routeExport').onclick=routeExport;
-
-$('routeExportHTML').onclick=exportCompleteHTML;
-
-
-// ======================================================
 // RACCOURCIS CLAVIER
 // ======================================================
 
-addEventListener('keydown',event=>{
+addEventListener('keydown',event=>{\n    return; // Les raccourcis d'édition sont réservés au chargeur de cartes.
     if (
         event.target instanceof HTMLInputElement ||
         event.target instanceof HTMLTextAreaElement ||
