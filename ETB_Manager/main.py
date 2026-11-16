@@ -3,11 +3,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import math
 import mimetypes
 import threading
 import time
 import webbrowser
+from logging.handlers import RotatingFileHandler
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import unquote, urlparse
@@ -21,6 +23,25 @@ WEB_DIR = BASE_DIR / "web"
 MODULES_DIR = BASE_DIR / "modules"
 MAX_JSON_REQUEST = 64 * 1024
 MAX_MODULE_UPLOAD = 512 * 1024 * 1024
+
+
+def configure_logging() -> Path:
+    """Crée un journal persistant pour les démarrages et erreurs du gestionnaire."""
+    log_dir = BASE_DIR / "logs"
+    log_dir.mkdir(parents=True, exist_ok=True)
+    handler = RotatingFileHandler(
+        log_dir / "etb_manager.log", maxBytes=2_000_000,
+        backupCount=4, encoding="utf-8"
+    )
+    handler.setFormatter(logging.Formatter(
+        "%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+        "%Y-%m-%d %H:%M:%S"
+    ))
+    root = logging.getLogger()
+    root.setLevel(logging.INFO)
+    root.addHandler(handler)
+    logging.getLogger("ETB").info("Journalisation initialisée: %s", log_dir)
+    return log_dir
 
 
 class Manager:
