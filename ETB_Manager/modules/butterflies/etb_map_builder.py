@@ -8,9 +8,10 @@ Usage :
     python etb_map_builder.py
     python etb_map_builder.py ParkingGarage.json --meshes SM_WallExterior_A.zip
 
---meshes (zip, dossier ou .json, répétable) : exports FModel de StaticMesh. L'outil lit leur collision
-(BodySetup/AggGeom) pour obtenir l'empreinte exacte des murs, ouvertures de portes comprises.
-Sans --meshes, il cherche un dossier « meshes » ou des .zip à côté du .json du niveau.
+Les collisions connues sont chargées depuis wall_database.json, livré avec ce module.
+Aucun dossier d'exports n'est parcouru pendant une génération normale.
+--meshes (zip, dossier ou .json, répétable) ajoute ponctuellement des exports FModel
+au calcul courant, sans modifier le catalogue intégré.
 """
 
 import argparse
