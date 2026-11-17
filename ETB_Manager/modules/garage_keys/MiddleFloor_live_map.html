@@ -1187,24 +1187,30 @@ applyMapConfiguration();
 // ------------------------------------------------------
 // DESSIN DE LA CARTE
 
-function fit() {
+function fit(preserveView = false) {
     const r = cv.getBoundingClientRect();
     const k = devicePixelRatio || 1;
+    const oldScale = s;
+    const oldCenter = (preserveView && w > 0 && h > 0 && oldScale > 0)
+        ? { x: (w/2 - ox) / oldScale, y: fy() * (h/2 - oy) / oldScale }
+        : null;
 
-    cv.width = r.width*k;
-    cv.height = r.height*k;
-
+    cv.width = Math.round(r.width*k);
+    cv.height = Math.round(r.height*k);
     w = r.width;
     h = r.height;
 
-    s = Math.min(
-        w/(bx1-bx0+1500),
-        h/(by1-by0+1500)
-    );
-
-    ox = w/2 - s*(bx0+bx1)/2;
-    oy = h/2 - fy()*s*(by0+by1)/2;
-
+    if (oldCenter) {
+        // Conserver le zoom et le centre lors d'un redimensionnement.
+        s = oldScale;
+        ox = w/2 - oldCenter.x*s;
+        oy = h/2 - fy()*oldCenter.y*s;
+        if ($('fo').checked && pl) center();
+    } else {
+        s = Math.min(w/(bx1-bx0+1500), h/(by1-by0+1500));
+        ox = w/2 - s*(bx0+bx1)/2;
+        oy = h/2 - fy()*s*(by0+by1)/2;
+    }
     draw();
 }
 
@@ -3559,10 +3565,10 @@ function restoreEmbeddedView() {
 // ======================================================
 
 addEventListener('resize',()=>{
-    fit();
+    fit(true);
 });
 if (typeof ResizeObserver !== 'undefined') {
-    const mapResizeObserver = new ResizeObserver(() => fit());
+    const mapResizeObserver = new ResizeObserver(() => fit(true));
     mapResizeObserver.observe(document.getElementById('w'));
 }
 
@@ -3571,11 +3577,11 @@ fit();
 
 restoreEmbeddedView();
 
-// Dans ETB Manager, afficher la carte entière à l'ouverture de l'iframe.
-// Le suivi du joueur est désactivé pour éviter de cadrer uniquement sur lui.
+// Dans ETB Manager, le suivi du joueur reste actif par défaut.
+// Le premier relevé centre la carte sur le personnage ; le suivi peut être
+// désactivé manuellement pour déplacer librement la carte.
 if (window.parent !== window) {
-    $('fo').checked = false;
-    fit();
+    $('fo').checked = true;
 }
 
 updatePathUI();
