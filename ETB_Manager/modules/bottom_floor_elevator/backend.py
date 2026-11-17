@@ -1,4 +1,4 @@
-"""Détection de l'étage de l'ascenseur du Garage depuis garageLevel2."""
+"""Détection de l'étage de la porte verrouillée de l'ascenseur dans garageLevel2."""
 from __future__ import annotations
 
 import struct
@@ -27,36 +27,25 @@ from memory_reader import (
 MAX_LEVELS = 256
 MAX_ACTORS = 1_000_000
 TARGET_WORLD = "garagelevel2"
-ELEVATOR_CLASS = "bp_utility_elevator_c"
+DOOR_CLASS = "bp_fun_single_door_c"
+
+# Coordonnées relevées approximativement depuis la caméra dans UMap.
+# La tolérance XY absorbe le décalage caméra/acteur ; Z distingue les étages.
+DOOR_LOCATIONS = (
+    {"floor": "Étage 1", "x": -2015.0, "y": 6103.0, "z": 2842.0},
+    {"floor": "Étage 2", "x": 1279.0, "y": 6294.0, "z": 2286.0},
+    {"floor": "Étage 3", "x": 2140.0, "y": 10165.0, "z": 1741.0},
+)
+MAX_HORIZONTAL_DISTANCE = 450.0
+MAX_VERTICAL_DISTANCE = 300.0
 
 
-def _read_fname(mem, resolver, address: int) -> str | None:
-    data = mem.read(address, 8)
-    if not data:
-        return None
-    index, number = struct.unpack("<II", data)
-    name = resolver.resolve_index(index)
-    if not name or name == "?":
-        return None
-    return f"{name}_{number - 1}" if number else name
+def _read_bool(mem, address: int) -> bool | None:
+    data = mem.read(address, 1)
+    return bool(data[0]) if data else None
 
 
-def _display_level(name: str | None) -> str | None:
-    if not name:
-        return None
-    value = name.strip()
-    if value.casefold() in {"none", "null", "none_name"}:
-        return None
-    # Les noms Unreal sont du type GarageLevel_2 ou garageLevel2.
-    if value.casefold() == "garagelevel2":
-        return "Garage Level 2"
-    if value.casefold().startswith("garagelevel_"):
-        suffix = value.rsplit("_", 1)[-1]
-        return f"Étage {suffix}"
-    return value.replace("_", " ")
-
-
-def _read_elevators(mem, world, resolver):
+def _read_doors(mem, world, resolver):
     levels = []
     persistent = mem.ptr(world + OFF_WORLD_PERSISTENT_LEVEL)
     if persistent:
@@ -64,7 +53,7 @@ def _read_elevators(mem, world, resolver):
     levels.extend(_read_unreal_tarray_pointers(mem, world + OFF_WORLD_LEVELS, MAX_LEVELS))
     levels = list(dict.fromkeys(value for value in levels if value))
 
-    elevators = []
+    candidates = []
     seen = set()
     for level in levels:
         for actor in _read_unreal_tarray_pointers(mem, level + OFF_LEVEL_ACTORS, MAX_ACTORS):
@@ -72,29 +61,56 @@ def _read_elevators(mem, world, resolver):
                 continue
             seen.add(actor)
             class_address = mem.ptr(actor + OFF_UOBJECT_CLASS)
-            if not class_address or resolver.object_name(class_address).casefold() != ELEVATOR_CLASS:
+            if not class_address or resolver.object_name(class_address).casefold() != DOOR_CLASS:
                 continue
-
-            class_name = resolver.object_name(class_address)
-            from_offset = _find_unreal_property_offset(mem, resolver, class_address, "FromLevel")
-            to_offset = _find_unreal_property_offset(mem, resolver, class_address, "ToLevel")
-            from_level = _read_fname(mem, resolver, actor + from_offset) if from_offset is not None else None
-            to_level = _read_fname(mem, resolver, actor + to_offset) if to_offset is not None else None
 
             root = mem.ptr(actor + OFF_ACTOR_ROOT_COMPONENT)
             position = mem.vec3(root + OFF_SCENE_COMPONENT_TO_WORLD_TRANSLATION) if root else None
-            elevators.append({
+            if position is None:
+                continue
+
+            locked_offset = _find_unreal_property_offset(mem, resolver, class_address, "IsLocked")
+            open_offset = _find_unreal_property_offset(mem, resolver, class_address, "IsOpen")
+            collide_offset = _find_unreal_property_offset(mem, resolver, class_address, "CanCollide")
+            candidates.append({
                 "id": f"{actor:X}",
-                "from_level": from_level,
-                "to_level": to_level,
-                "floor": _display_level(from_level),
-                "z": round(position[2], 1) if position else None,
-                "class": class_name,
+                "x": position[0],
+                "y": position[1],
+                "z": position[2],
+                "is_locked": _read_bool(mem, actor + locked_offset) if locked_offset is not None else None,
+                "is_open": _read_bool(mem, actor + open_offset) if open_offset is not None else None,
+                "can_collide": _read_bool(mem, actor + collide_offset) if collide_offset is not None else None,
             })
 
-    # Priorité aux ascenseurs dont la destination déclarée est garageLevel2.
-    matching = [item for item in elevators if (item["to_level"] or "").casefold() == "garagelevel2"]
-    return matching or elevators, len(levels), len(seen)
+    matched = []
+    used = set()
+    for location in DOOR_LOCATIONS:
+        nearby = []
+        for door in candidates:
+            if door["id"] in used:
+                continue
+            dx = door["x"] - location["x"]
+            dy = door["y"] - location["y"]
+            dz = door["z"] - location["z"]
+            horizontal = (dx * dx + dy * dy) ** 0.5
+            vertical = abs(dz)
+            if horizontal <= MAX_HORIZONTAL_DISTANCE and vertical <= MAX_VERTICAL_DISTANCE:
+                nearby.append((horizontal * horizontal + dz * dz, horizontal, vertical, door))
+        if not nearby:
+            continue
+        _distance_sq, horizontal, vertical, door = min(nearby, key=lambda item: item[0])
+        used.add(door["id"])
+        matched.append({
+            "id": door["id"],
+            "floor": location["floor"],
+            "is_locked": door["is_locked"],
+            "is_open": door["is_open"],
+            "can_collide": door["can_collide"],
+            "z": round(door["z"], 1),
+            "distance": round((horizontal * horizontal + vertical * vertical) ** 0.5, 1),
+        })
+
+    return matched, len(levels), len(seen), len(candidates)
 
 
 class GarageLevel2ElevatorBackend:
@@ -106,11 +122,13 @@ class GarageLevel2ElevatorBackend:
             "status": "En attente d'Escape the Backrooms…",
             "world_name": None,
             "floor": None,
-            "from_level": None,
-            "to_level": None,
+            "door_count": 0,
+            "locked_count": 0,
+            "is_open": None,
+            "can_collide": None,
             "z": None,
-            "elevator_count": 0,
-            "elevators": [],
+            "distance": None,
+            "doors": [],
             "last_scan": None,
             "level_count": 0,
             "actor_count": 0,
@@ -140,8 +158,8 @@ class GarageLevel2ElevatorBackend:
                         self._set(
                             active=False,
                             status=f"Recherche de {PROCESS_NAME}…",
-                            floor=None, from_level=None, to_level=None, z=None,
-                            elevators=[], elevator_count=0,
+                            floor=None, doors=[], door_count=0, locked_count=0,
+                            is_open=None, can_collide=None, z=None, distance=None,
                         )
                         pid = find_process_id(PROCESS_NAME)
                         mem = ProcessMemory(pid)
@@ -166,44 +184,46 @@ class GarageLevel2ElevatorBackend:
                         self._set(
                             active=False,
                             status=f"Niveau détecté : {world_name}. En attente de garageLevel2…",
-                            world_name=world_name, floor=None, from_level=None,
-                            to_level=None, z=None, elevators=[], elevator_count=0,
-                            last_scan=time.time(),
+                            world_name=world_name, floor=None, doors=[], door_count=0,
+                            locked_count=0, is_open=None, can_collide=None,
+                            z=None, distance=None, last_scan=time.time(),
                         )
                         failures = 0
                         self.stop_event.wait(1.0)
                         continue
 
-                    elevators, level_count, actor_count = _read_elevators(mem, world, resolver)
-                    if not elevators:
-                        status = "garageLevel2 détecté, mais aucun BP_Utility_Elevator_C n'est présent dans les niveaux chargés."
-                        selected = None
+                    doors, level_count, actor_count, door_actor_count = _read_doors(mem, world, resolver)
+                    locked = [door for door in doors if door["is_locked"] is True]
+                    unreadable = [door for door in doors if door["is_locked"] is None]
+
+                    selected = locked[0] if len(locked) == 1 else None
+                    if len(locked) == 1:
+                        status = f"Porte verrouillée détectée : {selected['floor']}."
+                    elif len(locked) > 1:
+                        status = f"{len(locked)} portes surveillées sont verrouillées : résultat ambigu."
+                    elif unreadable:
+                        status = "Portes repérées, mais la propriété IsLocked est illisible."
+                    elif len(doors) < len(DOOR_LOCATIONS):
+                        status = f"{len(doors)}/3 portes repérées. En attente des portes manquantes…"
                     else:
-                        distinct_floors = {item["from_level"] for item in elevators if item["from_level"]}
-                        if len(distinct_floors) == 1:
-                            source_level = next(iter(distinct_floors))
-                            selected = next(item for item in elevators if item["from_level"] == source_level)
-                            floor = selected["floor"]
-                            status = f"Ascenseur localisé : {floor or source_level}."
-                        elif len(distinct_floors) > 1:
-                            selected = None
-                            status = f"{len(elevators)} ascenseurs détectés avec plusieurs étages possibles."
-                        else:
-                            selected = None
-                            status = "Ascenseur détecté, mais FromLevel est illisible. La hauteur Z est disponible pour diagnostic."
+                        status = "Les trois portes sont repérées, mais aucune n'est verrouillée."
+
                     self._set(
                         active=True,
                         status=status,
                         world_name=world_name,
                         floor=selected["floor"] if selected else None,
-                        from_level=selected["from_level"] if selected else None,
-                        to_level=selected["to_level"] if selected else None,
+                        door_count=len(doors),
+                        locked_count=len(locked),
+                        is_open=selected["is_open"] if selected else None,
+                        can_collide=selected["can_collide"] if selected else None,
                         z=selected["z"] if selected else None,
-                        elevators=elevators,
-                        elevator_count=len(elevators),
+                        distance=selected["distance"] if selected else None,
+                        doors=doors,
                         last_scan=time.time(),
                         level_count=level_count,
                         actor_count=actor_count,
+                        door_actor_count=door_actor_count,
                     )
                     failures = 0
                 except Exception as exc:
@@ -229,7 +249,7 @@ class GarageLevel2ElevatorBackend:
 
     def snapshot(self, shared_state):
         with self.lock:
-            return dict(self.state, elevators=[dict(item) for item in self.state["elevators"]])
+            return dict(self.state, doors=[dict(item) for item in self.state["doors"]])
 
     def action(self, action, payload, shared_state):
         if action == "refresh":
