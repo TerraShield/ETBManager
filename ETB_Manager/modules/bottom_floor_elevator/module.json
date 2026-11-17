@@ -1,8 +1,8 @@
 {
   "id": "bottom_floor_elevator",
-  "name": "Garage Elevator",
-  "short_name": "Ascenseur",
-  "description": "Indique l'étage où se trouve l'ascenseur depuis garageLevel2.",
+  "name": "GarageLevel2",
+  "short_name": "GarageLevel2",
+  "description": "Indique l'étage où se trouve l'ascenseur depuis GarageLevel2.",
   "icon": "🛗",
   "order": 33,
   "levels": ["garageLevel2"],
