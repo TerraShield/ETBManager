@@ -1,12 +1,11 @@
 {
   "id": "hotel_terror_code",
-  "name": "Hotel Terror",
-  "short_name": "Code cadenas",
+  "name": "Hotel/Floor3",
+  "short_name": "Hotel/Floor3",
   "description": "Détection du code aléatoire du cadenas dans Hotel Terror Floor 3.",
   "icon": "🔐",
   "order": 32,
   "levels": [
-    "Hotel",
     "Floor3"
   ],
   "ui": {
