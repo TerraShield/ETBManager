@@ -1,6 +1,9 @@
 <div class="butterflies-module-intro panel-card">
   <div class="eyebrow">CARTOGRAPHIE · MOTHS</div><h2>Labyrinthe des papillons</h2>
-  <p>La carte interactive est générée à partir d’un export JSON de FModel. Utilise le bouton « Importer une carte » dans la barre d’outils supérieure.</p>
+  <p>La carte interactive est générée à partir d’un export JSON de FModel. Choisis le dossier de sortie, puis importe ton export.</p>
+  <label class="butterflies-output-label" for="butterfliesOutputDir">Dossier de destination</label>
+  <input id="butterfliesOutputDir" class="butterflies-output-input" type="text" spellcheck="false" placeholder="Dossier de destination…">
+  <small class="butterflies-output-help">Chemin absolu ou relatif au dossier du module. Le dossier est créé automatiquement.</small>
   <div class="butterflies-status" id="butterfliesStatus">Vérification de la carte…</div><div class="butterflies-error" id="butterfliesError" hidden></div>
 </div>
 <div class="butterflies-map-card" id="butterfliesMapCard" hidden>
