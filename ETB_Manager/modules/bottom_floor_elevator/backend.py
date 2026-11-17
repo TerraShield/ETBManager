@@ -290,13 +290,13 @@ class GarageLevel2ElevatorBackend:
             "door_class_actors": door_actor_count, "matched_doors": doors,
             "nearby_objects": diagnostics,
         }
-        signature = json.dumps(payload, sort_keys=True, ensure_ascii=False)
+        signature = json.dumps({key: value for key, value in payload.items() if key != "timestamp"}, sort_keys=True, ensure_ascii=False)
         if signature == getattr(self, "_last_log_signature", None):
             return
         self._last_log_signature = signature
         try:
             with LOG_PATH.open("a", encoding="utf-8") as log:
-                log.write(json.dumps(payload, ensure_ascii=False, indent=2) + "\\n")
+                log.write(json.dumps(payload, ensure_ascii=False, indent=2) + "\n")
         except OSError as exc:
             self._set(log_error=str(exc))
     def snapshot(self, shared_state):
