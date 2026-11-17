@@ -1,4 +1,4 @@
-"""Détection de l'étage de l'ascenseur du Garage depuis BottomFloor."""
+"""Détection de l'étage de l'ascenseur du Garage depuis garageLevel2."""
 from __future__ import annotations
 
 import struct
@@ -26,7 +26,7 @@ from memory_reader import (
 
 MAX_LEVELS = 256
 MAX_ACTORS = 1_000_000
-TARGET_WORLD = "bottomfloor"
+TARGET_WORLD = "garagelevel2"
 ELEVATOR_CLASS = "bp_utility_elevator_c"
 
 
@@ -48,8 +48,8 @@ def _display_level(name: str | None) -> str | None:
     if value.casefold() in {"none", "null", "none_name"}:
         return None
     # Les noms Unreal sont du type GarageLevel_2 ou BottomFloor.
-    if value.casefold() == "bottomfloor":
-        return "Bottom Floor"
+    if value.casefold() == "garagelevel2":
+        return "Garage Level 2"
     if value.casefold().startswith("garagelevel_"):
         suffix = value.rsplit("_", 1)[-1]
         return f"Étage {suffix}"
@@ -92,8 +92,8 @@ def _read_elevators(mem, world, resolver):
                 "class": class_name,
             })
 
-    # Priorité aux ascenseurs dont la destination déclarée est BottomFloor.
-    matching = [item for item in elevators if (item["to_level"] or "").casefold() == "bottomfloor"]
+    # Priorité aux ascenseurs dont la destination déclarée est garageLevel2.
+    matching = [item for item in elevators if (item["to_level"] or "").casefold() == "garagelevel2"]
     return matching or elevators, len(levels), len(seen)
 
 
@@ -165,7 +165,7 @@ class BottomFloorElevatorBackend:
                     if world_name.casefold() != TARGET_WORLD:
                         self._set(
                             active=False,
-                            status=f"Niveau détecté : {world_name}. En attente de BottomFloor…",
+                            status=f"Niveau détecté : {world_name}. En attente de garageLevel2…",
                             world_name=world_name, floor=None, from_level=None,
                             to_level=None, z=None, elevators=[], elevator_count=0,
                             last_scan=time.time(),
@@ -176,7 +176,7 @@ class BottomFloorElevatorBackend:
 
                     elevators, level_count, actor_count = _read_elevators(mem, world, resolver)
                     if not elevators:
-                        status = "BottomFloor détecté, mais aucun BP_Utility_Elevator_C n'est présent dans les niveaux chargés."
+                        status = "garageLevel2 détecté, mais aucun BP_Utility_Elevator_C n'est présent dans les niveaux chargés."
                         selected = None
                     else:
                         distinct_floors = {item["from_level"] for item in elevators if item["from_level"]}
