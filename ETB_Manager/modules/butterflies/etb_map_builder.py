@@ -5100,6 +5100,49 @@ fit();
 
 restoreEmbeddedView();
 
+// Dans une iframe de module, laisser la navigation libre par défaut.
+// Le suivi du joueur reste disponible via la case à cocher.
+if (window.parent !== window) {
+    $('fo').checked = false;
+}
+
+// Clés du Garage transmises par le module parent.
+let externalKeys = [];
+window.addEventListener('message', event => {
+    const data = event.data;
+    if (!data || data.type !== 'etb-garage-keys') return;
+    externalKeys = Array.isArray(data.keys)
+        ? data.keys.filter(point =>
+            point &&
+            Number.isFinite(Number(point.x)) &&
+            Number.isFinite(Number(point.y))
+          )
+        : [];
+    draw();
+});
+
+const drawBeforeExternalKeys = draw;
+draw = function() {
+    drawBeforeExternalKeys();
+    for (const key of externalKeys) {
+        const [x, y] = P(Number(key.x), Number(key.y));
+        cx.save();
+        cx.fillStyle = '#f4c542';
+        cx.strokeStyle = '#2a1d00';
+        cx.lineWidth = 2;
+        cx.beginPath();
+        cx.arc(x, y, 9, 0, Math.PI * 2);
+        cx.fill();
+        cx.stroke();
+        cx.fillStyle = '#241900';
+        cx.font = 'bold 11px system-ui';
+        cx.textAlign = 'center';
+        cx.textBaseline = 'middle';
+        cx.fillText('K', x, y + 0.5);
+        cx.restore();
+    }
+};
+
 updatePathUI();
 routeUpdateUI();
 
