@@ -2611,6 +2611,27 @@ function buildCats(filter) {
 
 buildCats('');
 
+async function applyMapConfiguration() {
+    try {
+        const response = await fetch('map.config.json', { cache: 'no-store' });
+        if (!response.ok) return;
+        const config = await response.json();
+        const visibility = config.visibility || {};
+        if (Array.isArray(visibility.defaultGroups)) {
+            const groups = visibility.defaultGroups.map(Number);
+            ON = CATS.map(category => groups.includes(Number(category.g)) ? 1 : 0);
+            buildCats('');
+        }
+        const tools = config.tools || {};
+        if (tools.manualTrace === false && $('traceToolbar')) $('traceToolbar').hidden = true;
+        if (tools.shortestPath === false && $('routeToolbar')) $('routeToolbar').hidden = true;
+        draw();
+    } catch (error) {
+        console.warn('Configuration de carte non chargée :', error);
+    }
+}
+applyMapConfiguration();
+
 
 // ------------------------------------------------------
 // DESSIN DE LA CARTE
@@ -5181,6 +5202,7 @@ def main():
         help="exports FModel de StaticMesh (collision exacte des murs)"
     )
 
+    ap.add_argument('--config-out', help="chemin du map.config.json généré à côté de la carte")
     ap.add_argument('--no-live', action='store_true')
     ap.add_argument('--no-open', action='store_true')
 
@@ -5221,6 +5243,32 @@ def main():
     )
 
     data = build(path, a)
+
+    config_path = a.config_out or os.path.join(os.path.dirname(os.path.abspath(base)), 'map.config.json')
+    os.makedirs(os.path.dirname(os.path.abspath(config_path)), exist_ok=True)
+    default_groups = sorted({
+        int(category.get('g', 0))
+        for category in data.get('CATS', [])
+        if category.get('on')
+    })
+    map_config = {
+        "version": 1,
+        "visibility": {
+            "defaultGroups": default_groups,
+            "walls": True,
+            "entities": True,
+            "floors": False,
+            "prefabs": False,
+            "points": False,
+            "volumes": False
+        },
+        "interface": {"filters": "context-menu", "fitMapOnOpen": True},
+        "tools": {"manualTrace": True, "shortestPath": True, "export": True}
+    }
+    with open(config_path, 'w', encoding='utf-8') as config_file:
+        json.dump(map_config, config_file, ensure_ascii=False, indent=2)
+        config_file.write('\\n')
+    print('Config :', config_path)
 
     out1 = base + '_map.html'
 
