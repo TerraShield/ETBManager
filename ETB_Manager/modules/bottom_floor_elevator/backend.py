@@ -47,7 +47,7 @@ def _display_level(name: str | None) -> str | None:
     value = name.strip()
     if value.casefold() in {"none", "null", "none_name"}:
         return None
-    # Les noms Unreal sont du type GarageLevel_2 ou BottomFloor.
+    # Les noms Unreal sont du type GarageLevel_2 ou garageLevel2.
     if value.casefold() == "garagelevel2":
         return "Garage Level 2"
     if value.casefold().startswith("garagelevel_"):
@@ -97,7 +97,7 @@ def _read_elevators(mem, world, resolver):
     return matching or elevators, len(levels), len(seen)
 
 
-class BottomFloorElevatorBackend:
+class GarageLevel2ElevatorBackend:
     def __init__(self, context):
         self.lock = threading.RLock()
         self.stop_event = threading.Event()
@@ -116,7 +116,7 @@ class BottomFloorElevatorBackend:
             "actor_count": 0,
         }
         self.thread = threading.Thread(
-            target=self._run, name="BottomFloorElevatorScanner", daemon=True
+            target=self._run, name="GarageLevel2ElevatorScanner", daemon=True
         )
         self.thread.start()
 
@@ -243,4 +243,4 @@ class BottomFloorElevatorBackend:
 
 
 def create_module(context):
-    return BottomFloorElevatorBackend(context)
+    return GarageLevel2ElevatorBackend(context)
