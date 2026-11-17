@@ -1,6 +1,7 @@
 """Backend autonome du module de cartographie du labyrinthe des papillons."""
 from __future__ import annotations
 
+import json
 import shutil
 import subprocess
 import sys
@@ -16,7 +17,15 @@ class ButterfliesBackend:
         self.root = context.module_dir
         self.builder = self.root / "etb_map_builder.py"
         self.source = self.root / "fmodel_export.json"
+        self.output_settings = self.root / ".map_output.json"
         self.output_dir = self.root / "public"
+        try:
+            saved = json.loads(self.output_settings.read_text(encoding="utf-8"))
+            saved_path = Path(saved.get("output_dir", "")).expanduser()
+            if str(saved_path).strip():
+                self.output_dir = saved_path.resolve()
+        except (OSError, ValueError, TypeError):
+            pass
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.output_prefix = self.output_dir / "butterflies_map"
         self.lock = threading.Lock()
@@ -64,6 +73,10 @@ class ButterfliesBackend:
         destination = destination.resolve()
         destination.mkdir(parents=True, exist_ok=True)
         self.output_dir = destination
+        self.output_settings.write_text(
+            json.dumps({"output_dir": str(destination)}, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
         return {"ok": True, "message": f"Dossier de sortie : {destination}", "output_dir": str(destination)}
 
     def read_config(self):
