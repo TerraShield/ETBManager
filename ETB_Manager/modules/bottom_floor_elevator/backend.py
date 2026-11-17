@@ -179,23 +179,23 @@ class BottomFloorElevatorBackend:
                         status = "BottomFloor détecté, mais aucun BP_Utility_Elevator_C n'est présent dans les niveaux chargés."
                         selected = None
                     else:
-                        distinct_floors = {
-                            (item["from_level"] or item["to_level"] or "Inconnu")
-                            for item in elevators
-                        }
+                        distinct_floors = {item["from_level"] for item in elevators if item["from_level"]}
                         if len(distinct_floors) == 1:
-                            selected = elevators[0]
-                            floor = selected["floor"] or _display_level(selected["to_level"])
-                            status = f"Ascenseur localisé : {floor or 'étage non identifié'}."
+                            source_level = next(iter(distinct_floors))
+                            selected = next(item for item in elevators if item["from_level"] == source_level)
+                            floor = selected["floor"]
+                            status = f"Ascenseur localisé : {floor or source_level}."
+                        elif len(distinct_floors) > 1:
+                            selected = None
+                            status = f"{len(elevators)} ascenseurs détectés avec plusieurs étages possibles."
                         else:
                             selected = None
-                            floor = None
-                            status = f"{len(elevators)} ascenseurs détectés avec plusieurs étages possibles."
+                            status = "Ascenseur détecté, mais FromLevel est illisible. La hauteur Z est disponible pour diagnostic."
                     self._set(
                         active=True,
                         status=status,
                         world_name=world_name,
-                        floor=(selected["floor"] or _display_level(selected["to_level"])) if selected else None,
+                        floor=selected["floor"] if selected else None,
                         from_level=selected["from_level"] if selected else None,
                         to_level=selected["to_level"] if selected else None,
                         z=selected["z"] if selected else None,
