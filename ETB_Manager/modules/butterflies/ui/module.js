@@ -1,7 +1,21 @@
 (() => {
-  function mount(root) {
+  function mount(root, api) {
     const $ = id => root.querySelector(`#${id}`);
     let mapUrl = "";
+    const browse = $("butterfliesBrowseOutput");
+    browse?.addEventListener("click", async () => {
+      browse.disabled = true;
+      try {
+        const result = await api.post("action", {action:"choose_output_dir"});
+        if (result.output_dir) $("butterfliesOutputDir").value = result.output_dir;
+        if (result.cancelled) return;
+      } catch (error) {
+        $("butterfliesError").hidden = false;
+        $("butterfliesError").textContent = error.message;
+      } finally {
+        browse.disabled = false;
+      }
+    });
     function update(state) {
       const data = state.module_state?.butterflies || {};
       const output = root.querySelector("#butterfliesOutputDir");
