@@ -51,6 +51,7 @@ class ButterfliesBackend:
             self.map_path = self._find_map()
         return {
             "map_ready": bool(self.map_path and self.map_path.is_file()),
+            "map_name": self.map_path.name if self.map_path and self.map_path.is_file() else None,
             "map_url": "/modules/butterflies/live_map.html" if self.map_path and self.map_path.is_file() else None,
             "output_dir": str(self.output_dir),
             "map_version": self.map_path.stat().st_mtime_ns if self.map_path and self.map_path.is_file() else None,
