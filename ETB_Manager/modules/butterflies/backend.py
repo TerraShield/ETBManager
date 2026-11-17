@@ -65,6 +65,7 @@ class ButterfliesBackend:
         destination = Path(destination).expanduser().resolve()
         destination.mkdir(parents=True, exist_ok=True)
         self.output_dir = destination
+        self.map_path = self._find_map()
         self.output_settings.write_text(
             json.dumps({"output_dir": str(destination)}, ensure_ascii=False, indent=2),
             encoding="utf-8",
@@ -104,7 +105,8 @@ class ButterfliesBackend:
         raise ValueError(f"Action Papillons inconnue : {action}")
 
     def read_config(self):
-        config = self.output_dir / "map.config.json"
+        config_dir = self.map_path.parent if self.map_path and self.map_path.is_file() else self.output_dir
+        config = config_dir / "map.config.json"
         if not config.is_file():
             raise FileNotFoundError("map.config.json introuvable pour la carte active.")
         return config.read_bytes()
