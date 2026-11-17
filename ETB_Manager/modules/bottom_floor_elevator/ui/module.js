@@ -21,6 +21,29 @@
       $("bfeUpdated").textContent = data.last_scan
         ? "Dernier scan : " + new Date(data.last_scan * 1000).toLocaleTimeString()
         : "Dernier scan : —";
+      $("bfeDiagnostics").textContent = (data.diagnostics || []).map((group) => {
+        const lines = [
+          group.floor + " — repère (" + group.reference.x + ", " + group.reference.y + ", " + group.reference.z + ")",
+          "Objets trouvés : " + group.objects_total + " (30 premiers affichés, journal complet) | rayon XY " + group.radius_xy + " | rayon Z " + group.radius_z
+        ];
+        (group.objects || []).slice(0, 30).forEach((object) => {
+          const props = object.properties || {};
+          const fmt = (key) => {
+            const item = props[key] || {};
+            return key + "=" + (item.value == null ? "?" : item.value ? "true" : "false") +
+              (item.offset ? " [" + item.offset + "]" : " [absente]");
+          };
+          lines.push(
+            "  " + object.name + " <" + object.class + "> @" + object.id +
+            " | pos=(" + object.x + ", " + object.y + ", " + object.z + ")" +
+            " | écart=" + object.distance + " (XY=" + object.horizontal_distance + ")" +
+            " | " + fmt("IsLocked") + " ; " + fmt("IsOpen") + " ; " + fmt("CanCollide")
+          );
+        });
+        return lines.join("\n");
+      }).join("\n\n") || "Aucun diagnostic disponible : vérifie que garageLevel2 est chargé.";
+      $("bfeLogPath").textContent = data.log_path || "—";
+      if (data.log_error) $("bfeLogPath").textContent += " (erreur écriture : " + data.log_error + ")";
     }
     return { update, destroy() {} };
   }
