@@ -5267,7 +5267,7 @@ def main():
     }
     with open(config_path, 'w', encoding='utf-8') as config_file:
         json.dump(map_config, config_file, ensure_ascii=False, indent=2)
-        config_file.write('\\n')
+        config_file.write('\n')
     print('Config :', config_path)
 
     out1 = base + '_map.html'
