@@ -266,11 +266,16 @@ class Handler(BaseHTTPRequestHandler):
             self._json(404, {"error": "Module inconnu."})
             return
 
-        if module_id == "butterflies" and relative == "live_map.html":
+        if module_id == "butterflies" and relative in {"live_map.html", "map.config.json"}:
             backend = self.manager.registry._backends.get(module_id)
             try:
-                body = backend.read_map()
-                self._send(200, body, "text/html; charset=utf-8")
+                if relative == "live_map.html":
+                    body = backend.read_map()
+                    content_type = "text/html; charset=utf-8"
+                else:
+                    body = backend.read_config()
+                    content_type = "application/json; charset=utf-8"
+                self._send(200, body, content_type)
             except Exception as exc:
                 self._json(404, {"error": str(exc)})
             return

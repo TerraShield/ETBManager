@@ -8,9 +8,10 @@ Usage :
     python etb_map_builder.py
     python etb_map_builder.py ParkingGarage.json --meshes SM_WallExterior_A.zip
 
---meshes (zip, dossier ou .json, répétable) : exports FModel de StaticMesh. L'outil lit leur collision
-(BodySetup/AggGeom) pour obtenir l'empreinte exacte des murs, ouvertures de portes comprises.
-Sans --meshes, il cherche un dossier « meshes » ou des .zip à côté du .json du niveau.
+Les collisions connues sont chargées depuis wall_database.json, livré avec ce module.
+Aucun dossier d'exports n'est parcouru pendant une génération normale.
+--meshes (zip, dossier ou .json, répétable) ajoute ponctuellement des exports FModel
+au calcul courant, sans modifier le catalogue intégré.
 """
 
 import argparse
@@ -638,6 +639,7 @@ def _elem_polys(agg):
 
 
 def _read_mesh_export(data, foot):
+    """Import ponctuel d'un export FModel dans le cache mémoire."""
     if not isinstance(data, list):
         return
 
@@ -645,76 +647,95 @@ def _read_mesh_export(data, foot):
         (o for o in data if isinstance(o, dict) and o.get('Type') == 'BodySetup'),
         None
     )
+    agg = ((body or {}).get('Properties') or {}).get('AggGeom') or {}
 
-    for m in data:
-        if not isinstance(m, dict) or m.get('Type') != 'StaticMesh':
+    for mesh in data:
+        if not isinstance(mesh, dict) or mesh.get('Type') != 'StaticMesh':
             continue
-
-        agg = ((body or {}).get('Properties') or {}).get('AggGeom') or {}
-        polys = [(h, z0, z1) for h, z0, z1 in _elem_polys(agg) if len(h) >= 3]
-
-        if not polys:  # pas de collision : boîte englobante
-            b = (m.get('Properties') or {}).get('ExtendedBounds') or {}
-            o, e = b.get('Origin'), b.get('BoxExtent')
-
-            if o and e:
+        polys = [
+            (h, z0, z1)
+            for h, z0, z1 in _elem_polys(agg)
+            if len(h) >= 3
+        ]
+        if not polys:
+            bounds = (mesh.get('Properties') or {}).get('ExtendedBounds') or {}
+            origin, extent = bounds.get('Origin'), bounds.get('BoxExtent')
+            if origin and extent:
                 hull = [
-                    (o['X'] + sx*e['X'], o['Y'] + sy*e['Y'])
+                    (origin['X'] + sx*extent['X'], origin['Y'] + sy*extent['Y'])
                     for sx in (-1, 1) for sy in (-1, 1)
                 ]
-                polys = [(_hull2d(hull), o['Z'] - e['Z'], o['Z'] + e['Z'])]
-
+                polys = [(_hull2d(hull), origin['Z'] - extent['Z'], origin['Z'] + extent['Z'])]
         if polys:
-            foot[m['Name']] = polys
+            foot[mesh['Name']] = polys
 
 
 def load_footprints(sources, level_path, log):
-    paths = list(sources or [])
-    auto = not paths
-
-    if auto:
-        base = os.path.dirname(os.path.abspath(level_path))
-
-        for name in ('meshes', 'Meshes', 'mesh_exports'):
-            if os.path.isdir(os.path.join(base, name)):
-                paths.append(os.path.join(base, name))
-
-        paths += glob.glob(os.path.join(base, '*.zip'))
-
+    """Charge d'abord le catalogue intégré ; les exports ne sont lus que sur demande."""
+    db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'wall_database.json')
     foot = {}
+    aliases = {}
 
+    try:
+        with open(db_path, encoding='utf-8') as fh:
+            database = json.load(fh)
+        geometries = database.get('geometries') or {}
+        aliases = database.get('aliases') or {}
+        for mesh_name_, geometry_id in aliases.items():
+            geometry = geometries.get(geometry_id) or {}
+            agg = geometry.get('agg_geom') or {}
+            polys = [
+                (h, z0, z1)
+                for h, z0, z1 in _elem_polys(agg)
+                if len(h) >= 3
+            ]
+            if polys:
+                foot[mesh_name_] = polys
+        log(
+            f"Catalogue des murs chargé : {len(foot)} noms, "
+            f"{len(geometries)} géométries uniques"
+        )
+    except FileNotFoundError:
+        log("  ! Catalogue wall_database.json introuvable")
+    except Exception as ex:
+        log(f"  ! Erreur de lecture du catalogue : {ex}")
+
+    # --meshes reste un mécanisme d'import ponctuel, jamais un scan implicite.
+    paths = list(sources or [])
+    if not paths:
+        return foot
+
+    import glob
+    import zipfile
+
+    imported = {}
     def add_file(raw):
         try:
-            _read_mesh_export(json.loads(raw.decode('utf-8')), foot)
-        except Exception:
-            pass
-
-    for p in paths:
-        try:
-            if os.path.isdir(p):
-                for f in glob.glob(os.path.join(p, '**', '*.json'), recursive=True):
-                    if os.path.getsize(f) < 30_000_000:
-                        with open(f, 'rb') as fh:
-                            add_file(fh.read())
-
-            elif p.lower().endswith('.zip'):
-                with zipfile.ZipFile(p) as zf:
-                    for n in zf.namelist():
-                        if n.lower().endswith('.json') and zf.getinfo(n).file_size < 30_000_000:
-                            add_file(zf.read(n))
-
-            else:
-                with open(p, 'rb') as fh:
-                    add_file(fh.read())
-
+            _read_mesh_export(json.loads(raw.decode('utf-8')), imported)
         except Exception as ex:
-            if not auto:
-                log(f"  ! {p} : {ex}")
+            log(f"  ! Export mesh ignoré : {ex}")
 
-    if foot:
-        log(f"Empreintes de collision chargées : {len(foot)} meshes"
-            + (" (détection automatique)" if auto else ""))
+    for source in paths:
+        try:
+            if os.path.isdir(source):
+                for filename in glob.glob(os.path.join(source, '**', '*.json'), recursive=True):
+                    if os.path.getsize(filename) < 30_000_000:
+                        with open(filename, 'rb') as fh:
+                            add_file(fh.read())
+            elif source.lower().endswith('.zip'):
+                with zipfile.ZipFile(source) as archive:
+                    for filename in archive.namelist():
+                        if filename.lower().endswith('.json') and archive.getinfo(filename).file_size < 30_000_000:
+                            add_file(archive.read(filename))
+            else:
+                with open(source, 'rb') as fh:
+                    add_file(fh.read())
+        except Exception as ex:
+            log(f"  ! {source} : {ex}")
 
+    foot.update(imported)
+    if imported:
+        log(f"Exports complémentaires chargés ponctuellement : {len(imported)} meshes")
     return foot
 
 
@@ -1365,6 +1386,7 @@ body {
 -------------------------------------------------- */
 
 #toolbars {
+    order: 1;
     flex: 0 0 auto;
     display: flex;
     flex-direction: column;
@@ -1478,7 +1500,8 @@ body {
 -------------------------------------------------- */
 
 #m {
-    flex: 1;
+    order: 0;
+    flex: 1 1 auto;
     min-height: 0;
     display: flex;
 }
@@ -1491,12 +1514,37 @@ body {
 }
 
 #cats {
-    width: 270px;
+    display: none;
+    position: absolute;
+    z-index: 30;
+    top: 48px;
+    left: 10px;
+    width: min(320px, calc(100% - 20px));
+    max-height: min(72vh, 680px);
     overflow: auto;
     background: var(--bar);
-    padding: 8px 10px;
+    color: var(--fg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 12px 34px #0008;
+    padding: 10px;
     box-sizing: border-box;
     font-size: 13px;
+}
+#cats.open { display: block; }
+
+#filtersToggle {
+    position: absolute;
+    z-index: 31;
+    top: 10px;
+    left: 10px;
+    padding: 7px 11px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bar);
+    color: var(--fg);
+    font: 600 12px system-ui, sans-serif;
+    cursor: pointer;
 }
 
 #cats input[type=search] {
@@ -1622,9 +1670,14 @@ canvas {
         min-height: 55vh;
     }
 
-    #pn, #cats {
+    #pn {
         width: auto;
         max-height: 25vh;
+    }
+
+    #cats {
+        width: min(320px, calc(100% - 20px));
+        max-height: min(72vh, 680px);
     }
 
     .toolbar-status {
@@ -1780,9 +1833,9 @@ canvas {
 ====================================================== -->
 
 <div id="m">
-    <aside id="cats"></aside>
-
     <div id="w">
+        <button type="button" id="filtersToggle" aria-expanded="false">☷ Filtres</button>
+        <aside id="cats"></aside>
         <canvas id="cv"></canvas>
 
         <div id="hud">
@@ -2589,6 +2642,47 @@ function buildCats(filter) {
 
 
 buildCats('');
+
+$('filtersToggle').addEventListener('click', () => {
+    const open = $('cats').classList.toggle('open');
+    $('filtersToggle').setAttribute('aria-expanded', String(open));
+});
+
+document.addEventListener('pointerdown', event => {
+    if (
+        $('cats').classList.contains('open') &&
+        !$('cats').contains(event.target) &&
+        !$('filtersToggle').contains(event.target)
+    ) {
+        $('cats').classList.remove('open');
+        $('filtersToggle').setAttribute('aria-expanded', 'false');
+    }
+});
+
+async function applyMapConfiguration() {
+    try {
+        const response = await fetch('map.config.json', { cache: 'no-store' });
+        if (!response.ok) return;
+        const config = await response.json();
+        const visibility = config.visibility || {};
+        if (Array.isArray(visibility.defaultCategories)) {
+            const selected = new Set(visibility.defaultCategories.map(Number));
+            ON = CATS.map((category, index) => selected.has(index) ? 1 : 0);
+            buildCats('');
+        } else if (Array.isArray(visibility.defaultGroups)) {
+            const groups = visibility.defaultGroups.map(Number);
+            ON = CATS.map(category => groups.includes(Number(category.g)) ? 1 : 0);
+            buildCats('');
+        }
+        const tools = config.tools || {};
+        if (tools.manualTrace === false && $('traceToolbar')) $('traceToolbar').hidden = true;
+        if (tools.shortestPath === false && $('routeToolbar')) $('routeToolbar').hidden = true;
+        draw();
+    } catch (error) {
+        console.warn('Configuration de carte non chargée :', error);
+    }
+}
+applyMapConfiguration();
 
 
 // ------------------------------------------------------
@@ -5054,6 +5148,49 @@ fit();
 
 restoreEmbeddedView();
 
+// Dans une iframe de module, laisser la navigation libre par défaut.
+// Le suivi du joueur reste disponible via la case à cocher.
+if (window.parent !== window) {
+    $('fo').checked = false;
+}
+
+// Clés du Garage transmises par le module parent.
+let externalKeys = [];
+window.addEventListener('message', event => {
+    const data = event.data;
+    if (!data || data.type !== 'etb-garage-keys') return;
+    externalKeys = Array.isArray(data.keys)
+        ? data.keys.filter(point =>
+            point &&
+            Number.isFinite(Number(point.x)) &&
+            Number.isFinite(Number(point.y))
+          )
+        : [];
+    draw();
+});
+
+const drawBeforeExternalKeys = draw;
+draw = function() {
+    drawBeforeExternalKeys();
+    for (const key of externalKeys) {
+        const [x, y] = P(Number(key.x), Number(key.y));
+        cx.save();
+        cx.fillStyle = '#f4c542';
+        cx.strokeStyle = '#2a1d00';
+        cx.lineWidth = 2;
+        cx.beginPath();
+        cx.arc(x, y, 9, 0, Math.PI * 2);
+        cx.fill();
+        cx.stroke();
+        cx.fillStyle = '#241900';
+        cx.font = 'bold 11px system-ui';
+        cx.textAlign = 'center';
+        cx.textBaseline = 'middle';
+        cx.fillText('K', x, y + 0.5);
+        cx.restore();
+    }
+};
+
 updatePathUI();
 routeUpdateUI();
 
@@ -5160,6 +5297,7 @@ def main():
         help="exports FModel de StaticMesh (collision exacte des murs)"
     )
 
+    ap.add_argument('--config-out', help="chemin du map.config.json généré à côté de la carte")
     ap.add_argument('--no-live', action='store_true')
     ap.add_argument('--no-open', action='store_true')
 
@@ -5200,6 +5338,37 @@ def main():
     )
 
     data = build(path, a)
+
+    config_path = a.config_out or os.path.join(os.path.dirname(os.path.abspath(base)), 'map.config.json')
+    os.makedirs(os.path.dirname(os.path.abspath(config_path)), exist_ok=True)
+    default_groups = sorted({
+        int(category.get('g', 0))
+        for category in data.get('CATS', [])
+        if category.get('on')
+    })
+    default_categories = [
+        index for index, category in enumerate(data.get('CATS', []))
+        if category.get('on')
+    ]
+    map_config = {
+        "version": 1,
+        "visibility": {
+            "defaultGroups": default_groups,
+            "defaultCategories": default_categories,
+            "walls": True,
+            "entities": True,
+            "floors": False,
+            "prefabs": False,
+            "points": False,
+            "volumes": False
+        },
+        "interface": {"filters": "context-menu", "fitMapOnOpen": True},
+        "tools": {"manualTrace": True, "shortestPath": True, "export": True}
+    }
+    with open(config_path, 'w', encoding='utf-8') as config_file:
+        json.dump(map_config, config_file, ensure_ascii=False, indent=2)
+        config_file.write('\n')
+    print('Config :', config_path)
 
     out1 = base + '_map.html'
 
