@@ -120,7 +120,7 @@ def _read_doors(mem, world, resolver):
             "floor": location["floor"],
             "reference": {k: location[k] for k in ("x", "y", "z")},
             "radius_xy": DIAGNOSTIC_RADIUS_XY, "radius_z": DIAGNOSTIC_RADIUS_Z,
-            "objects_total": len(nearby), "objects": nearby[:MAX_DIAGNOSTIC_OBJECTS_PER_TARGET],
+            "objects_total": len(nearby), "objects": nearby,
         })
 
     matched, used = [], set()
