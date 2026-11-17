@@ -4,6 +4,13 @@
   <label class="butterflies-output-label" for="butterfliesOutputDir">Dossier de destination</label>
   <div class="butterflies-output-row"><input id="butterfliesOutputDir" class="butterflies-output-input" type="text" spellcheck="false" placeholder="Dossier de destination…"><button id="butterfliesBrowseOutput" type="button">Parcourir…</button></div>
   <small class="butterflies-output-help">Choisis un dossier sur le PC ou saisis directement son chemin. Le dossier est créé automatiquement.</small>
+  <style>
+    .butterflies-output-row{display:flex;gap:8px;align-items:center;max-width:780px;margin-top:6px}
+    .butterflies-output-input{flex:1;min-width:0;box-sizing:border-box;padding:10px 12px;border:1px solid var(--border,#334155);border-radius:8px;background:var(--panel,#182230);color:var(--text,#e8edf5);font:12px ui-monospace,monospace}
+    .butterflies-output-label{display:block;margin-top:14px;font-size:12px;font-weight:700;color:var(--text,#e8edf5)}
+    .butterflies-output-help{display:block;margin-top:5px;color:var(--muted,#91a0b5);font-size:11px}
+    #butterfliesBrowseOutput{flex:none;padding:9px 12px;border:1px solid var(--border,#334155);border-radius:8px;background:var(--panel,#182230);color:var(--text,#e8edf5);cursor:pointer}
+  </style>
   <div class="butterflies-status" id="butterfliesStatus">Vérification de la carte…</div><div class="butterflies-error" id="butterfliesError" hidden></div>
 </div>
 <div class="butterflies-map-card" id="butterfliesMapCard" hidden>
