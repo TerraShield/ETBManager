@@ -61,16 +61,8 @@ class ButterfliesBackend:
             "building": self.lock.locked(),
         }
 
-    def action(self, action, payload, shared_state):
-        if action != "set_output_dir":
-            raise ValueError(f"Action Papillons inconnue : {action}")
-        raw = str(payload.get("output_dir") or "").strip()
-        if not raw:
-            raise ValueError("Indique un dossier de destination.")
-        destination = Path(raw).expanduser()
-        if not destination.is_absolute():
-            destination = self.root / destination
-        destination = destination.resolve()
+    def _save_output_dir(self, destination):
+        destination = Path(destination).expanduser().resolve()
         destination.mkdir(parents=True, exist_ok=True)
         self.output_dir = destination
         self.output_settings.write_text(
@@ -78,6 +70,38 @@ class ButterfliesBackend:
             encoding="utf-8",
         )
         return {"ok": True, "message": f"Dossier de sortie : {destination}", "output_dir": str(destination)}
+
+    def action(self, action, payload, shared_state):
+        if action == "set_output_dir":
+            raw = str(payload.get("output_dir") or "").strip()
+            if not raw:
+                raise ValueError("Indique un dossier de destination.")
+            destination = Path(raw).expanduser()
+            if not destination.is_absolute():
+                destination = self.root / destination
+            return self._save_output_dir(destination)
+        if action == "choose_output_dir":
+            try:
+                import tkinter as tk
+                from tkinter import filedialog
+                dialog = tk.Tk()
+                dialog.withdraw()
+                try:
+                    dialog.attributes("-topmost", True)
+                except Exception:
+                    pass
+                selected = filedialog.askdirectory(
+                    title="Choisir le dossier de destination de la carte",
+                    initialdir=str(self.output_dir),
+                    parent=dialog,
+                )
+                dialog.destroy()
+            except Exception as exc:
+                raise RuntimeError(f"Impossible d'ouvrir le sélecteur de dossier : {exc}") from exc
+            if not selected:
+                return {"ok": False, "cancelled": True, "message": "Sélection annulée."}
+            return self._save_output_dir(selected)
+        raise ValueError(f"Action Papillons inconnue : {action}")
 
     def read_config(self):
         config = self.output_dir / "map.config.json"
