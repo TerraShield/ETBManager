@@ -1166,7 +1166,7 @@ async function applyMapConfiguration() {
     try {
         const [globalResponse, localResponse] = await Promise.all([
             fetch('/modules/map_loader/public/map-defaults.json', { cache: 'no-store' }),
-            fetch('map.config.json', { cache: 'no-store' })
+            fetch('/modules/garage_keys/public/map.config.json', { cache: 'no-store' })
         ]);
         const globalConfig = globalResponse.ok ? await globalResponse.json() : {};
         const localConfig = localResponse.ok ? await localResponse.json() : {};
