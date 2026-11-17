@@ -24,9 +24,9 @@
       $("bfeDiagnostics").textContent = (data.diagnostics || []).map((group) => {
         const lines = [
           group.floor + " — repère (" + group.reference.x + ", " + group.reference.y + ", " + group.reference.z + ")",
-          "Objets trouvés : " + group.objects_total + " | rayon XY " + group.radius_xy + " | rayon Z " + group.radius_z
+          "Objets trouvés : " + group.objects_total + " (30 premiers affichés, journal complet) | rayon XY " + group.radius_xy + " | rayon Z " + group.radius_z
         ];
-        (group.objects || []).forEach((object) => {
+        (group.objects || []).slice(0, 30).forEach((object) => {
           const props = object.properties || {};
           const fmt = (key) => {
             const item = props[key] || {};
@@ -43,6 +43,7 @@
         return lines.join("\n");
       }).join("\n\n") || "Aucun diagnostic disponible : vérifie que garageLevel2 est chargé.";
       $("bfeLogPath").textContent = data.log_path || "—";
+      if (data.log_error) $("bfeLogPath").textContent += " (erreur écriture : " + data.log_error + ")";
     }
     return { update, destroy() {} };
   }
