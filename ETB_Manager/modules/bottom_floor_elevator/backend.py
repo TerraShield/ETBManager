@@ -1,4 +1,4 @@
-"""Détection de l'étage de la porte verrouillée de l'ascenseur dans garageLevel2."""
+"""Détection de l'étage de la porte déverrouillée de l'ascenseur dans garageLevel2."""
 from __future__ import annotations
 
 import struct
@@ -226,20 +226,22 @@ class GarageLevel2ElevatorBackend:
                         continue
 
                     doors, level_count, actor_count, door_actor_count, diagnostics = _read_doors(mem, world, resolver)
+                    unlocked = [door for door in doors if door["is_locked"] is False]
                     locked = [door for door in doors if door["is_locked"] is True]
                     unreadable = [door for door in doors if door["is_locked"] is None]
 
-                    selected = locked[0] if len(locked) == 1 else None
-                    if len(locked) == 1:
-                        status = f"Porte verrouillée détectée : {selected['floor']}."
-                    elif len(locked) > 1:
-                        status = f"{len(locked)} portes surveillées sont verrouillées : résultat ambigu."
+                    # L'aide doit indiquer l'unique porte déverrouillée, pas les portes verrouillées.
+                    selected = unlocked[0] if len(unlocked) == 1 else None
+                    if len(unlocked) == 1:
+                        status = f"Porte déverrouillée détectée : {selected['floor']}."
+                    elif len(unlocked) > 1:
+                        status = f"{len(unlocked)} portes surveillées sont déverrouillées : résultat ambigu."
                     elif unreadable:
                         status = "Portes repérées, mais la propriété IsLocked est illisible."
                     elif len(doors) < len(DOOR_LOCATIONS):
                         status = f"{len(doors)}/3 portes repérées. En attente des portes manquantes…"
                     else:
-                        status = "Les trois portes sont repérées, mais aucune n'est verrouillée."
+                        status = "Les trois portes sont repérées, mais elles sont toutes verrouillées."
 
                     self._write_diagnostic_log(world_name, doors, diagnostics, level_count, actor_count, door_actor_count)
                     self._set(
