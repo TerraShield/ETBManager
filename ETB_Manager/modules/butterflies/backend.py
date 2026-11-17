@@ -100,7 +100,7 @@ class ButterfliesBackend:
             except Exception as exc:
                 raise RuntimeError(f"Impossible d'ouvrir le sélecteur de dossier : {exc}") from exc
             if not selected:
-                return {"ok": False, "cancelled": True, "message": "Sélection annulée."}
+                return {"ok": True, "cancelled": True, "message": "Sélection annulée."}
             return self._save_output_dir(selected)
         raise ValueError(f"Action Papillons inconnue : {action}")
 
