@@ -132,36 +132,13 @@ body {
     opacity: .7;
 }
 
-#pathToggle.active,
-#routeSelect.active {
-    background: #2563a6;
-    color: white;
-    border-color: #2563a6;
-}
-
-#routeCalculate {
-    background: #246d4b;
-    color: white;
-    border-color: #246d4b;
-}
-
-#routeExportHTML {
-    background: #2563a6;
-    color: white;
-    border-color: #2563a6;
-}
-
-#pathHelp,
-#routeStatus {
-    overflow-wrap: anywhere;
-}
-
 /* --------------------------------------------------
    CARTE
 -------------------------------------------------- */
 
 #m {
     flex: 1;
+    position: relative;
     min-height: 0;
     display: flex;
 }
@@ -174,12 +151,36 @@ body {
 }
 
 #cats {
-    width: 270px;
+    display: none;
+    position: absolute;
+    z-index: 30;
+    top: 48px;
+    left: 10px;
+    width: min(320px, calc(100% - 20px));
+    max-height: min(72vh, 680px);
     overflow: auto;
     background: var(--bar);
-    padding: 8px 10px;
+    color: var(--fg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 12px 34px #0008;
+    padding: 10px;
     box-sizing: border-box;
     font-size: 13px;
+}
+#cats.open { display: block; }
+#filtersToggle {
+    position: absolute;
+    z-index: 31;
+    top: 10px;
+    left: 10px;
+    padding: 7px 11px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bar);
+    color: var(--fg);
+    font: 600 12px system-ui, sans-serif;
+    cursor: pointer;
 }
 
 #cats input[type=search] {
@@ -323,8 +324,24 @@ canvas {
      1. AFFICHAGE ET NAVIGATION
 ====================================================== -->
 
-<div id="toolbars">
+<div id="m">
+    
 
+    <div id="w">
+        <button type="button" id="filtersToggle" aria-expanded="false">☷ Filtres</button>
+<aside id="cats"></aside>
+<canvas id="cv" width="642" height="627"></canvas>
+
+        <div id="hud">
+            <span id="st" hidden=""></span>
+            <span id="tx">X -18007  Y -11530   ›  SM_Wall_4m_01  (-17799, -11302)</span>
+        </div>
+    </div>
+
+    <aside id="pn" hidden=""></aside>
+</div>
+
+<div id="toolbars">
 <div class="toolbar" id="viewToolbar">
     <span class="toolbar-title">Affichage et navigation</span>
 
@@ -343,16 +360,6 @@ canvas {
         Trace joueur
     </label>
 
-    <label>
-        Calque
-        <select id="ly"><option value="-1">Tous</option><option value="0">z ≈ -2002  (28 pièces)</option><option value="1">z ≈ -1702  (32 pièces)</option><option value="2">z ≈ -1104  (45 pièces)</option><option value="3">z ≈ -372  (16 pièces)</option><option value="4">z ≈ +26  (1141 pièces)</option><option value="5">z ≈ +425  (76 pièces)</option></select>
-    </label>
-
-    <label>
-        <input type="checkbox" id="vo" checked="">
-        Volumes
-    </label>
-
     <label class="lv" hidden="">
         <input type="checkbox" id="sim">
         Test : clic = téléporter
@@ -369,109 +376,7 @@ canvas {
     <button id="r">Recentrer</button>
     <button id="cl" class="lv" hidden="">Effacer trace joueur</button>
 </div>
-
-
-<!-- ======================================================
-     2. TRACÉ MANUEL
-====================================================== -->
-
-<div class="toolbar" id="traceToolbar">
-    <span class="toolbar-title">Tracé manuel</span>
-
-    <button id="pathToggle">Tracer (T)</button>
-
-    <label>
-        Couleur
-        <input type="color" id="pathColor" value="#ff5252">
-    </label>
-
-    <button id="pathFinish" disabled="">
-        Terminer (Échap)
-    </button>
-
-    <button id="pathUndo" disabled="">
-        Annuler point
-    </button>
-
-    <button id="pathDelete" disabled="">
-        Supprimer segment
-    </button>
-
-    <button id="pathClear">
-        Effacer tracé
-    </button>
-
-    <span id="pathHelp" class="toolbar-status">T pour commencer · sélectionne un segment pour le recolorer.</span>
 </div>
-
-
-<!-- ======================================================
-     3. CHEMIN LE PLUS COURT
-     Fonctionnement de calcul conservé.
-====================================================== -->
-
-<div class="toolbar" id="routeToolbar">
-    <span class="toolbar-title">Chemin le plus court</span>
-
-    <button id="routeSelect">Ajouter des points</button>
-
-    <button id="routeCalculate" disabled="">
-        Calculer le plus court
-    </button>
-
-    <button id="routeUndo" disabled="">
-        Annuler point
-    </button>
-
-    <button id="routeClear">
-        Effacer points
-    </button>
-
-    <label>
-        Couleur
-        <input type="color" id="routeColor" value="#00d5ff">
-    </label>
-
-    <span id="routeStatus" class="toolbar-status">0 point(s) sélectionné(s). Calcule le parcours.</span>
-</div>
-
-
-<!-- ======================================================
-     4. EXPORTATION
-====================================================== -->
-
-<div class="toolbar" id="exportToolbar">
-    <span class="toolbar-title">Exportation</span>
-
-    <button id="png">Exporter PNG</button>
-    <button id="pathExport">Tracé JSON</button>
-    <button id="routeExport">Itinéraire JSON</button>
-    <button id="routeExportHTML">Exporter HTML complet</button>
-</div>
-
-</div>
-
-
-<!-- ======================================================
-     CARTE ET PANNEAUX
-====================================================== -->
-
-<div id="m">
-    <aside id="cats"><input type="search" id="sq" placeholder="Filtrer…" value=""><div style="display:flex;gap:6px;margin-bottom:6px"><button id="ca">Tout</button><button id="cn">Aucun</button><button id="cd">Défaut</button></div><details open=""><summary><input type="checkbox" data-g="2" checked="" data-ind="0"> Portes / ouvertures<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">114</span></summary><label class="row"><input type="checkbox" data-c="21" checked=""><span class="sw" style="background:#ff8a65"></span><span class="nm" title="SM_Wall_Doorway_4m_02">SM_Wall_Doorway_4m_02</span><span class="n">45</span></label><label class="row"><input type="checkbox" data-c="22" checked=""><span class="sw" style="background:#ff8a65"></span><span class="nm" title="SM_Wall_Doorway_4m_03">SM_Wall_Doorway_4m_03</span><span class="n">51</span></label><label class="row"><input type="checkbox" data-c="26" checked=""><span class="sw" style="background:#ff8a65"></span><span class="nm" title="SM_Wall_Doorway_4m_01">SM_Wall_Doorway_4m_01</span><span class="n">18</span></label></details><details open=""><summary><input type="checkbox" data-g="3" checked="" data-ind="0"> Murs<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">995</span></summary><label class="row"><input type="checkbox" data-c="19" checked=""><span class="sw" style="background:#cfe0f0"></span><span class="nm" title="SM_Wall_2m_01">SM_Wall_2m_01</span><span class="n">239</span></label><label class="row"><input type="checkbox" data-c="20" checked=""><span class="sw" style="background:#cfe0f0"></span><span class="nm" title="SM_Wall_4m_01">SM_Wall_4m_01</span><span class="n">587</span></label><label class="row"><input type="checkbox" data-c="23" checked=""><span class="sw" style="background:#cfe0f0"></span><span class="nm" title="SM_Wall_Corner_01">SM_Wall_Corner_01</span><span class="n">50</span></label><label class="row"><input type="checkbox" data-c="36" checked=""><span class="sw" style="background:#cfe0f0"></span><span class="nm" title="SM_Wall_01">SM_Wall_01</span><span class="n">119</span></label></details><details open=""><summary><input type="checkbox" data-g="4" checked="" data-ind="0"> Sols<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">203</span></summary><label class="row"><input type="checkbox" data-c="2" checked=""><span class="sw" style="background:#9fb3c8"></span><span class="nm" title="SM_Floor_01">SM_Floor_01</span><span class="n">16</span></label><label class="row"><input type="checkbox" data-c="10" checked=""><span class="sw" style="background:#9fb3c8"></span><span class="nm" title="SM_Floor_4m_01">SM_Floor_4m_01</span><span class="n">187</span></label></details><details><summary><input type="checkbox" data-g="7" checked="" data-ind="0"> Escaliers / rampes<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">8</span></summary><label class="row"><input type="checkbox" data-c="3" checked=""><span class="sw" style="background:#5fd0a0"></span><span class="nm" title="SM_Stairs_01">SM_Stairs_01</span><span class="n">8</span></label></details><details><summary><input type="checkbox" data-g="8" data-ind="0"> Tuyaux / conduits<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">1604</span></summary><label class="row"><input type="checkbox" data-c="11"><span class="sw" style="background:#e8d44d"></span><span class="nm" title="SM_hose_b">SM_hose_b</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="12"><span class="sw" style="background:#e8d44d"></span><span class="nm" title="SM_Pipe_Standard_4m_01">SM_Pipe_Standard_4m_01</span><span class="n">764</span></label><label class="row"><input type="checkbox" data-c="13"><span class="sw" style="background:#e8d44d"></span><span class="nm" title="SM_Pipe_Standard_T_2m_01">SM_Pipe_Standard_T_2m_01</span><span class="n">76</span></label><label class="row"><input type="checkbox" data-c="14"><span class="sw" style="background:#e8d44d"></span><span class="nm" title="SM_Pipe_Standard_Bend_90_1m_01">SM_Pipe_Standard_Bend_90_1m_01</span><span class="n">282</span></label><label class="row"><input type="checkbox" data-c="15"><span class="sw" style="background:#e8d44d"></span><span class="nm" title="SM_Pipe_Standard_1m_01">SM_Pipe_Standard_1m_01</span><span class="n">127</span></label><label class="row"><input type="checkbox" data-c="16"><span class="sw" style="background:#e8d44d"></span><span class="nm" title="SM_Pipe_Standard_2m_01">SM_Pipe_Standard_2m_01</span><span class="n">281</span></label><label class="row"><input type="checkbox" data-c="24"><span class="sw" style="background:#e8d44d"></span><span class="nm" title="SM_Pipe_Standard_Bend_S_2m_01">SM_Pipe_Standard_Bend_S_2m_01</span><span class="n">56</span></label><label class="row"><input type="checkbox" data-c="25"><span class="sw" style="background:#e8d44d"></span><span class="nm" title="SM_Pipe_Standard_Bend_180_1m_01">SM_Pipe_Standard_Bend_180_1m_01</span><span class="n">17</span></label></details><details><summary><input type="checkbox" data-g="9" checked="" data-ind="0"> Clôtures / barrières<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">18</span></summary><label class="row"><input type="checkbox" data-c="4" checked=""><span class="sw" style="background:#c792ea"></span><span class="nm" title="SM_Fence_02">SM_Fence_02</span><span class="n">16</span></label><label class="row"><input type="checkbox" data-c="9" checked=""><span class="sw" style="background:#c792ea"></span><span class="nm" title="SM_Fence_01">SM_Fence_01</span><span class="n">2</span></label></details><details><summary><input type="checkbox" data-g="10" data-ind="0"> Décals<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">192</span></summary><label class="row"><input type="checkbox" data-c="7"><span class="sw" style="background:#6b7785"></span><span class="nm" title="SM_Decal_01">SM_Decal_01</span><span class="n">192</span></label></details><details><summary><input type="checkbox" data-g="11" checked="" data-ind="0"> Autres meshes<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">97</span></summary><label class="row"><input type="checkbox" data-c="0" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="StaticMesh">StaticMesh</span><span class="n">47</span></label><label class="row"><input type="checkbox" data-c="1" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="Cube">Cube</span><span class="n">2</span></label><label class="row"><input type="checkbox" data-c="5" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="Plane">Plane</span><span class="n">8</span></label><label class="row"><input type="checkbox" data-c="6" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="SM_Concrete_Block_03">SM_Concrete_Block_03</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="8" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="SM_Exit_02">SM_Exit_02</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="17" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="SM_RackTable_01">SM_RackTable_01</span><span class="n">3</span></label><label class="row"><input type="checkbox" data-c="18" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="SM_SignB_13">SM_SignB_13</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="27" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="storage5">storage5</span><span class="n">5</span></label><label class="row"><input type="checkbox" data-c="28" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="storage6">storage6</span><span class="n">5</span></label><label class="row"><input type="checkbox" data-c="29" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="storage7">storage7</span><span class="n">8</span></label><label class="row"><input type="checkbox" data-c="30" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="storage8">storage8</span><span class="n">7</span></label><label class="row"><input type="checkbox" data-c="31" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="storage1">storage1</span><span class="n">2</span></label><label class="row"><input type="checkbox" data-c="32" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="storage11">storage11</span><span class="n">2</span></label><label class="row"><input type="checkbox" data-c="33" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="storage4">storage4</span><span class="n">2</span></label><label class="row"><input type="checkbox" data-c="34" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="storage2">storage2</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="35" checked=""><span class="sw" style="background:#8fbcbb"></span><span class="nm" title="storage9">storage9</span><span class="n">2</span></label></details><details><summary><input type="checkbox" data-g="12" data-ind="1"> Objets (acteurs)<span class="n" style="margin-left:auto;opacity:.6;font-size:11px">309</span></summary><label class="row"><input type="checkbox" data-c="37"><span class="sw" style="background:#ff5252"></span><span class="nm" title="Actor">Actor</span><span class="n">3</span></label><label class="row"><input type="checkbox" data-c="38"><span class="sw" style="background:#ffe066"></span><span class="nm" title="AmbientSound">AmbientSound</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="39"><span class="sw" style="background:#ff80ab"></span><span class="nm" title="BoxReflectionCapture">BoxReflectionCapture</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="40" checked=""><span class="sw" style="background:#ff5252"></span><span class="nm" title="BP_BoilerDoor">BP_BoilerDoor</span><span class="n">4</span></label><label class="row"><input type="checkbox" data-c="41" checked=""><span class="sw" style="background:#ffe066"></span><span class="nm" title="BP_Boilerroom_Checkpoint_Trigger">BP_Boilerroom_Checkpoint_Trigger</span><span class="n">2</span></label><label class="row"><input type="checkbox" data-c="42" checked=""><span class="sw" style="background:#a5d6a7"></span><span class="nm" title="BP_DroppedItem_AlmondWater">BP_DroppedItem_AlmondWater</span><span class="n">2</span></label><label class="row"><input type="checkbox" data-c="43" checked=""><span class="sw" style="background:#5fd0a0"></span><span class="nm" title="BP_DroppedItem_EnergyBar">BP_DroppedItem_EnergyBar</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="44" checked=""><span class="sw" style="background:#ff80ab"></span><span class="nm" title="BP_DroppedItem_Juice">BP_DroppedItem_Juice</span><span class="n">2</span></label><label class="row"><input type="checkbox" data-c="45" checked=""><span class="sw" style="background:#c792ea"></span><span class="nm" title="BP_DroppedItem_Thermometer">BP_DroppedItem_Thermometer</span><span class="n">12</span></label><label class="row"><input type="checkbox" data-c="46" checked=""><span class="sw" style="background:#f48fb1"></span><span class="nm" title="BP_ExitZone">BP_ExitZone</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="47" checked=""><span class="sw" style="background:#5fd0a0"></span><span class="nm" title="BP_Flashlight_Trigger">BP_Flashlight_Trigger</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="48" checked=""><span class="sw" style="background:#5fd0a0"></span><span class="nm" title="BP_HeatZone">BP_HeatZone</span><span class="n">13</span></label><label class="row"><input type="checkbox" data-c="49" checked=""><span class="sw" style="background:#35b7ff"></span><span class="nm" title="BP_Lamp">BP_Lamp</span><span class="n">134</span></label><label class="row"><input type="checkbox" data-c="50" checked=""><span class="sw" style="background:#ffb86b"></span><span class="nm" title="BP_Moth">BP_Moth</span><span class="n">10</span></label><label class="row"><input type="checkbox" data-c="51" checked=""><span class="sw" style="background:#c792ea"></span><span class="nm" title="BP_Moths">BP_Moths</span><span class="n">5</span></label><label class="row"><input type="checkbox" data-c="52"><span class="sw" style="background:#ff5252"></span><span class="nm" title="BP_Note">BP_Note</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="53" checked=""><span class="sw" style="background:#35b7ff"></span><span class="nm" title="BP_PipeSpray">BP_PipeSpray</span><span class="n">14</span></label><label class="row"><input type="checkbox" data-c="54" checked=""><span class="sw" style="background:#ff80ab"></span><span class="nm" title="BP_TimeStampCapture">BP_TimeStampCapture</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="55" checked=""><span class="sw" style="background:#00e5ff"></span><span class="nm" title="BP_Valve">BP_Valve</span><span class="n">14</span></label><label class="row"><input type="checkbox" data-c="56" checked=""><span class="sw" style="background:#a5d6a7"></span><span class="nm" title="BP_ValveHint">BP_ValveHint</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="57"><span class="sw" style="background:#00e5ff"></span><span class="nm" title="DecalActor">DecalActor</span><span class="n">7</span></label><label class="row"><input type="checkbox" data-c="58"><span class="sw" style="background:#ff5252"></span><span class="nm" title="Emitter">Emitter</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="59"><span class="sw" style="background:#ffb86b"></span><span class="nm" title="InstancedFoliageActor">InstancedFoliageActor</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="60"><span class="sw" style="background:#00e5ff"></span><span class="nm" title="LevelSequenceActor">LevelSequenceActor</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="61"><span class="sw" style="background:#ffe066"></span><span class="nm" title="LightmassImportanceVolume">LightmassImportanceVolume</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="62"><span class="sw" style="background:#c792ea"></span><span class="nm" title="NavMeshBoundsVolume">NavMeshBoundsVolume</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="63" checked=""><span class="sw" style="background:#ff80ab"></span><span class="nm" title="Pipe_Exit">Pipe_Exit</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="64" checked=""><span class="sw" style="background:#ce93d8"></span><span class="nm" title="PlayerStart">PlayerStart</span><span class="n">16</span></label><label class="row"><input type="checkbox" data-c="65" checked=""><span class="sw" style="background:#ff5252"></span><span class="nm" title="PointLight">PointLight</span><span class="n">3</span></label><label class="row"><input type="checkbox" data-c="66"><span class="sw" style="background:#c792ea"></span><span class="nm" title="PostProcessVolume">PostProcessVolume</span><span class="n">1</span></label><label class="row"><input type="checkbox" data-c="67"><span class="sw" style="background:#a5d6a7"></span><span class="nm" title="RecastNavMesh">RecastNavMesh</span><span class="n">2</span></label><label class="row"><input type="checkbox" data-c="68"><span class="sw" style="background:#ffe066"></span><span class="nm" title="SphereReflectionCapture">SphereReflectionCapture</span><span class="n">51</span></label></details></aside>
-
-    <div id="w">
-        <canvas id="cv" width="642" height="627"></canvas>
-
-        <div id="hud">
-            <span id="st" hidden=""></span>
-            <span id="tx">X -18007  Y -11530   ›  SM_Wall_4m_01  (-17799, -11302)</span>
-        </div>
-    </div>
-
-    <aside id="pn" hidden=""></aside>
-</div>
-
-
 <script>
 
 // ======================================================
@@ -521,7 +426,7 @@ let tr = [];
 let last = 0;
 
 let layer = LIVE ? 0 : -1;
-let ON = CATS.map(c => c.on);
+let ON = CATS.map(c => (c.g === 3 || c.g === 12) ? 1 : 0);
 let raf = 0;
 
 if (EMBEDDED.player) {
@@ -642,9 +547,9 @@ function loadManualPath() {
     }
 }
 
-loadManualPath();
+// Les anciens tracés ne sont pas chargés dans les cartes de jeu.
 
-$('pathColor').value = pathColor;
+
 
 
 // ------------------------------------------------------
@@ -659,40 +564,7 @@ window.__ETB_GET_MANUAL_TRACE__ = () => ({
 // ------------------------------------------------------
 // INTERFACE
 
-function updatePathUI() {
-    $('pathToggle').textContent = pathDrawing
-        ? 'Terminer (Échap)'
-        : 'Tracer (T)';
-
-    $('pathToggle').classList.toggle(
-        'active',
-        pathDrawing
-    );
-
-    $('pathFinish').disabled =
-        !pathDrawing || pathPoints.length < 2;
-
-    $('pathUndo').disabled =
-        !pathDrawing || pathPoints.length === 0;
-
-    $('pathDelete').disabled =
-        selectedPathSegment < 0;
-
-    if (pathDrawing) {
-        $('pathHelp').textContent =
-            'T ajoute un segment · clic gauche ajoute un point · Échap termine.';
-
-    } else if (selectedPathSegment >= 0) {
-        $('pathHelp').textContent =
-            'Segment ' +
-            (selectedPathSegment + 1) +
-            ' sélectionné : modifie sa couleur.';
-
-    } else {
-        $('pathHelp').textContent =
-            'T pour commencer · sélectionne un segment pour le recolorer.';
-    }
-}
+function updatePathUI() { /* éditeur déplacé vers le chargeur de cartes */ }
 
 
 // ------------------------------------------------------
@@ -940,7 +812,7 @@ window.addEventListener(
 
         pathColor = color;
 
-        $('pathColor').value = color;
+        
 
         if (
             selectedPathSegment >= 0 &&
@@ -956,9 +828,7 @@ window.addEventListener(
 );
 
 
-$('pathColor').addEventListener('input', event => {
-    changePathColor(event.target.value);
-});
+
 
 
 // ------------------------------------------------------
@@ -1119,15 +989,8 @@ const by0 = YS.length ? q(YS, .005) : -1000;
 const by1 = YS.length ? q(YS, .995) : 1000;
 
 
-$('ly').innerHTML =
-    '<option value="-1">Tous</option>' +
-    LBL.map((t,i) =>
-        '<option value="' + i + '">' + t + '</option>'
-    ).join('');
-
-$('ly').value = layer;
-
-
+const layerOptions = '<option value="-1">Tous</option>' + LBL.map((t,i) => '<option value="' + i + '">' + t + '</option>').join('');
+let volumesVisible = true;
 if (!LIVE) {
     document.querySelectorAll('.lv').forEach(e => e.hidden = true);
 
@@ -1159,7 +1022,9 @@ function buildCats(filter) {
         '<button id="ca">Tout</button>' +
         '<button id="cn">Aucun</button>' +
         '<button id="cd">Défaut</button>' +
-        '</div>';
+        '</div>' +
+        '<label>Calque <select id="ly">' + layerOptions + '</select></label>' +
+        '<label><input type="checkbox" id="vo" ' + (volumesVisible ? 'checked' : '') + '> Volumes</label>';
 
     GR.forEach((g, gi) => {
         const ids = CATS.map((c, i) => i).filter(i =>
@@ -1207,6 +1072,10 @@ function buildCats(filter) {
     });
 
     $('cats').innerHTML = html;
+    $('ly').value = String(layer);
+    $('ly').onchange = () => { layer = +$('ly').value; $('au').checked = false; draw(); };
+    $('vo').checked = volumesVisible;
+    $('vo').onchange = () => { volumesVisible = $('vo').checked; draw(); };
 
     $('cats').querySelectorAll('input[data-ind="1"]').forEach(e => {
         e.indeterminate = true;
@@ -1234,7 +1103,7 @@ function buildCats(filter) {
     };
 
     $('cd').onclick = () => {
-        ON = CATS.map(c => c.on);
+        ON = CATS.map(c => (c.g === 3 || c.g === 12) ? 1 : 0);
         buildCats($('sq').value);
         draw();
     };
@@ -1264,6 +1133,36 @@ function buildCats(filter) {
 
 
 buildCats('');
+$('filtersToggle').onclick = () => {
+    const open = $('cats').classList.toggle('open');
+    $('filtersToggle').setAttribute('aria-expanded', String(open));
+};
+document.addEventListener('pointerdown', event => {
+    if (!$('cats').contains(event.target) && event.target !== $('filtersToggle')) {
+        $('cats').classList.remove('open');
+        $('filtersToggle').setAttribute('aria-expanded', 'false');
+    }
+});
+async function applyMapConfiguration() {
+    try {
+        const [globalResponse, localResponse] = await Promise.all([
+            fetch('/modules/map_loader/public/map-defaults.json', { cache: 'no-store' }),
+            fetch('map.config.json', { cache: 'no-store' })
+        ]);
+        const globalConfig = globalResponse.ok ? await globalResponse.json() : {};
+        const localConfig = localResponse.ok ? await localResponse.json() : {};
+        const visibility = { ...(globalConfig.visibility || {}), ...(localConfig.visibility || {}) };
+        const groups = Array.isArray(visibility.defaultGroups) ? visibility.defaultGroups : [3, 12];
+        volumesVisible = visibility.volumes === true;
+        ON = CATS.map(category => groups.includes(Number(category.g)) ? 1 : 0);
+        buildCats('');
+        draw();
+    } catch (error) {
+        console.warn('Configuration de carte non chargée :', error);
+    }
+}
+applyMapConfiguration();
+
 
 
 // ------------------------------------------------------
@@ -1821,7 +1720,7 @@ function routeLoad() {
             routeColor = embedded.color;
         }
 
-        $('routeColor').value = routeColor;
+        
 
         return;
     }
@@ -1862,32 +1761,7 @@ function routeLoad() {
 // ------------------------------------------------------
 // INTERFACE
 
-function routeUpdateUI() {
-    $('routeSelect').classList.toggle(
-        'active',
-        routeSelecting
-    );
-
-    $('routeSelect').textContent = routeSelecting
-        ? 'Terminer les points'
-        : 'Ajouter des points';
-
-    $('routeUndo').disabled =
-        routeWaypoints.length === 0;
-
-    $('routeCalculate').disabled =
-        routeWaypoints.length < (LIVE ? 1 : 2);
-
-    routeStatus(
-        routeSelecting
-            ? `Clique sur la carte pour ajouter des destinations (${routeWaypoints.length}/${ROUTE_MAX_TARGETS}).`
-            : `${routeWaypoints.length} point(s) sélectionné(s). ${
-                routePath.length
-                    ? `Trajet : ${(routeDistance/100).toFixed(1)} m.`
-                    : 'Calcule le parcours.'
-            }`
-    );
-}
+function routeUpdateUI() { /* calcul d'itinéraire déplacé vers le chargeur de cartes */ }
 
 
 // ------------------------------------------------------
@@ -2937,7 +2811,7 @@ window.addEventListener(
 
         routeColor=event.detail.color;
 
-        $('routeColor').value=routeColor;
+        
 
         routeSave();
         draw();
@@ -2945,22 +2819,7 @@ window.addEventListener(
 );
 
 
-$('routeColor').addEventListener('input',event=>{
-    routeColor=event.target.value;
 
-    routeSave();
-
-    window.dispatchEvent(
-        new CustomEvent('etb-trace-color-change',{
-            detail:{
-                color:routeColor,
-                source:'route'
-            }
-        })
-    );
-
-    draw();
-});
 
 
 // ======================================================
@@ -3258,13 +3117,6 @@ cv.onwheel=e=>{
 });
 
 
-$('ly').onchange=()=>{
-    layer=+$('ly').value;
-    $('au').checked=false;
-    draw();
-};
-
-
 $('o').onchange=()=>{
     fit();
     center();
@@ -3284,69 +3136,13 @@ $('cl').onclick=()=>{
 };
 
 
-// Tracé manuel
+// Outils de tracé, itinéraire et export déplacés hors des cartes de jeu.
 
-$('pathToggle').onclick=()=>{
-    if (pathDrawing) {
-        finishPathDrawing();
-    } else {
-        startPathDrawing();
-    }
-};
-
-
-$('pathFinish').onclick=finishPathDrawing;
-
-$('pathUndo').onclick=undoPathPoint;
-
-$('pathDelete').onclick=deleteSelectedPathSegment;
-
-$('pathClear').onclick=clearManualPath;
-
-$('pathExport').onclick=exportManualPath;
-
-
-// Chemin le plus court
-
-$('routeSelect').onclick=routeToggleSelection;
-
-$('routeCalculate').onclick=routeCalculate;
-
-$('routeUndo').onclick=routeUndo;
-
-$('routeClear').onclick=routeClear;
-
-
-// Exports
-
-$('png').onclick=()=>{
-    cv.toBlob(b=>{
-        if (!b) return;
-
-        const a=document.createElement('a');
-
-        const url=URL.createObjectURL(b);
-
-        a.href=url;
-        a.download='carte.png';
-
-        a.click();
-
-        setTimeout(()=>URL.revokeObjectURL(url),2000);
-    });
-};
-
-
-$('routeExport').onclick=routeExport;
-
-$('routeExportHTML').onclick=exportCompleteHTML;
-
-
-// ======================================================
 // RACCOURCIS CLAVIER
 // ======================================================
 
 addEventListener('keydown',event=>{
+    return; // Les raccourcis d'édition sont réservés au chargeur de cartes.
     if (
         event.target instanceof HTMLInputElement ||
         event.target instanceof HTMLTextAreaElement ||
@@ -3485,13 +3281,17 @@ function restoreEmbeddedView() {
 addEventListener('resize',()=>{
     fit();
 });
+if (typeof ResizeObserver !== 'undefined') {
+    const mapResizeObserver = new ResizeObserver(() => fit());
+    mapResizeObserver.observe(document.getElementById('w'));
+}
+
 
 fit();
 
 restoreEmbeddedView();
 
-updatePathUI();
-routeUpdateUI();
+// Aucun outil d'édition n'est initialisé dans ce module.
 
 if (LIVE) {
     poll();
