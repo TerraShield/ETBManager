@@ -4,13 +4,32 @@
     const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
     const mapFrame = root.querySelector("#gkeysMapFrame");
     let latestKeys = [];
+    let activeMapUrl = "";
     function sendKeysToMap() {
       if (!mapFrame || !mapFrame.contentWindow) return;
       mapFrame.contentWindow.postMessage({ type: "etb-garage-keys", keys: latestKeys }, "*");
     }
     if (mapFrame) mapFrame.addEventListener("load", sendKeysToMap);
 
+    function updateMapSource(state) {
+      if (!mapFrame) return;
+      const generated = state.module_state?.butterflies || {};
+      const isMiddleFloor = /middle.?floor/i.test(generated.map_name || "");
+      const baseUrl = generated.map_ready && generated.map_url && isMiddleFloor
+        ? generated.map_url
+        : "/modules/garage_keys/public/MiddleFloor_live_map.html";
+      const version = generated.map_ready && generated.map_url && isMiddleFloor
+        ? (generated.map_version || "")
+        : "legacy";
+      const desired = baseUrl + "?v=" + encodeURIComponent(version);
+      if (desired !== activeMapUrl) {
+        activeMapUrl = desired;
+        mapFrame.src = desired;
+      }
+    }
+
     function update(state) {
+      updateMapSource(state);
       const data = state.module_state?.garage_keys || {};
       const keys = Array.isArray(data.keys) ? data.keys : [];
       latestKeys = keys.map(key => ({ x: Number(key.x), y: Number(key.y) }));
