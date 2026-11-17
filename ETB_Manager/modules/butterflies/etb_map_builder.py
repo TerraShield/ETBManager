@@ -1386,6 +1386,7 @@ body {
 -------------------------------------------------- */
 
 #toolbars {
+    order: 1;
     flex: 0 0 auto;
     display: flex;
     flex-direction: column;
@@ -1499,7 +1500,8 @@ body {
 -------------------------------------------------- */
 
 #m {
-    flex: 1;
+    order: 0;
+    flex: 1 1 auto;
     min-height: 0;
     display: flex;
 }
@@ -1512,12 +1514,37 @@ body {
 }
 
 #cats {
-    width: 270px;
+    display: none;
+    position: absolute;
+    z-index: 30;
+    top: 48px;
+    left: 10px;
+    width: min(320px, calc(100% - 20px));
+    max-height: min(72vh, 680px);
     overflow: auto;
     background: var(--bar);
-    padding: 8px 10px;
+    color: var(--fg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 12px 34px #0008;
+    padding: 10px;
     box-sizing: border-box;
     font-size: 13px;
+}
+#cats.open { display: block; }
+
+#filtersToggle {
+    position: absolute;
+    z-index: 31;
+    top: 10px;
+    left: 10px;
+    padding: 7px 11px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bar);
+    color: var(--fg);
+    font: 600 12px system-ui, sans-serif;
+    cursor: pointer;
 }
 
 #cats input[type=search] {
@@ -1801,9 +1828,9 @@ canvas {
 ====================================================== -->
 
 <div id="m">
-    <aside id="cats"></aside>
-
     <div id="w">
+        <button type="button" id="filtersToggle" aria-expanded="false">☷ Filtres</button>
+        <aside id="cats"></aside>
         <canvas id="cv"></canvas>
 
         <div id="hud">
@@ -2610,6 +2637,22 @@ function buildCats(filter) {
 
 
 buildCats('');
+
+$('filtersToggle').addEventListener('click', () => {
+    const open = $('cats').classList.toggle('open');
+    $('filtersToggle').setAttribute('aria-expanded', String(open));
+});
+
+document.addEventListener('pointerdown', event => {
+    if (
+        $('cats').classList.contains('open') &&
+        !$('cats').contains(event.target) &&
+        !$('filtersToggle').contains(event.target)
+    ) {
+        $('cats').classList.remove('open');
+        $('filtersToggle').setAttribute('aria-expanded', 'false');
+    }
+});
 
 async function applyMapConfiguration() {
     try {
