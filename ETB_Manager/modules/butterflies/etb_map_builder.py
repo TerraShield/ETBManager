@@ -638,6 +638,7 @@ def _elem_polys(agg):
 
 
 def _read_mesh_export(data, foot):
+    """Import ponctuel d'un export FModel dans le cache mémoire."""
     if not isinstance(data, list):
         return
 
@@ -645,76 +646,95 @@ def _read_mesh_export(data, foot):
         (o for o in data if isinstance(o, dict) and o.get('Type') == 'BodySetup'),
         None
     )
+    agg = ((body or {}).get('Properties') or {}).get('AggGeom') or {}
 
-    for m in data:
-        if not isinstance(m, dict) or m.get('Type') != 'StaticMesh':
+    for mesh in data:
+        if not isinstance(mesh, dict) or mesh.get('Type') != 'StaticMesh':
             continue
-
-        agg = ((body or {}).get('Properties') or {}).get('AggGeom') or {}
-        polys = [(h, z0, z1) for h, z0, z1 in _elem_polys(agg) if len(h) >= 3]
-
-        if not polys:  # pas de collision : boîte englobante
-            b = (m.get('Properties') or {}).get('ExtendedBounds') or {}
-            o, e = b.get('Origin'), b.get('BoxExtent')
-
-            if o and e:
+        polys = [
+            (h, z0, z1)
+            for h, z0, z1 in _elem_polys(agg)
+            if len(h) >= 3
+        ]
+        if not polys:
+            bounds = (mesh.get('Properties') or {}).get('ExtendedBounds') or {}
+            origin, extent = bounds.get('Origin'), bounds.get('BoxExtent')
+            if origin and extent:
                 hull = [
-                    (o['X'] + sx*e['X'], o['Y'] + sy*e['Y'])
+                    (origin['X'] + sx*extent['X'], origin['Y'] + sy*extent['Y'])
                     for sx in (-1, 1) for sy in (-1, 1)
                 ]
-                polys = [(_hull2d(hull), o['Z'] - e['Z'], o['Z'] + e['Z'])]
-
+                polys = [(_hull2d(hull), origin['Z'] - extent['Z'], origin['Z'] + extent['Z'])]
         if polys:
-            foot[m['Name']] = polys
+            foot[mesh['Name']] = polys
 
 
 def load_footprints(sources, level_path, log):
-    paths = list(sources or [])
-    auto = not paths
-
-    if auto:
-        base = os.path.dirname(os.path.abspath(level_path))
-
-        for name in ('meshes', 'Meshes', 'mesh_exports'):
-            if os.path.isdir(os.path.join(base, name)):
-                paths.append(os.path.join(base, name))
-
-        paths += glob.glob(os.path.join(base, '*.zip'))
-
+    """Charge d'abord le catalogue intégré ; les exports ne sont lus que sur demande."""
+    db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'wall_database.json')
     foot = {}
+    aliases = {}
 
+    try:
+        with open(db_path, encoding='utf-8') as fh:
+            database = json.load(fh)
+        geometries = database.get('geometries') or {}
+        aliases = database.get('aliases') or {}
+        for mesh_name_, geometry_id in aliases.items():
+            geometry = geometries.get(geometry_id) or {}
+            agg = geometry.get('agg_geom') or {}
+            polys = [
+                (h, z0, z1)
+                for h, z0, z1 in _elem_polys(agg)
+                if len(h) >= 3
+            ]
+            if polys:
+                foot[mesh_name_] = polys
+        log(
+            f"Catalogue des murs chargé : {len(foot)} noms, "
+            f"{len(geometries)} géométries uniques"
+        )
+    except FileNotFoundError:
+        log("  ! Catalogue wall_database.json introuvable")
+    except Exception as ex:
+        log(f"  ! Erreur de lecture du catalogue : {ex}")
+
+    # --meshes reste un mécanisme d'import ponctuel, jamais un scan implicite.
+    paths = list(sources or [])
+    if not paths:
+        return foot
+
+    import glob
+    import zipfile
+
+    imported = {}
     def add_file(raw):
         try:
-            _read_mesh_export(json.loads(raw.decode('utf-8')), foot)
-        except Exception:
-            pass
-
-    for p in paths:
-        try:
-            if os.path.isdir(p):
-                for f in glob.glob(os.path.join(p, '**', '*.json'), recursive=True):
-                    if os.path.getsize(f) < 30_000_000:
-                        with open(f, 'rb') as fh:
-                            add_file(fh.read())
-
-            elif p.lower().endswith('.zip'):
-                with zipfile.ZipFile(p) as zf:
-                    for n in zf.namelist():
-                        if n.lower().endswith('.json') and zf.getinfo(n).file_size < 30_000_000:
-                            add_file(zf.read(n))
-
-            else:
-                with open(p, 'rb') as fh:
-                    add_file(fh.read())
-
+            _read_mesh_export(json.loads(raw.decode('utf-8')), imported)
         except Exception as ex:
-            if not auto:
-                log(f"  ! {p} : {ex}")
+            log(f"  ! Export mesh ignoré : {ex}")
 
-    if foot:
-        log(f"Empreintes de collision chargées : {len(foot)} meshes"
-            + (" (détection automatique)" if auto else ""))
+    for source in paths:
+        try:
+            if os.path.isdir(source):
+                for filename in glob.glob(os.path.join(source, '**', '*.json'), recursive=True):
+                    if os.path.getsize(filename) < 30_000_000:
+                        with open(filename, 'rb') as fh:
+                            add_file(fh.read())
+            elif source.lower().endswith('.zip'):
+                with zipfile.ZipFile(source) as archive:
+                    for filename in archive.namelist():
+                        if filename.lower().endswith('.json') and archive.getinfo(filename).file_size < 30_000_000:
+                            add_file(archive.read(filename))
+            else:
+                with open(source, 'rb') as fh:
+                    add_file(fh.read())
+        except Exception as ex:
+            log(f"  ! {source} : {ex}")
 
+    foot.update(imported)
+    if imported:
+        log(f"Exports complémentaires chargés ponctuellement : {len(imported)} meshes")
     return foot
 
 
