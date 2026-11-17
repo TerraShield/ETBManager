@@ -2617,7 +2617,11 @@ async function applyMapConfiguration() {
         if (!response.ok) return;
         const config = await response.json();
         const visibility = config.visibility || {};
-        if (Array.isArray(visibility.defaultGroups)) {
+        if (Array.isArray(visibility.defaultCategories)) {
+            const selected = new Set(visibility.defaultCategories.map(Number));
+            ON = CATS.map((category, index) => selected.has(index) ? 1 : 0);
+            buildCats('');
+        } else if (Array.isArray(visibility.defaultGroups)) {
             const groups = visibility.defaultGroups.map(Number);
             ON = CATS.map(category => groups.includes(Number(category.g)) ? 1 : 0);
             buildCats('');
@@ -5251,10 +5255,15 @@ def main():
         for category in data.get('CATS', [])
         if category.get('on')
     })
+    default_categories = [
+        index for index, category in enumerate(data.get('CATS', []))
+        if category.get('on')
+    ]
     map_config = {
         "version": 1,
         "visibility": {
             "defaultGroups": default_groups,
+            "defaultCategories": default_categories,
             "walls": True,
             "entities": True,
             "floors": False,
