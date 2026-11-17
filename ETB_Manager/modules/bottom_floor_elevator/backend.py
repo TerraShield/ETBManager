@@ -34,9 +34,9 @@ DOOR_CLASS = "bp_fun_single_door_c"
 # Coordonnées relevées approximativement depuis la caméra dans UMap.
 # La tolérance XY absorbe le décalage caméra/acteur ; Z distingue les étages.
 DOOR_LOCATIONS = (
-    {"floor": "Étage 1", "x": -2015.0, "y": 6103.0, "z": 2842.0},
-    {"floor": "Étage 2", "x": 1279.0, "y": 6294.0, "z": 2286.0},
-    {"floor": "Étage 3", "x": 2140.0, "y": 10165.0, "z": 1741.0},
+    {"floor": "Étage 1", "x": -1964.9, "y": 6111.3, "z": 2832.6},
+    {"floor": "Étage 2", "x": 1246.9, "y": 6316.0, "z": 2286.6},
+    {"floor": "Étage 3", "x": 2125.0, "y": 10166.8, "z": 1741.6},
 )
 MAX_HORIZONTAL_DISTANCE = 450.0
 MAX_VERTICAL_DISTANCE = 300.0
