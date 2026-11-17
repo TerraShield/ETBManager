@@ -29,7 +29,7 @@ from memory_reader import (
 MAX_LEVELS = 256
 MAX_ACTORS = 1_000_000
 TARGET_WORLD = "garagelevel2"
-DOOR_CLASS = "bp_fun_single_door_c"
+DOOR_CLASS = "bp_singledoor_c"
 
 # Coordonnées relevées approximativement depuis la caméra dans UMap.
 # La tolérance XY absorbe le décalage caméra/acteur ; Z distingue les étages.
