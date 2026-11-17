@@ -16,7 +16,9 @@ class ButterfliesBackend:
         self.root = context.module_dir
         self.builder = self.root / "etb_map_builder.py"
         self.source = self.root / "fmodel_export.json"
-        self.output_prefix = self.root / "butterflies_map"
+        self.output_dir = self.root / "public"
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.output_prefix = self.output_dir / "butterflies_map"
         self.lock = threading.Lock()
         self.map_path = self._find_map()
         self.status = (
@@ -27,7 +29,7 @@ class ButterfliesBackend:
 
     def _find_map(self, newer_than_ns=0):
         candidates = [
-            path for path in self.root.glob("butterflies_map*.html")
+            path for path in self.output_dir.glob("*_live_map.html")
             if path.is_file() and path.stat().st_mtime_ns >= newer_than_ns
         ]
         if not candidates:
@@ -41,6 +43,7 @@ class ButterfliesBackend:
         return {
             "map_ready": bool(self.map_path and self.map_path.is_file()),
             "map_url": "/modules/butterflies/live_map.html" if self.map_path and self.map_path.is_file() else None,
+            "output_dir": str(self.output_dir),
             "map_version": self.map_path.stat().st_mtime_ns if self.map_path and self.map_path.is_file() else None,
             "status": self.status,
             "error": self.error,
@@ -48,6 +51,26 @@ class ButterfliesBackend:
             "source_available": self.source.is_file(),
             "building": self.lock.locked(),
         }
+
+    def action(self, action, payload, shared_state):
+        if action != "set_output_dir":
+            raise ValueError(f"Action Papillons inconnue : {action}")
+        raw = str(payload.get("output_dir") or "").strip()
+        if not raw:
+            raise ValueError("Indique un dossier de destination.")
+        destination = Path(raw).expanduser()
+        if not destination.is_absolute():
+            destination = self.root / destination
+        destination = destination.resolve()
+        destination.mkdir(parents=True, exist_ok=True)
+        self.output_dir = destination
+        return {"ok": True, "message": f"Dossier de sortie : {destination}", "output_dir": str(destination)}
+
+    def read_config(self):
+        config = self.output_dir / "map.config.json"
+        if not config.is_file():
+            raise FileNotFoundError("map.config.json introuvable pour la carte active.")
+        return config.read_bytes()
 
     def upload(self, temp_path: Path, filename: str, shared_state):
         if not self.lock.acquire(blocking=False):
@@ -63,13 +86,19 @@ class ButterfliesBackend:
                 return {"ok": False, "error": "Le fichier JSON reçu est vide."}
 
             self.root.mkdir(parents=True, exist_ok=True)
+            self.output_dir.mkdir(parents=True, exist_ok=True)
             shutil.move(str(temp_path), str(self.source))
+            safe_stem = Path(filename).stem.strip().replace(" ", "_") or "map"
+            safe_stem = "".join(char for char in safe_stem if char.isalnum() or char in "-_")[:80] or "map"
+            self.output_prefix = self.output_dir / safe_stem
             started_ns = time.time_ns()
             self.status = "Génération de la carte en cours…"
             self.error = None
             command = [
                 sys.executable, str(self.builder), str(self.source),
-                "--out", str(self.output_prefix), "--no-open",
+                "--out", str(self.output_prefix),
+                "--config-out", str(self.output_dir / "map.config.json"),
+                "--no-open",
             ]
             try:
                 completed = subprocess.run(
@@ -87,12 +116,9 @@ class ButterfliesBackend:
                 self.status, self.error = "Échec de génération de la carte.", message
                 return {"ok": False, "error": message}
 
-            generated = self._find_map(started_ns)
-            if generated is None:
-                candidates = [p for p in self.root.glob("*.html") if p.is_file() and p.stat().st_mtime_ns >= started_ns]
-                if candidates:
-                    live = [p for p in candidates if "live" in p.stem.casefold()]
-                    generated = max(live or candidates, key=lambda p: p.stat().st_mtime_ns)
+            generated = Path(str(self.output_prefix) + "_live_map.html")
+            if not generated.is_file() or generated.stat().st_mtime_ns < started_ns:
+                generated = self._find_map(started_ns)
             if generated is None:
                 message = "Le générateur n'a produit aucun fichier HTML dans le dossier du module."
                 self.status, self.error = "HTML généré introuvable.", message
