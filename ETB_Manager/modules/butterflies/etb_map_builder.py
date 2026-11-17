@@ -1670,9 +1670,14 @@ canvas {
         min-height: 55vh;
     }
 
-    #pn, #cats {
+    #pn {
         width: auto;
         max-height: 25vh;
+    }
+
+    #cats {
+        width: min(320px, calc(100% - 20px));
+        max-height: min(72vh, 680px);
     }
 
     .toolbar-status {
