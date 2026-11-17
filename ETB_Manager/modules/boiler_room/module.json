@@ -1,7 +1,7 @@
 {
   "id": "boiler_room",
-  "name": "Boiler Room",
-  "short_name": "Boiler Room",
+  "name": "BoilerRoom",
+  "short_name": "BoilerRoom",
   "description": "Carte interactive et consignes de déplacement selon les tracés.",
   "icon": "♨",
   "order": 25,

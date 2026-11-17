@@ -1,0 +1,25 @@
+<section class="bfe-layout">
+  <header class="bfe-header">
+    <div><div class="bfe-eyebrow">GARAGE · GARAGELEVEL2</div><h2>Localisation de l'ascenseur</h2><p>Détection de la porte verrouillée parmi les trois accès possibles.</p></div>
+    <div class="bfe-icon">🛗</div>
+  </header>
+  <div class="bfe-status"><span id="bfeDot" class="bfe-dot"></span><span id="bfeStatus">Connexion au jeu…</span><span id="bfeWorld" class="bfe-world">—</span></div>
+  <div class="bfe-result">
+    <span class="bfe-label">PORTE VERROUILLÉE À L'ÉTAGE</span>
+    <strong id="bfeFloor">—</strong>
+    <span id="bfeHint">En attente de la détection des portes…</span>
+  </div>
+  <div class="bfe-details">
+    <div><span>Portes repérées</span><strong id="bfeCount">0 / 3</strong></div>
+    <div><span>Portes verrouillées</span><strong id="bfeLocked">0</strong></div>
+    <div><span>Porte ouverte (IsOpen)</span><strong id="bfeOpen">—</strong></div>
+    <div><span>Collision (CanCollide)</span><strong id="bfeCollision">—</strong></div>
+    <div><span>Hauteur Z de la porte</span><strong id="bfeZ">—</strong></div>
+    <div><span>Écart avec le repère</span><strong id="bfeDistance">—</strong></div>
+  </div>
+  <footer class="bfe-footer"><span id="bfeUpdated">Dernier scan : —</span><span>Actualisation automatique · 1 s</span></footer>
+  <p class="bfe-note">Lecture mémoire en lecture seule de <code>BP_Fun_Single_Door_C</code>. Les trois portes sont recherchées par proximité de leurs coordonnées, puis leur propriété <code>IsLocked</code> est vérifiée.</p>
+</section>
+<style>
+.bfe-layout{display:flex;flex-direction:column;gap:16px;color:var(--text,#e8edf5);font-family:inherit}.bfe-header{display:flex;justify-content:space-between;align-items:center;gap:18px}.bfe-eyebrow{font-size:11px;letter-spacing:.14em;color:var(--muted,#91a0b5);font-weight:700}.bfe-header h2{margin:5px 0;font-size:24px}.bfe-header p{margin:0;color:var(--muted,#91a0b5);font-size:13px}.bfe-icon{width:54px;height:54px;display:grid;place-items:center;border:1px solid var(--border,#334155);border-radius:14px;background:var(--panel,#182230);font-size:27px}.bfe-status{display:flex;align-items:center;gap:9px;padding:12px 14px;border:1px solid var(--border,#334155);border-radius:10px;background:var(--panel,#182230);font-size:13px}.bfe-dot{width:9px;height:9px;border-radius:50%;background:#d69b45;flex:none}.bfe-dot.live{background:#42c58a;box-shadow:0 0 10px #42c58a66}.bfe-world{margin-left:auto;color:var(--muted,#91a0b5);font-size:11px}.bfe-result{display:flex;flex-direction:column;align-items:center;gap:12px;padding:32px 18px;border:1px solid var(--border,#334155);border-radius:16px;background:var(--panel,#182230);text-align:center}.bfe-label{font-size:10px;letter-spacing:.16em;font-weight:800;color:var(--muted,#91a0b5)}.bfe-result strong{font-size:clamp(34px,6vw,56px);line-height:1.1;color:var(--text,#e8edf5)}.bfe-result strong.ready{color:#55d69a}.bfe-result>span:last-child{font-size:12px;color:var(--muted,#91a0b5)}.bfe-details{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.bfe-details>div{padding:13px;border:1px solid var(--border,#334155);border-radius:10px;background:var(--panel,#182230);min-width:0}.bfe-details span{display:block;color:var(--muted,#91a0b5);font-size:10px}.bfe-details strong{display:block;margin-top:6px;font-size:13px;overflow-wrap:anywhere}.bfe-footer{display:flex;justify-content:space-between;gap:12px;color:var(--muted,#91a0b5);font-size:11px}.bfe-note{margin:0;color:var(--muted,#91a0b5);font-size:11px;line-height:1.5}.bfe-note code{color:inherit}@media(max-width:700px){.bfe-details{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:600px){.bfe-header h2{font-size:20px}.bfe-footer{flex-direction:column}}
+</style>

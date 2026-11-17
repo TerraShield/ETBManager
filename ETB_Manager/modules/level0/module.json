@@ -1,8 +1,8 @@
 {
   "id": "level0",
-  "name": "Carte Level 0",
-  "short_name": "Level 0",
-  "description": "Carte du niveau et position du joueur en direct.",
+  "name": "Level0",
+  "short_name": "Level0",
+  "description": "Carte du niveau Level0 et position du joueur en direct.",
   "icon": "⌖",
   "order": 10,
   "levels": [
