@@ -65,29 +65,28 @@ class LampMemoryScanner:
         finally:
             if mem: mem.close()
             with self.lock: self.running=False
-    def _describe_class_properties(mem, resolver, class_address):
-    """Énumère les propriétés de la classe et de ses parents."""
-    classes = []
-    current = class_address
-    visited_classes = set()
-    while current and current not in visited_classes and len(classes) < 32:
-        visited_classes.add(current)
-        class_name = resolver.object_name(current)
-        fields = []
-        field = mem.ptr(current + OFF_USTRUCT_CHILD_PROPERTIES)
-        visited_fields = set()
-        steps = 0
-        while field and field not in visited_fields and steps < 4096:
-            visited_fields.add(field)
-            steps += 1
-            name = _read_fname_at(mem, resolver, field + OFF_FFIELD_NAME)
-            offset = _read_i32(mem, field + OFF_FPROPERTY_OFFSET)
-            fields.append({"name": name, "offset": offset})
-            field = mem.ptr(field + OFF_FFIELD_NEXT)
-        classes.append({"name": class_name, "fields": fields, "field_count": steps})
-        current = mem.ptr(current + OFF_USTRUCT_SUPER)
-    return classes
-
+    def _describe_class_properties(self, mem, resolver, class_address):
+        """Énumère les propriétés de la classe et de ses parents."""
+        classes = []
+        current = class_address
+        visited_classes = set()
+        while current and current not in visited_classes and len(classes) < 32:
+            visited_classes.add(current)
+            class_name = resolver.object_name(current)
+            fields = []
+            field = mem.ptr(current + OFF_USTRUCT_CHILD_PROPERTIES)
+            visited_fields = set()
+            steps = 0
+            while field and field not in visited_fields and steps < 4096:
+                visited_fields.add(field)
+                steps += 1
+                name = _read_fname_at(mem, resolver, field + OFF_FFIELD_NAME)
+                offset = _read_i32(mem, field + OFF_FPROPERTY_OFFSET)
+                fields.append({"name": name, "offset": offset})
+                field = mem.ptr(field + OFF_FFIELD_NEXT)
+            classes.append({"name": class_name, "fields": fields, "field_count": steps})
+            current = mem.ptr(current + OFF_USTRUCT_SUPER)
+        return classes
 
     def _scan_world(self,mem,world,resolver):
         levels=[]; persistent=mem.ptr(world+OFF_WORLD_PERSISTENT_LEVEL)
@@ -104,7 +103,7 @@ class LampMemoryScanner:
                 # Certains objets de la scène sont nommés SM_mp_Lamp_Axxx
                 # alors que leur classe réelle n'est pas BP_Lamp_C.
                 if class_name.casefold() not in ("bp_lamp_c","bp_lamp") and not actor_name.casefold().startswith(("sm_mp_lamp_","bp_lamp")): continue
-                hierarchy=_describe_class_properties(mem,resolver,cls)
+                hierarchy=self._describe_class_properties(mem,resolver,cls)
                 if class_name not in logged_classes:
                     logged_classes.add(class_name)
                     details=" | ".join("%s[%d]: %s"%(c["name"],c["field_count"],", ".join("%s=%s"%(p["name"],("+0x%X"%p["offset"]) if p["offset"] is not None else "?") for p in c["fields"]) or "aucune propriété décodée") for c in hierarchy)
