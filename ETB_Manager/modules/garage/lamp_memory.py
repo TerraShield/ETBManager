@@ -46,8 +46,12 @@ class LampMemoryScanner:
                         previous={x["actor"]:x for x in self.lamps}; self.lamps=result["lamps"]
                         self.stats=result["stats"]; self.world_name=world_name; self.last_scan=now; self.status=result["status"]
                     for lamp in result["lamps"]:
-                        before=previous.get(lamp["actor"],{}).get("intensity")
-                        if before is not None and lamp["intensity"] is not None and before != lamp["intensity"]:
+                        old_lamp=previous.get(lamp["actor"])
+                        before=old_lamp.get("intensity") if old_lamp else None
+                        changed=old_lamp is None or before != lamp["intensity"] or old_lamp.get("read_status") != lamp["read_status"]
+                        if not changed:
+                            continue
+                        if old_lamp is not None and before is not None and lamp["intensity"] is not None:
                             log.warning("VARIATION %s (0x%s) : %.5f -> %.5f lm",lamp["name"],lamp["actor"],before,lamp["intensity"])
                         log.info("LAMP name=%s class=%s actor=0x%s component=0x%s class_component=%s intensity=%s unit=lumens offsets=%s/%s status=%s",lamp["name"],lamp["class"],lamp["actor"],lamp["spotlight"] or "?",lamp["component_class"] or "?",lamp["intensity"],lamp["spotlight_offset"] or "?",lamp["intensity_offset"] or "?",lamp["read_status"])
                     if world_name.casefold() != "bottomfloor": log.warning("Niveau courant=%s (BottomFloor attendu).",world_name)
