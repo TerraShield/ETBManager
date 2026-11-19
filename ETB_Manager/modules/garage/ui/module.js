@@ -16,7 +16,7 @@
       $("lampReadable").textContent = stats.readable ?? 0;
       $("lampLastScan").textContent = d.last_scan ? new Date(d.last_scan * 1000).toLocaleTimeString() : "—";
       const lamps = d.lamps || [];
-      $("lampRows").innerHTML = lamps.length ? lamps.map(x => "<tr><td><strong>"+esc(x.name)+"</strong><small>0x"+esc(x.actor)+"</small></td><td>"+esc(x.component_class || "—")+"</td><td>"+(x.intensity == null ? "—" : Number(x.intensity).toFixed(3)+" lm")+"</td><td><small>Spotlight "+esc(x.spotlight_offset || "—")+"<br>Intensity "+esc(x.intensity_offset || "—")+"</small></td><td>"+esc(x.read_status)+"</td></tr>").join("") : '<tr><td colspan="5">Aucun lampadaire détecté.</td></tr>';
+      $("lampRows").innerHTML = lamps.length ? lamps.map(x => "<tr><td><strong>"+esc(x.name)+"</strong><small>Classe : "+esc(x.class)+" · 0x"+esc(x.actor)+"</small><small>Hiérarchie : "+esc(x.hierarchy || "—")+"</small></td><td>"+esc(x.component_class || "—")+"</td><td>"+(x.intensity == null ? "—" : Number(x.intensity).toFixed(3)+" lm")+"</td><td><small>Spotlight "+esc(x.spotlight_offset || "—")+"<br>Intensity "+esc(x.intensity_offset || "—")+"</small></td><td>"+esc(x.read_status)+"<small>"+esc(x.properties || "")+"</small></td></tr>").join("") : '<tr><td colspan="5">Aucun lampadaire détecté.</td></tr>';
     }
     return { update, destroy() {} };
   }
