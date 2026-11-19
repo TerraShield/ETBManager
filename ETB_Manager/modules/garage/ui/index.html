@@ -1,35 +1,29 @@
-<div class="garage-layout">
-            <div class="timer-card">
-              <div class="timer-topline"><span class="live-indicator"></span> PRÉDICTION EN DIRECT <span class="timer-chip" id="detectChip">À L'ARRÊT</span></div>
-              <div class="countdown" id="countdown">--.--<small> s</small></div>
-              <div class="timer-caption">PROCHAIN CLIGNOTEMENT ESTIMÉ</div>
-              <div class="timer-divider"></div>
-              <div class="timer-status" id="garageStatus">Sélectionne une zone autour d'une lampe pour commencer.</div>
-              <div class="timer-actions">
-                <button class="primary-button" id="startStopButton">Démarrer la détection</button>
-                <button class="secondary-button" id="chooseRegionButton">Choisir la zone</button>
-              </div>
-            </div>
-            <div class="side-stack">
-              <div class="panel-card">
-                <div class="panel-heading"><div><div class="eyebrow">CONFIGURATION</div><h3>Partie</h3></div><span class="panel-icon">⚙</span></div>
-                <label class="field-label" for="playersSelect">Joueurs au démarrage</label>
-                <select id="playersSelect"><option value="1">1 joueur</option><option value="2">2 joueurs</option><option value="3">3 joueurs</option><option value="4">4 joueurs</option><option value="Inconnu">Inconnu</option></select>
-                <div class="region-info" id="regionInfo">Aucune zone sélectionnée</div>
-              </div>
-              <div class="panel-card calibration-card">
-                <div class="panel-heading"><div><div class="eyebrow">CALIBRATION AUTOMATIQUE</div><h3>Mesures</h3></div><span class="panel-icon">◷</span></div>
-                <div class="metric-row"><span>Luminosité actuelle</span><strong id="lumaValue">—</strong></div>
-                <div class="metric-row"><span>Période estimée</span><strong id="periodValue">En attente</strong></div>
-                <div class="metric-row"><span>Clignotements détectés</span><strong id="eventsValue">0</strong></div>
-                <div class="metric-row"><span>Fiabilité</span><strong id="qualityValue">—</strong></div>
-                <div class="metric-row"><span>Raccourcis globaux</span><strong id="hotkeysValue">—</strong></div>
-                <button class="text-button" id="resetButton">↺ Réinitialiser la calibration</button>
-              </div>
-            </div>
-          </div>
-          <div class="manual-panel">
-            <div><div class="eyebrow">CORRECTION MANUELLE</div><h3>Les raccourcis restent disponibles</h3><p>Utilise les touches du clavier ou ces boutons si une détection est manquée.</p></div>
-            <div class="manual-buttons"><button class="secondary-button" id="flickerButton"><kbd>F8</kbd> Marquer un clignotement</button><button class="secondary-button" id="relightButton"><kbd>F9</kbd> Marquer le rallumage</button></div>
-          </div>
-          <div class="footnote">La capture analyse une petite zone de l'écran à environ 15 images/s. Évite le HUD, le viseur et les éléments mobiles dans la zone choisie.</div>
+<div class="lamp-diagnostic">
+  <section class="panel-card">
+    <div class="eyebrow">GARAGE · BOTTOMFLOOR</div>
+    <h2>Diagnostic des lampadaires</h2>
+    <p>Lecture mémoire des acteurs BP_Lamp_C et de leur composant Spotlight. Les valeurs réelles sont affichées sans supposer le seuil d'extinction.</p>
+    <div class="timer-status" id="lampStatus">Diagnostic arrêté.</div>
+    <div class="timer-actions">
+      <button class="primary-button" id="lampStart">Démarrer le diagnostic</button>
+      <button class="secondary-button" id="lampStop">Arrêter</button>
+      <button class="secondary-button" id="lampClear">Effacer les mesures</button>
+    </div>
+  </section>
+  <section class="panel-card">
+    <div class="eyebrow">ÉTAT DU SCAN</div>
+    <div class="metric-row"><span>Niveau détecté</span><strong id="lampWorld">—</strong></div>
+    <div class="metric-row"><span>Acteurs parcourus</span><strong id="lampActorsSeen">0</strong></div>
+    <div class="metric-row"><span>Lampadaires trouvés</span><strong id="lampCount">0</strong></div>
+    <div class="metric-row"><span>Intensités lisibles</span><strong id="lampReadable">0</strong></div>
+    <div class="metric-row"><span>Dernier scan</span><strong id="lampLastScan">—</strong></div>
+  </section>
+  <section class="panel-card">
+    <div class="eyebrow">VALEURS BRUTES · LUMENS</div><h3>Instances détectées</h3>
+    <div class="lamp-table-wrap"><table class="lamp-table"><thead><tr><th>Acteur</th><th>Composant</th><th>Intensité</th><th>Offsets</th><th>Lecture</th></tr></thead><tbody id="lampRows"><tr><td colspan="5">En attente du premier scan…</td></tr></tbody></table></div>
+  </section>
+  <section class="panel-card">
+    <div class="eyebrow">CALIBRATION</div>
+    <p>Laisse le diagnostic actif et observe les logs en alternant lampadaires allumés et éteints. Les logs signalent chaque intensité et chaque variation détectée. Le seuil d'extinction sera déterminé à partir de ces observations réelles.</p>
+  </section>
+</div>
