@@ -89,7 +89,7 @@ class LampMemoryScanner:
     return classes
 
 
-def _scan_world(self,mem,world,resolver):
+    def _scan_world(self,mem,world,resolver):
         levels=[]; persistent=mem.ptr(world+OFF_WORLD_PERSISTENT_LEVEL)
         if persistent: levels.append(persistent)
         levels.extend(_read_unreal_tarray_pointers(mem,world+OFF_WORLD_LEVELS,MAX_LEVELS))
