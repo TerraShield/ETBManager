@@ -1,7 +1,7 @@
 """Diagnostic mémoire en lecture seule des BP_Lamp_C du Garage BottomFloor."""
 from __future__ import annotations
 import logging, math, struct, threading, time
-from memory_reader import (PROCESS_NAME, ProcessMemory, find_process_id, find_module, locate_gworld, locate_gnames, FNameResolver, _read_unreal_tarray_pointers, _find_unreal_property_offset, _read_i32, _read_fname_at, OFF_WORLD_PERSISTENT_LEVEL, OFF_WORLD_LEVELS, OFF_LEVEL_ACTORS, OFF_UOBJECT_CLASS, OFF_USTRUCT_SUPER, OFF_USTRUCT_CHILD_PROPERTIES, OFF_FFIELD_NEXT, OFF_FFIELD_NAME)
+from memory_reader import (PROCESS_NAME, ProcessMemory, find_process_id, find_module, locate_gworld, locate_gnames, FNameResolver, _read_unreal_tarray_pointers, _find_unreal_property_offset, _read_i32, _read_fname_at, OFF_WORLD_PERSISTENT_LEVEL, OFF_WORLD_LEVELS, OFF_LEVEL_ACTORS, OFF_UOBJECT_CLASS, OFF_USTRUCT_SUPER, OFF_USTRUCT_CHILD_PROPERTIES, OFF_FFIELD_NEXT, OFF_FFIELD_NAME, OFF_FPROPERTY_OFFSET)
 
 log = logging.getLogger("ETB.BottomFloor.Lamps")
 MAX_LEVELS = 256
