@@ -65,25 +65,58 @@ class LampMemoryScanner:
         finally:
             if mem: mem.close()
             with self.lock: self.running=False
-    def _scan_world(self,mem,world,resolver):
+    def _describe_class_properties(mem, resolver, class_address):
+    """Énumère les propriétés de la classe et de ses parents."""
+    classes = []
+    current = class_address
+    visited_classes = set()
+    while current and current not in visited_classes and len(classes) < 32:
+        visited_classes.add(current)
+        class_name = resolver.object_name(current)
+        fields = []
+        field = mem.ptr(current + OFF_USTRUCT_CHILD_PROPERTIES)
+        visited_fields = set()
+        steps = 0
+        while field and field not in visited_fields and steps < 4096:
+            visited_fields.add(field)
+            steps += 1
+            name = _read_fname_at(mem, resolver, field + OFF_FFIELD_NAME)
+            offset = _read_i32(mem, field + OFF_FPROPERTY_OFFSET)
+            fields.append({"name": name, "offset": offset})
+            field = mem.ptr(field + OFF_FFIELD_NEXT)
+        classes.append({"name": class_name, "fields": fields, "field_count": steps})
+        current = mem.ptr(current + OFF_USTRUCT_SUPER)
+    return classes
+
+
+def _scan_world(self,mem,world,resolver):
         levels=[]; persistent=mem.ptr(world+OFF_WORLD_PERSISTENT_LEVEL)
         if persistent: levels.append(persistent)
         levels.extend(_read_unreal_tarray_pointers(mem,world+OFF_WORLD_LEVELS,MAX_LEVELS))
-        seen=set(); lamps=[]
+        seen=set(); lamps=[]; logged_classes=set()
         for level in dict.fromkeys(levels):
             for actor in _read_unreal_tarray_pointers(mem,level+OFF_LEVEL_ACTORS,MAX_ACTORS):
                 if actor in seen: continue
                 seen.add(actor); cls=mem.ptr(actor+OFF_UOBJECT_CLASS)
                 if not cls: continue
                 class_name=resolver.object_name(cls)
-                if class_name.casefold() not in ("bp_lamp_c","bp_lamp"): continue
                 actor_name=resolver.object_name(actor)
-                comp_off=_find_unreal_property_offset(mem,resolver,cls,"Spotlight")
+                # Certains objets de la scène sont nommés SM_mp_Lamp_Axxx
+                # alors que leur classe réelle n'est pas BP_Lamp_C.
+                if class_name.casefold() not in ("bp_lamp_c","bp_lamp") and not actor_name.casefold().startswith(("sm_mp_lamp_","bp_lamp")): continue
+                hierarchy=_describe_class_properties(mem,resolver,cls)
+                if class_name not in logged_classes:
+                    logged_classes.add(class_name)
+                    details=" | ".join("%s[%d]: %s"%(c["name"],c["field_count"],", ".join("%s=%s"%(p["name"],("+0x%X"%p["offset"]) if p["offset"] is not None else "?") for p in c["fields"]) or "aucune propriété décodée") for c in hierarchy)
+                    log.info("LAMP_CLASS class=%s actor_example=%s hierarchy=%s",class_name,actor_name,details)
+                properties=[p for c in hierarchy for p in c["fields"]]
+                matches=[p for p in properties if "spot" in p["name"].casefold() or "light" in p["name"].casefold()]
+                comp_off=next((p["offset"] for p in properties if p["name"].casefold()=="spotlight" and p["offset"] is not None),None)
                 component=mem.ptr(actor+comp_off) if comp_off is not None else 0
                 comp_class=None; intensity=None; int_off=None
-                status="Spotlight property introuvable" if comp_off is None else "Pointeur Spotlight illisible"
+                status="Spotlight absent des propriétés inspectées" if comp_off is None else "Pointeur Spotlight illisible"
                 if component:
-                    comp_cls=mem.ptr(component+0x10)
+                    comp_cls=mem.ptr(component+OFF_UOBJECT_CLASS)
                     comp_class=resolver.object_name(comp_cls) if comp_cls else "?"
                     int_off=_find_unreal_property_offset(mem,resolver,comp_cls,"Intensity") if comp_cls else None
                     if int_off is None: status="FProperty Intensity introuvable"
@@ -94,9 +127,10 @@ class LampMemoryScanner:
                             if math.isfinite(value): intensity=round(value,5); status="OK"
                             else: status="Intensité non finie"
                         else: status="Intensité illisible"
-                lamps.append({"name":actor_name,"class":class_name,"actor":"%X"%actor,"spotlight":"%X"%component if component else None,"component_class":comp_class,"intensity":intensity,"spotlight_offset":"+0x%X"%comp_off if comp_off is not None else None,"intensity_offset":"+0x%X"%int_off if int_off is not None else None,"read_status":status})
+                props_summary=", ".join("%s%s"%(p["name"],("=+0x%X"%p["offset"]) if p["offset"] is not None else "") for p in matches)
+                lamps.append({"name":actor_name,"class":class_name,"actor":"%X"%actor,"spotlight":"%X"%component if component else None,"component_class":comp_class,"intensity":intensity,"spotlight_offset":"+0x%X"%comp_off if comp_off is not None else None,"intensity_offset":"+0x%X"%int_off if int_off is not None else None,"read_status":status,"properties":props_summary or "Aucune propriété Spotlight/Light reconnue","hierarchy":" > ".join(c["name"] for c in hierarchy)})
         readable=sum(x["intensity"] is not None for x in lamps)
-        status=("%d BP_Lamp_C trouvé(s), %d intensité(s) lisible(s)."%(len(lamps),readable)) if lamps else "Aucun BP_Lamp_C trouvé dans les niveaux chargés."
+        status=("%d acteur(s) lampe trouvé(s), %d intensité(s) lisible(s)."%(len(lamps),readable)) if lamps else "Aucun acteur lampe trouvé dans les niveaux chargés."
         return {"lamps":lamps,"stats":{"actors_seen":len(seen),"lamp_actors":len(lamps),"readable":readable,"unreadable":len(lamps)-readable},"status":status}
     def snapshot(self):
         with self.lock: return {"running":self.running,"status":self.status,"world_name":self.world_name,"last_scan":self.last_scan,"lamps":list(self.lamps),"stats":dict(self.stats)}
