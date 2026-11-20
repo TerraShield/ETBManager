@@ -15,7 +15,21 @@
     });
     const wallButton = $("importcarteAddWalls");
     const wallInput = $("importcarteWallFiles");
+    const resetWallsButton = $("importcarteResetWalls");
     wallButton?.addEventListener("click", () => wallInput?.click());
+    resetWallsButton?.addEventListener("click", async () => {
+      const confirmed = window.confirm("Réinitialiser les imports de murs ? Les JSON actuels seront archivés dans un dossier de sauvegarde et pourront être récupérés.");
+      if (!confirmed) return;
+      resetWallsButton.disabled = true;
+      try {
+        const result = await api.post("action", {action:"reset_imported_walls"});
+        $("importcarteWallStatus").textContent = result.message || "Imports réinitialisés.";
+        renderWallCatalog(result.wall_json_files);
+        await api.refresh();
+      } catch (error) {
+        $("importcarteWallStatus").textContent = "Erreur : " + error.message;
+      } finally { resetWallsButton.disabled = false; }
+    });
     wallInput?.addEventListener("change", async () => {
       const files = Array.from(wallInput.files || []);
       if (!files.length) return;
