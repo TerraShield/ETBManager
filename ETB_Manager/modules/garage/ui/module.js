@@ -30,6 +30,18 @@
     }
     const timer = setInterval(renderCountdown, 100);
 
+    // Les coupures courtes sont informatives, mais ne relancent pas le compte à rebours.
+    function flickerLine(d) {
+      if (d.flicker_active) return "Clignotement en cours : le décompte continue";
+      const parts = [];
+      if (d.flicker_count > 0) parts.push(`${d.flicker_count} clignotement(s) depuis le rallumage`);
+      if (d.flicker_lead != null) parts.push(`le premier précède l'extinction d'≈ ${d.flicker_lead.toFixed(1)} s`);
+      return parts.join(" · ");
+    }
+    const offsLabel = offs => (offs || []).slice(-6)
+      .map(([seconds, extinction]) => seconds.toFixed(2) + " s" + (extinction ? " ★" : ""))
+      .join(" · ") || "—";
+
     function update(state) {
       const d = state.module_state?.garage || {};
       const stats = d.stats || {};
@@ -39,6 +51,7 @@
       setText("lampPeriod", d.period_label || "Calibration…");
       setText("lampQuality", d.quality || "—");
       setText("lampEvents", String(d.event_count ?? 0));
+      setText("lampOffs", offsLabel(d.recent_offs));
       setText("lampStatus", d.status || "");
       const player = $("lampPlayers");
       if (player && d.player_count && document.activeElement !== player) player.value = d.player_count;
@@ -55,15 +68,14 @@
           mode: d.prediction_mode, overdue: !!d.overdue,
           central: now + d.remaining * 1000, min: now + (d.remaining_min ?? d.remaining) * 1000, max: now + (d.remaining_max ?? d.remaining) * 1000,
         };
-        setText("lampLead", d.blackout_lead != null ? `Coupure complète ≈ ${d.blackout_lead.toFixed(2)} s après le début du clignotement` : "");
+        setText("lampLead", flickerLine(d));
         renderCountdown();
       } else {
         countdown = null;
         setText("lampWindow", "");
-        setText("lampLead", "");
+        setText("lampLead", d.timer_state === "off" ? "Extinction détectée : le décompte repart au rallumage" : "");
         setText("lampCountdown",
           d.timer_state === "off" ? "En attente du rallumage"
-          : d.timer_state === "pending" ? "Fin du clignotement…"
           : (d.progress_label || "Détection des cycles…"));
       }
 
