@@ -13,7 +13,8 @@ LIGHT_ON_THRESHOLD = 50.0  # Même seuil que BP_Lamp.CheckLight(Value).
 GLOBAL_ON_RATIO = 0.60    # Majorité nette de lampes allumées.
 GLOBAL_OFF_RATIO = 0.40   # Hystérésis autour de 50 %.
 STATE_CONFIRMATION = 0.05 # Confirmation sur plusieurs échantillons.
-REARM_STABLE = 0.80       # Retour ON stable avant un nouveau cycle.
+FLICKER_MAX_OFF = 0.70    # Une coupure plus longue est considérée comme une extinction.
+FLICKER_SEQUENCE_LOCKOUT = 1.00 # Une seule détection pendant toute la séquence de clignotement.
 RANGES = {"1": (4.25, 7.26), "2": (4.50, 7.50), "3": (5.00, 7.50), "4": (5.00, 7.50), "Inconnu": (4.00, 8.00)}
 
 def estimate_period(times, player_count):
@@ -42,7 +43,7 @@ class LampMemoryScanner:
         self.last_flicker=None; self.blackout_started=None; self.relight_time=None; self.dark_since=None
         self.signal=None; self.signal_state=None; self.lamp_states={}
         self.global_state=None; self.global_candidate=None; self.global_candidate_since=None
-        self.on_stable_since=None; self.cycle_armed=False
+        self.off_started=None
         self.next_tick=None; self.last_transition=None; self.last_cycle_event=None
         self.last_sample_at=None; self.sample_hz_actual=0.0
         log.info("SCANNER_INIT_OK")
@@ -63,7 +64,7 @@ class LampMemoryScanner:
             self.blackout_started=None; self.relight_time=None; self.dark_since=None; self.last_transition=None
             self.next_tick=None; self.signal_state=None; self.lamp_states.clear(); self.last_cycle_event=None
             self.global_state=None; self.global_candidate=None; self.global_candidate_since=None
-            self.on_stable_since=None; self.cycle_armed=False
+            self.off_started=None
             self.status="Calibration effacée. Les mesures mémoire continuent."
         return {"ok":True}
     def set_players(self,value):
@@ -234,60 +235,66 @@ class LampMemoryScanner:
                 return
 
             if self.global_state is None:
-                # Initialisation silencieuse : l'état au démarrage n'est pas un cycle.
+                # L'état initial ne constitue jamais un événement.
                 self.global_state=raw_state
                 self.signal_state=raw_state
-                self.on_stable_since=now if raw_state else None
-                self.cycle_armed=False
+                if raw_state:
+                    self.relight_time=now
+                else:
+                    self.off_started=now
                 return
 
             if raw_state == self.global_state:
                 self.signal_state=self.global_state
-                if raw_state and not self.cycle_armed:
-                    if self.on_stable_since is None:
-                        self.on_stable_since=now
-                    elif now-self.on_stable_since>=REARM_STABLE:
-                        self.cycle_armed=True
                 return
 
             previous_state=self.global_state
             self.global_state=raw_state
             self.signal_state=raw_state
 
-            if raw_state:
-                # Réarmement seulement après 0,8 s de lumière stable.
-                self.on_stable_since=now
-                self.cycle_armed=False
+            if previous_state and not raw_state:
+                # Début d'une coupure : on masque immédiatement le compte à rebours.
+                # On attend le rallumage pour savoir s'il s'agissait d'une brève
+                # impulsion de clignotement ou d'une véritable extinction.
+                self.off_started=now
                 return
 
-            self.on_stable_since=None
-            if previous_state and self.cycle_armed:
-                self.last_cycle_event=now
-                self.last_flicker=now
-                self.events.append(now)
-                self.last_transition=now
-                self.cycle_armed=False
-                self._recalculate_locked()
-                log.info("FLICKER_CYCLE_DETECTED time=%.3f on_ratio=%.2f lamps=%d cycles=%d period=%s score=%s",
-                         now,on_ratio,len(states),len(self.events),self.period,self.quality_score)
+            if not previous_state and raw_state:
+                off_duration=(now-self.off_started) if self.off_started is not None else float("inf")
+                self.relight_time=now
+
+                if off_duration <= FLICKER_MAX_OFF:
+                    # Une coupure brève suivie d'un rallumage est un clignotement.
+                    # Les autres impulsions de la même séquence sont ignorées.
+                    if self.last_flicker is None or self.off_started-self.last_flicker>=FLICKER_SEQUENCE_LOCKOUT:
+                        event_time=self.off_started if self.off_started is not None else now
+                        self.last_flicker=event_time
+                        self.events.append(event_time)
+                        self.last_transition=event_time
+                        self._recalculate_locked()
+                        log.info("FLICKER_CYCLE_DETECTED time=%.3f off_duration=%.3f lamps=%d cycles=%d period=%s score=%s",
+                                 event_time,off_duration,len(states),len(self.events),self.period,self.quality_score)
+                else:
+                    # Une extinction longue suivie d'un rallumage ne compte pas
+                    # comme un clignotement. Elle ne fait que relancer le timer.
+                    log.info("LAMPS_RELIT_AFTER_BLACKOUT time=%.3f off_duration=%.3f",now,off_duration)
+
+                self.off_started=None
+                return
 
     def snapshot(self):
         with self.lock:
-            now=time.perf_counter()
             remaining=None
-            if self.period is not None and self.last_flicker is not None:
-                # Projection du prochain événement sur la phase mesurée.
-                # Le compte à rebours reste ainsi disponible après le rallumage.
-                steps=max(1, math.floor((now-self.last_flicker)/self.period)+1)
-                self.next_tick=self.last_flicker+steps*self.period
-                remaining=max(0.0,self.next_tick-now)
+            if self.period is not None and self.relight_time is not None and self.signal_state is True:
+                # Le décompte repart au rallumage et reste masqué pendant l'extinction.
+                deadline=self.relight_time+self.period
+                remaining=max(0.0,deadline-time.perf_counter())
             if self.period is None:
                 period_label=f"Détection : {len(self.events)}/3 cycles" if self.events else "En attente de détection"
                 quality="Première estimation après 3 cycles détectés"
             else:
                 period_label=f"{self.period:.2f} s"; score=self.quality_score or 0.0
                 quality=("élevée" if score<0.07 else "moyenne" if score<0.16 else "faible")+f" (écart {score:.3f} s)"
-            now=time.perf_counter()
             if not self.running:
                 lamp_state, lamp_state_key = "Arrêté", "idle"
             elif self.signal_state is True:
@@ -296,8 +303,9 @@ class LampMemoryScanner:
                 lamp_state, lamp_state_key = "Éteintes", "off"
             else:
                 lamp_state, lamp_state_key = "Recherche…", "idle"
+            timer_state="off" if self.signal_state is False else "running" if remaining is not None else "calibrating"
             return {"running":self.running,"status":self.status,"world_name":self.world_name,"last_scan":self.last_scan,
                     "lamps":list(self.lamps),"stats":dict(self.stats),"sample_hz":round(self.sample_hz_actual,1) if self.sample_hz_actual>0 else 1/POLL_INTERVAL,"sample_hz_target":1/POLL_INTERVAL,"signal":self.signal,
                     "player_count":self.player_count,"event_count":len(self.events),"period":self.period,"period_label":period_label,
-                    "quality":quality,"remaining":remaining,"blackout":False,
+                    "quality":quality,"remaining":remaining,"timer_state":timer_state,"blackout":self.signal_state is False,
                     "lamp_state":lamp_state,"lamp_state_key":lamp_state_key}
