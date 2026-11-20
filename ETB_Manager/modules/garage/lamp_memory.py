@@ -261,7 +261,6 @@ class LampMemoryScanner:
 
             if not previous_state and raw_state:
                 off_duration=(now-self.off_started) if self.off_started is not None else float("inf")
-                self.relight_time=now
 
                 if off_duration <= FLICKER_MAX_OFF:
                     # Une coupure brève suivie d'un rallumage est un clignotement.
@@ -269,6 +268,7 @@ class LampMemoryScanner:
                     if self.last_flicker is None or self.off_started-self.last_flicker>=FLICKER_SEQUENCE_LOCKOUT:
                         event_time=self.off_started if self.off_started is not None else now
                         self.last_flicker=event_time
+                        self.relight_time=now
                         self.events.append(event_time)
                         self.last_transition=event_time
                         self._recalculate_locked()
@@ -277,6 +277,7 @@ class LampMemoryScanner:
                 else:
                     # Une extinction longue suivie d'un rallumage ne compte pas
                     # comme un clignotement. Elle ne fait que relancer le timer.
+                    self.relight_time=now
                     log.info("LAMPS_RELIT_AFTER_BLACKOUT time=%.3f off_duration=%.3f",now,off_duration)
 
                 self.off_started=None
