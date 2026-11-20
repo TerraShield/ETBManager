@@ -2,16 +2,18 @@
 
 Deux parties indépendantes :
 
-* ``LampCycleTracker`` : logique pure (états des lampes -> épisodes de clignotement ->
-  estimation du délai). Aucun accès mémoire, donc testable sans le jeu
+* ``LampCycleTracker`` : logique pure (états des lampes -> clignotements / extinctions
+  réelles -> estimation du délai). Aucun accès mémoire, donc testable sans le jeu
   (voir ``tests/test_lamp_cycle.py``).
 * ``LampMemoryScanner`` : accès mémoire. Un thread découvre les lampes (lent, mis en cache),
   un autre les échantillonne en continu (rapide) pour que la découverte ne crée jamais de
   trous de mesure.
 
-Modèle du cycle : lumières allumées pendant un délai D -> épisode (impulsions de
-clignotement, éventuellement suivies d'une coupure longue) -> rallumage -> délai D suivant.
-On mesure D entre le dernier rallumage d'un épisode et le début de l'épisode suivant.
+Modèle du cycle : après le rallumage qui suit une extinction réelle, le délai D
+continue de s'écouler. Les coupures courtes (<= FLICKER_MAX_OFF) sont des clignotements :
+elles sont comptées, mais ne relancent pas le délai. Seule une coupure dépassant ce seuil
+est une extinction ; le décompte repart au rallumage qui la suit. D est mesuré entre ce
+rallumage et le début de l'extinction réelle suivante.
 """
 from __future__ import annotations
 
