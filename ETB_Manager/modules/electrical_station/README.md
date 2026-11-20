@@ -36,4 +36,4 @@ Si aucune image de carte n'est présente dans `public/`, le module lance une ana
 
 Une image manuelle (`png`, `jpg`, `jpeg`, `webp` ou `svg`, autre que la carte auto-générée) reste prioritaire. Le bouton **Analyser / reconstruire la carte** force une nouvelle lecture. Les volumes générés sont des approximations à partir des bounds Unreal : ils ne remplacent pas l'extraction exacte des polygones de collision. Cette fonctionnalité est expérimentale et doit être vérifiée en jeu.
 
-La géométrie locale des assets est également ajoutée à la bibliothèque partagée `ETB_Manager/mesh_library/static_meshes.json`, indexée par chemin complet d'asset. Les prochains modules pourront ainsi réutiliser les bounds d'un mesh sans devoir le réanalyser lorsqu'il réapparaît dans un autre niveau.
+La géométrie locale des assets est également ajoutée à la bibliothèque partagée `ETB_Manager/mesh_library/static_meshes.json`, indexée par chemin complet d'asset. Si la lecture mémoire des bounds d'un mesh échoue lors d'une analyse ultérieure, le scanner réutilise les bounds locaux déjà enregistrés. Les prochains modules pourront également exploiter ce même fichier.
