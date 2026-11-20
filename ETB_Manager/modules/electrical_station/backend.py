@@ -26,6 +26,7 @@ class ElectricalStationScanner:
         self.lock=threading.RLock()
         self.stop_event=threading.Event()
         self.thread=None
+        self.map_scan_requested=threading.Event()
         self.mem=self.pid=self.world_slot=self.resolver=None
         self.state={"running":False,"connected":False,"level_active":False,
             "status":"En attente d'Escape the Backrooms…","fuseboxes":[],"count":0,
@@ -273,11 +274,26 @@ class ElectricalStationScanner:
                             "last_scan":time.time(),"scan_error":None})
                 else:
                     fuseboxes,manager,error=self._scan_world(world)
+                    force_map=self.map_scan_requested.is_set()
+                    if force_map: self.map_scan_requested.clear()
+                    map_status="Carte déjà disponible" if not self._auto_map_needed() else "En attente de génération"
+                    map_count=0
+                    if force_map or self._auto_map_needed():
+                        with self.lock: self.state["map_scan_status"]="Analyse des meshes du niveau…"
+                        try:
+                            mesh_records=self._scan_static_meshes(world)
+                            map_count=self._write_auto_map(mesh_records,world_name)
+                            map_status=f"Carte générée : {map_count} éléments verticaux"
+                            log.info("AUTO_MAP_GENERATED level=%s candidates=%s",world_name,map_count)
+                        except Exception as map_exc:
+                            map_status=f"Échec de la cartographie automatique : {map_exc}"
+                            log.exception("AUTO_MAP_FAILED level=%s",world_name)
                     with self.lock:
                         self.state.update({"connected":True,"level_active":True,
                             "status":error or f"{len(fuseboxes)} fusebox(es) détectée(s).",
                             "fuseboxes":fuseboxes,"count":len(fuseboxes),
                             "manager_found":bool(manager),"manager":manager,
+                            "map_scan_status":map_status,"map_wall_count":map_count or self.state.get("map_wall_count",0),
                             "last_scan":time.time(),"scan_error":error})
                     log.info("SCAN_OK level=%s fuseboxes=%s manager=%s",world_name,len(fuseboxes),bool(manager))
             except Exception as exc:
@@ -305,10 +321,14 @@ class ElectricalStationBackend:
         import json
         data=self.scanner.snapshot()
         public=self.root/"public"
-        images=sorted([p for suffix in (".png",".jpg",".jpeg",".webp") for p in public.glob("*"+suffix)],key=lambda p:p.name.casefold())
+        images=sorted([p for suffix in (".png",".jpg",".jpeg",".webp",".svg") for p in public.glob("*"+suffix) if p.name!="electrical_station_auto_map.svg"],key=lambda p:p.name.casefold())
+        auto_image=public/"electrical_station_auto_map.svg"
+        if not images and auto_image.is_file(): images=[auto_image]
         data["map_available"]=bool(images)
+        data["map_auto_generated"]=bool(images and images[0].name=="electrical_station_auto_map.svg")
         data["map_url"]=f"/modules/electrical_station/public/{images[0].name}" if images else None
         data["map_filename"]=images[0].name if images else None
+        if data["map_auto_generated"]: data["map_scan_status"]=data.get("map_scan_status") or "Carte générée automatiquement"
         path=public/"map.config.json"
         try: config=json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
         except Exception as exc:
@@ -322,6 +342,9 @@ class ElectricalStationBackend:
         if action=="start": return self.scanner.start()
         if action=="stop": return self.scanner.stop()
         if action=="rescan": return {"ok":True,"message":"Le prochain relevé sera effectué automatiquement."}
+        if action=="generate_map":
+            self.scanner.map_scan_requested.set()
+            return {"ok":True,"message":"Analyse des meshes demandée. Le résultat apparaîtra automatiquement."}
         raise ValueError(f"Action ElectricalStation inconnue : {action}")
     def shutdown(self): self.scanner.stop()
 
