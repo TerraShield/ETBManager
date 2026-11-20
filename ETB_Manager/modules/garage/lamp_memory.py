@@ -9,6 +9,9 @@ MAX_LEVELS, MAX_ACTORS = 256, 250000
 POLL_INTERVAL = 0.02       # 50 Hz : lecture des intensités toutes les 20 ms
 DISCOVERY_INTERVAL = 1.0   # nouvelle recherche des acteurs toutes les secondes
 BLACKOUT_THRESHOLD = 1.25
+STATE_CONFIRM_SECONDS = 0.08  # Confirme une transition sur plusieurs échantillons (50 Hz).
+ON_THRESHOLD = 55.0
+OFF_THRESHOLD = 45.0
 RANGES = {"1": (4.25, 7.26), "2": (4.50, 7.50), "3": (5.00, 7.50), "4": (5.00, 7.50), "Inconnu": (4.00, 8.00)}
 
 def estimate_period(times, player_count):
@@ -30,12 +33,13 @@ class LampMemoryScanner:
     def __init__(self):
         log.info("SCANNER_INIT_BEGIN poll_interval=%.3fs discovery_interval=%.3fs process_name=%s", POLL_INTERVAL, DISCOVERY_INTERVAL, PROCESS_NAME)
         self.lock=threading.RLock(); self.stop_event=threading.Event(); self.thread=None; self.running=False
-        self.status="Diagnostic arrêté. Charge BottomFloor puis démarre le prédicteur."
+        self.status="Connexion au jeu et recherche des lampadaires…"
         self.world_name=None; self.last_scan=None; self.lamps=[]; self.cache=[]
         self.stats={"actors_seen":0,"lamp_actors":0,"readable":0,"unreadable":0}
         self.player_count="1"; self.events=deque(maxlen=80); self.period=None; self.quality_score=None
         self.last_flicker=None; self.blackout_started=None; self.relight_time=None; self.dark_since=None
-        self.signal=None; self.signal_state=None; self.next_tick=None; self.last_transition=None
+        self.signal=None; self.signal_state=None; self.signal_candidate=None; self.signal_candidate_since=None
+        self.next_tick=None; self.last_transition=None; self.flicker_until=0.0
         self.last_sample_at=None; self.sample_hz_actual=0.0
         log.info("SCANNER_INIT_OK")
     def start(self):
@@ -189,47 +193,66 @@ class LampMemoryScanner:
             self.signal=signal
             self._process_signal_locked(now,signal)
     def _process_signal_locked(self,now,value):
-        # Un état initial ne constitue pas un clignotement : on attend une vraie transition.
-        is_on=value>=50.0
+        # Hystérésis + confirmation temporelle : les variations brèves du signal
+        # collectif ne doivent pas créer plusieurs faux clignotements.
         if self.signal_state is None:
-            self.signal_state=is_on
-            if not is_on: self.dark_since=now
+            self.signal_state = value >= 50.0
+            if not self.signal_state:
+                self.dark_since = now
             return
-        if self.signal_state and not is_on:
-            self.dark_since=now
-            self.flicker_until=now+0.65
-        elif not self.signal_state and is_on:
-            dark_duration=now-self.dark_since if self.dark_since is not None else 0.0
-            if self.blackout_started is not None and dark_duration>=BLACKOUT_THRESHOLD:
-                self.relight_time=now
-                self.status="Rallumage détecté : chronomètre prédictif actif."
-                log.info("RALLUMAGE après %.3f s d'extinction.",dark_duration)
-            elif self.dark_since is not None and dark_duration>0.04:
-                # On horodate le début de la baisse, comme dans l'ancien prédicteur.
-                self.events.append(self.dark_since)
-                self.last_flicker=self.dark_since
-                self.last_transition=now
-                self._recalculate_locked()
-                log.info("CLIGNOTEMENT détecté à %.3f s (durée sombre %.3f s, signal %.2f lm)",self.dark_since,dark_duration,value)
-            self.dark_since=None
-            self.blackout_started=None
-            self.flicker_until=now+0.65
-        self.signal_state=is_on
-        if not is_on and self.dark_since is not None and now-self.dark_since>=BLACKOUT_THRESHOLD and self.blackout_started is None:
-            self.blackout_started=self.dark_since
-            self.relight_time=None
-            self.status="Extinction prolongée détectée : attente du rallumage."
-        if self.period is not None and self.relight_time is not None and self.last_flicker is not None:
-            elapsed=self.relight_time-self.last_flicker
-            steps=math.floor(elapsed/self.period)+1
-            self.next_tick=self.last_flicker+steps*self.period
+
+        if self.signal_state:
+            candidate = False if value <= OFF_THRESHOLD else None
+        else:
+            candidate = True if value >= ON_THRESHOLD else None
+
+        if candidate is None:
+            self.signal_candidate = None
+            self.signal_candidate_since = None
+        elif candidate != self.signal_candidate:
+            self.signal_candidate = candidate
+            self.signal_candidate_since = now
+        elif self.signal_candidate_since is not None and now - self.signal_candidate_since >= STATE_CONFIRM_SECONDS:
+            transition_at = self.signal_candidate_since
+            previous_state = self.signal_state
+            self.signal_state = candidate
+            self.signal_candidate = None
+            self.signal_candidate_since = None
+
+            if previous_state and not candidate:
+                self.dark_since = transition_at
+                self.flicker_until = now + 0.65
+            elif not previous_state and candidate:
+                dark_duration = transition_at - self.dark_since if self.dark_since is not None else 0.0
+                if self.blackout_started is not None and dark_duration >= BLACKOUT_THRESHOLD:
+                    self.relight_time = transition_at
+                    self.status = "Rallumage détecté : prédiction du prochain clignotement."
+                    log.info("RALLUMAGE après %.3f s d'extinction.", dark_duration)
+                elif self.dark_since is not None and STATE_CONFIRM_SECONDS <= dark_duration < BLACKOUT_THRESHOLD:
+                    # Un clignotement = une extinction confirmée puis un rallumage confirmé.
+                    self.events.append(self.dark_since)
+                    self.last_flicker = self.dark_since
+                    self.last_transition = transition_at
+                    self._recalculate_locked()
+                    log.info("CLIGNOTEMENT validé à %.3f s (durée sombre %.3f s, signal %.2f lm, total=%d)",
+                             self.dark_since, dark_duration, value, len(self.events))
+                self.dark_since = None
+                self.blackout_started = None
+                self.flicker_until = now + 0.65
+
+        if not self.signal_state and self.dark_since is not None and now - self.dark_since >= BLACKOUT_THRESHOLD and self.blackout_started is None:
+            self.blackout_started = self.dark_since
+            self.relight_time = None
+            self.status = "Extinction prolongée détectée : attente du rallumage."
     def snapshot(self):
         with self.lock:
+            now=time.perf_counter()
             remaining=None
-            if self.next_tick is not None:
-                now=time.perf_counter()
-                if self.period is not None and self.next_tick<=now:
-                    self.next_tick += (math.floor((now-self.next_tick)/self.period)+1)*self.period
+            if self.period is not None and self.last_flicker is not None:
+                # Projection du prochain événement sur la phase mesurée.
+                # Le compte à rebours reste ainsi disponible après le rallumage.
+                steps=max(1, math.floor((now-self.last_flicker)/self.period)+1)
+                self.next_tick=self.last_flicker+steps*self.period
                 remaining=max(0.0,self.next_tick-now)
             if self.period is None:
                 period_label="Calibration en cours" if self.events else "En attente de détection"
@@ -250,9 +273,8 @@ class LampMemoryScanner:
                 lamp_state, lamp_state_key = "Éteintes", "off"
             else:
                 lamp_state, lamp_state_key = "Recherche…", "idle"
-            elapsed = None if self.relight_time is None else max(0.0, now-self.relight_time)
             return {"running":self.running,"status":self.status,"world_name":self.world_name,"last_scan":self.last_scan,
                     "lamps":list(self.lamps),"stats":dict(self.stats),"sample_hz":round(self.sample_hz_actual,1) if self.sample_hz_actual>0 else 1/POLL_INTERVAL,"sample_hz_target":1/POLL_INTERVAL,"signal":self.signal,
                     "player_count":self.player_count,"event_count":len(self.events),"period":self.period,"period_label":period_label,
-                    "quality":quality,"remaining":remaining,"blackout":self.blackout_started is not None,"relight_time":self.relight_time,
-                    "lamp_state":lamp_state,"lamp_state_key":lamp_state_key,"elapsed_since_relight":elapsed}
+                    "quality":quality,"remaining":remaining,"blackout":self.blackout_started is not None,
+                    "lamp_state":lamp_state,"lamp_state_key":lamp_state_key}
