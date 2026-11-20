@@ -28,6 +28,7 @@ def estimate_period(times, player_count):
 
 class LampMemoryScanner:
     def __init__(self):
+        log.info("SCANNER_INIT_BEGIN poll_interval=%.3fs discovery_interval=%.3fs process_name=%s", POLL_INTERVAL, DISCOVERY_INTERVAL, PROCESS_NAME)
         self.lock=threading.RLock(); self.stop_event=threading.Event(); self.thread=None; self.running=False
         self.status="Diagnostic arrêté. Charge BottomFloor puis démarre le prédicteur."
         self.world_name=None; self.last_scan=None; self.lamps=[]; self.cache=[]
@@ -36,6 +37,7 @@ class LampMemoryScanner:
         self.last_flicker=None; self.blackout_started=None; self.relight_time=None; self.dark_since=None
         self.signal=None; self.signal_state=None; self.next_tick=None; self.last_transition=None
         self.last_sample_at=None; self.sample_hz_actual=0.0
+        log.info("SCANNER_INIT_OK")
     def start(self):
         with self.lock:
             if self.running: return {"ok":True,"message":"Prédicteur déjà actif."}
@@ -63,8 +65,18 @@ class LampMemoryScanner:
     def _run(self):
         mem=None
         try:
-            pid=find_process_id(PROCESS_NAME); mem=ProcessMemory(pid); base,_=find_module(pid,PROCESS_NAME)
-            slot=locate_gworld(mem,base); names=locate_gnames(mem,base); resolver=FNameResolver(mem,names)
+            log.info("MEMORY_CONNECT_BEGIN process_name=%s", PROCESS_NAME)
+            pid=find_process_id(PROCESS_NAME)
+            log.info("MEMORY_PROCESS_FOUND pid=%s", pid)
+            mem=ProcessMemory(pid)
+            log.info("MEMORY_HANDLE_OPEN pid=%s", pid)
+            base,module_size=find_module(pid,PROCESS_NAME)
+            log.info("MEMORY_MODULE_FOUND pid=%s base=0x%X size=%s", pid, base, module_size)
+            slot=locate_gworld(mem,base)
+            log.info("MEMORY_GWORLD_FOUND slot=0x%X", slot)
+            names=locate_gnames(mem,base)
+            log.info("MEMORY_GNAMES_FOUND address=0x%X", names)
+            resolver=FNameResolver(mem,names)
             log.info("Connexion PID=%s base=0x%X GWorldSlot=0x%X GNames=0x%X",pid,base,slot,names)
             next_discovery=0.0
             while not self.stop_event.is_set():
@@ -77,6 +89,7 @@ class LampMemoryScanner:
                         with self.lock:
                             self.cache=result["cache"]; self.lamps=result["lamps"]; self.stats=result["stats"]
                             self.world_name=world_name; self.last_scan=time.time(); self.status=result["status"]
+                        log.info("LAMP_DISCOVERY_OK world=%s actors=%s lamps=%s readable=%s cached=%s", world_name, result["stats"]["actors_seen"], result["stats"]["lamp_actors"], result["stats"]["readable"], len(result["cache"]))
                         next_discovery=now+DISCOVERY_INTERVAL
                         if world_name.casefold()!="bottomfloor": log.warning("Niveau courant=%s (BottomFloor attendu).",world_name)
                     except Exception as exc:
@@ -90,10 +103,11 @@ class LampMemoryScanner:
                 self.stop_event.wait(POLL_INTERVAL)
         except Exception as exc:
             with self.lock: self.status="Connexion impossible : "+str(exc)
-            log.exception("Initialisation du prédicteur impossible")
+            log.exception("SCANNER_FATAL_ERROR exception=%s message=%s", type(exc).__name__, exc)
         finally:
             if mem: mem.close()
             with self.lock: self.running=False
+            log.info("SCANNER_THREAD_EXIT")
     def _describe_class_properties(self,mem,resolver,class_address):
         classes=[]; current=class_address; visited=set()
         while current and current not in visited and len(classes)<32:
