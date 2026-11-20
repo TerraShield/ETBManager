@@ -57,7 +57,7 @@ class LampMemoryScanner:
         with self.lock:
             self.events.clear(); self.period=None; self.quality_score=None; self.last_flicker=None
             self.blackout_started=None; self.relight_time=None; self.dark_since=None; self.last_transition=None
-            self.next_tick=None; self.signal_state=None; self.flicker_until=0.0
+            self.next_tick=None; self.signal_state=None; self.signal_candidate=None; self.signal_candidate_since=None; self.flicker_until=0.0
             self.status="Calibration effacée. Les mesures mémoire continuent."
         return {"ok":True}
     def set_players(self,value):
