@@ -109,6 +109,10 @@ class ElectricalStationScanner:
         levels.extend(_read_unreal_tarray_pointers(self.mem,world+OFF_WORLD_LEVELS,MAX_LEVELS))
         levels=list(dict.fromkeys(x for x in levels if x))
         records=[]
+        try:
+            cache_doc=json.loads(self.mesh_library_path.read_text(encoding="utf-8")) if getattr(self,"mesh_library_path",None) and self.mesh_library_path.is_file() else {}
+            mesh_cache=cache_doc.get("assets") or {}
+        except Exception: mesh_cache={}
         seen=set()
         component_offsets={}
         bounds_offsets={}
@@ -147,15 +151,30 @@ class ElectricalStationScanner:
                     if mesh_offset is None: continue
                     mesh=self.mem.ptr(component+mesh_offset)
                     if not mesh: continue
+                    mesh_name=self.resolver.object_name(mesh)
+                    outer_parts=[]; outer=mesh
+                    for _ in range(8):
+                        if not outer: break
+                        part=self.resolver.object_name(outer)
+                        if part and part!="?": outer_parts.append(part)
+                        outer=self.mem.ptr(outer+0x20)
+                    asset_path="/".join(reversed(outer_parts))
                     mesh_class=self.mem.ptr(mesh+OFF_UOBJECT_CLASS)
                     if not mesh_class: continue
                     if mesh_class not in bounds_offsets:
                         bounds_offsets[mesh_class]=_find_unreal_property_offset(self.mem,self.resolver,mesh_class,"ExtendedBounds")
                     bounds_offset=bounds_offsets[mesh_class]
-                    if bounds_offset is None: continue
-                    raw=self.mem.read(mesh+bounds_offset,28)
-                    if not raw: continue
-                    values=struct.unpack("<7f",raw)
+                    values=None
+                    if bounds_offset is not None:
+                        raw=self.mem.read(mesh+bounds_offset,28)
+                        if raw:
+                            candidate=struct.unpack("<7f",raw)
+                            if all(math.isfinite(v) for v in candidate): values=candidate
+                    if values is None:
+                        cached=(mesh_cache.get(asset_path) or {}).get("local_bounds") if asset_path else None
+                        if isinstance(cached,dict) and len(cached.get("origin",[]))==3 and len(cached.get("extent",[]))==3:
+                            values=tuple(cached["origin"])+tuple(cached["extent"])+(0.0,)
+                    if values is None: continue
                     if not all(math.isfinite(v) for v in values): continue
                     ox,oy,oz,ex,ey,ez,_radius=values
                     if min(ex,ey,ez)<0 or max(ex,ey,ez)>100000: continue
@@ -181,15 +200,7 @@ class ElectricalStationScanner:
                     hz=abs(ez*sz)
                     # On retient les volumes verticaux plausibles (murs, portes, piliers), pas les sols plats.
                     if hz<60 or max(hx,hy)<35: continue
-                    mesh_name=self.resolver.object_name(mesh)
                     actor_name=self.resolver.object_name(actor)
-                    outer_parts=[]; outer=mesh
-                    for _ in range(8):
-                        if not outer: break
-                        part=self.resolver.object_name(outer)
-                        if part and part!="?": outer_parts.append(part)
-                        outer=self.mem.ptr(outer+0x20)
-                    asset_path="/".join(reversed(outer_parts))
                     records.append({"actor":actor_name,"mesh":mesh_name,"asset_path":asset_path,
                         "local_bounds":{"origin":[ox,oy,oz],"extent":[ex,ey,ez]},
                         "x":cx,"y":cy,"z":cz,"half_x":hx,"half_y":hy,"half_z":hz,"yaw":yaw})
