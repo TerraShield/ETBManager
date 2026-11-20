@@ -27,6 +27,7 @@ class ElectricalStationScanner:
         self.stop_event=threading.Event()
         self.thread=None
         self.map_scan_requested=threading.Event()
+        self.auto_map_attempted_world=None
         self.mem=self.pid=self.world_slot=self.resolver=None
         self.state={"running":False,"connected":False,"level_active":False,
             "status":"En attente d'Escape the Backrooms…","fuseboxes":[],"count":0,
@@ -86,7 +87,7 @@ class ElectricalStationScanner:
         return {name:_find_unreal_property_offset(self.mem,self.resolver,class_address,name) for name in names}
     def _read_fusebox(self,actor,class_name,offsets):
         root=self.mem.ptr(actor+OFF_ACTOR_ROOT_COMPONENT)
-        position=self.mem.vec3(root+OFF_SCENE_COMPONENT_TO_WORLD_TRANSLATION) if root else None
+        position=self.mem.vec3(component+OFF_SCENE_COMPONENT_TO_WORLD_TRANSLATION) if root else None
         if position is None: return None
         io=offsets.get("FuseboxIndex")
         eo=offsets.get("IsEnabled")
@@ -111,6 +112,8 @@ class ElectricalStationScanner:
         seen=set()
         component_offsets={}
         bounds_offsets={}
+        actor_component_offsets={}
+        seen_components=set()
         actor_total=0
         component_total=0
         for level in levels:
@@ -119,17 +122,30 @@ class ElectricalStationScanner:
                 if not actor or actor in seen: continue
                 seen.add(actor); actor_total+=1
                 root=self.mem.ptr(actor+OFF_ACTOR_ROOT_COMPONENT)
-                if not root: continue
-                component_class=self.mem.ptr(root+OFF_UOBJECT_CLASS)
-                if not component_class: continue
-                chain=self._class_chain(component_class)
-                if not any("staticmeshcomponent" in name.casefold() for _,name in chain): continue
-                component_total+=1
+                components=[root] if root else []
+                actor_class=self.mem.ptr(actor+OFF_UOBJECT_CLASS)
+                if actor_class:
+                    if actor_class not in actor_component_offsets:
+                        actor_component_offsets[actor_class]=[
+                            _find_unreal_property_offset(self.mem,self.resolver,actor_class,name)
+                            for name in ("InstanceComponents","BlueprintCreatedComponents")
+                        ]
+                    for offset in actor_component_offsets[actor_class]:
+                        if offset is not None:
+                            components.extend(_read_unreal_tarray_pointers(self.mem,actor+offset,2048))
+                for component in components:
+                    if not component or component in seen_components: continue
+                    seen_components.add(component)
+                    component_class=self.mem.ptr(component+OFF_UOBJECT_CLASS)
+                    if not component_class: continue
+                    chain=self._class_chain(component_class)
+                    if not any("staticmeshcomponent" in name.casefold() for _,name in chain): continue
+                    component_total+=1
                 if component_class not in component_offsets:
                     component_offsets[component_class]=_find_unreal_property_offset(self.mem,self.resolver,component_class,"StaticMesh")
                 mesh_offset=component_offsets[component_class]
                 if mesh_offset is None: continue
-                mesh=self.mem.ptr(root+mesh_offset)
+                mesh=self.mem.ptr(component+mesh_offset)
                 if not mesh: continue
                 mesh_class=self.mem.ptr(mesh+OFF_UOBJECT_CLASS)
                 if not mesh_class: continue
@@ -143,7 +159,7 @@ class ElectricalStationScanner:
                 if not all(math.isfinite(v) for v in values): continue
                 ox,oy,oz,ex,ey,ez,_radius=values
                 if min(ex,ey,ez)<0 or max(ex,ey,ez)>100000: continue
-                transform=self.mem.read(root+0x1C0,40)
+                transform=self.mem.read(component+0x1C0,40)
                 yaw=0.0; sx=sy=sz=1.0
                 if transform:
                     tv=struct.unpack("<10f",transform)
