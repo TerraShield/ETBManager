@@ -11,6 +11,17 @@
     </div>
   </section>
   <section class="panel-card">
+    <div class="eyebrow">PRÉDICTION DU CYCLE</div>
+    <div class="metric-row"><span>Fréquence de lecture mémoire</span><strong id="lampSampleRate">20 Hz</strong></div>
+    <div class="metric-row"><span>Signal moyen</span><strong id="lampSignal">—</strong></div>
+    <div class="metric-row"><span>Nombre de joueurs</span><strong><select id="lampPlayers"><option value="1">1 joueur</option><option value="2">2 joueurs</option><option value="3">3 joueurs</option><option value="4">4 joueurs</option></select></strong></div>
+    <div class="metric-row"><span>Clignotements détectés</span><strong id="lampEvents">0</strong></div>
+    <div class="metric-row"><span>Période estimée</span><strong id="lampPeriod">En attente</strong></div>
+    <div class="metric-row"><span>Fiabilité</span><strong id="lampQuality">—</strong></div>
+    <div class="metric-row"><span>Temps avant prochain cycle</span><strong id="lampCountdown">—</strong></div>
+    <p>Le chronomètre démarre au rallumage après une extinction prolongée. La période est calculée à partir des clignotements mémorisés.</p>
+  </section>
+  <section class="panel-card">
     <div class="eyebrow">ÉTAT DU SCAN</div>
     <div class="metric-row"><span>Niveau détecté</span><strong id="lampWorld">—</strong></div>
     <div class="metric-row"><span>Acteurs parcourus</span><strong id="lampActorsSeen">0</strong></div>
