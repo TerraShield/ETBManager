@@ -1,0 +1,32 @@
+<section class="es-module">
+  <header class="panel-card es-intro">
+    <div class="eyebrow">ELECTRICAL STATION · FUSEBOXES</div>
+    <h2>Localisation des boîtiers à fusibles</h2>
+    <p>Détection automatique des BP_Fusebox_Base_C présents dans le niveau.</p>
+    <div class="es-status"><span id="esDot"></span><strong id="esStatus">Initialisation du scanner…</strong></div>
+    <div class="es-toolbar"><button class="secondary-button" id="esStart">Démarrer le scanner</button><button class="secondary-button" id="esStop">Arrêter</button></div>
+  </header>
+  <div class="es-metrics">
+    <div class="panel-card"><span>FUSEBOXES DÉTECTÉES</span><strong id="esCount">0</strong></div>
+    <div class="panel-card"><span>NIVEAU</span><strong id="esLevel">En attente</strong></div>
+    <div class="panel-card"><span>STATION MANAGER</span><strong id="esManagerFound">—</strong></div>
+  </div>
+  <section class="panel-card es-manager" id="esManager" hidden>
+    <div class="eyebrow">PROGRESSION DU NIVEAU</div>
+    <div class="es-progress-grid">
+      <div><span>Sous-station Est</span><strong id="esEast">—</strong></div>
+      <div><span>Sous-station Ouest</span><strong id="esWest">—</strong></div>
+      <div><span>Générateur</span><strong id="esGenerator">—</strong></div>
+      <div><span>Tous les générateurs</span><strong id="esAllGenerators">—</strong></div>
+    </div><small>Indicateurs lus dans BP_StationManager_C.</small>
+  </section>
+  <section class="panel-card es-map-section">
+    <div class="es-section-head"><div><div class="eyebrow">CARTE DU NIVEAU</div><h3>Emplacement des fuseboxes</h3></div><span id="esMapStatus">Carte non installée</span></div>
+    <div class="es-map-viewport" id="esMapViewport" hidden><div class="es-map-stage"><img id="esMapImage" alt="Carte du niveau ElectricalStation"><div class="es-map-markers" id="esMapMarkers"></div></div></div>
+    <p class="es-map-help" id="esMapHelp">Dépose une image de la carte dans modules/electrical_station/public/ et renseigne ses limites Unreal dans map.config.json.</p>
+  </section>
+  <section class="panel-card">
+    <div class="es-section-head"><div><div class="eyebrow">DÉTECTION MÉMOIRE</div><h3>Fuseboxes trouvées</h3></div><span id="esLastScan">Aucun relevé</span></div>
+    <div class="es-list" id="esFuseboxList"><p class="muted">En attente de la lecture mémoire…</p></div>
+  </section>
+</section>
