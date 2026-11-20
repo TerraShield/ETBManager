@@ -1,0 +1,214 @@
+[
+  {
+    "Type": "BodySetup",
+    "Name": "BodySetup_0",
+    "Flags": "RF_Transactional | RF_WasLoaded | RF_LoadCompleted",
+    "Class": "UScriptClass'BodySetup'",
+    "Outer": {
+      "ObjectName": "StaticMesh'SM_WallInterior_B'",
+      "ObjectPath": "EscapeTheBackrooms/Content/ParkingGarage/Meshes/SM_WallInterior_B.2"
+    },
+    "Properties": {
+      "AggGeom": {
+        "BoxElems": [
+          {
+            "Center": {
+              "X": 0.0,
+              "Y": -125.0,
+              "Z": 190.0
+            },
+            "Rotation": {
+              "Pitch": 0.0,
+              "Yaw": 0.0,
+              "Roll": 0.0
+            },
+            "X": 20.0,
+            "Y": 250.0,
+            "Z": 400.0,
+            "RestOffset": 0.0,
+            "Name": "None",
+            "bContributeToMass": true,
+            "CollisionEnabled": "ECollisionEnabled::QueryAndPhysics"
+          }
+        ]
+      },
+      "DefaultInstance": {
+        "ObjectType": "ECC_WorldStatic",
+        "CollisionProfileName": "BlockAll",
+        "CollisionResponses": {
+          "ResponseArray": [
+            {
+              "Channel": "Spectator",
+              "Response": "ECR_Block"
+            }
+          ]
+        }
+      }
+    },
+    "BodySetupGuid": "41414A4847B4BC21C1A00F85738D0E67",
+    "CookedFormatData": {
+      "PhysXPC": {
+        "BulkDataFlags": "BULKDATA_SingleUse | BULKDATA_ForceInlinePayload",
+        "ElementCount": 1337,
+        "SizeOnDisk": 1337,
+        "OffsetInFile": "0xDC2B"
+      }
+    }
+  },
+  {
+    "Type": "NavCollision",
+    "Name": "NavCollision_0",
+    "Flags": "RF_WasLoaded | RF_LoadCompleted",
+    "Class": "UScriptClass'NavCollision'",
+    "Outer": {
+      "ObjectName": "StaticMesh'SM_WallInterior_B'",
+      "ObjectPath": "EscapeTheBackrooms/Content/ParkingGarage/Meshes/SM_WallInterior_B.2"
+    },
+    "CookedFormatData": {
+      "NavCollision_X": {
+        "BulkDataFlags": "BULKDATA_SingleUse | BULKDATA_ForceInlinePayload",
+        "ElementCount": 265,
+        "SizeOnDisk": 265,
+        "OffsetInFile": "0xE1AC"
+      }
+    }
+  },
+  {
+    "Type": "StaticMesh",
+    "Name": "SM_WallInterior_B",
+    "Flags": "RF_Public | RF_Standalone | RF_Transactional | RF_WasLoaded | RF_LoadCompleted",
+    "Class": "UScriptClass'StaticMesh'",
+    "Package": "EscapeTheBackrooms/Content/ParkingGarage/Meshes/SM_WallInterior_B",
+    "Properties": {
+      "StaticMaterials": [
+        {
+          "MaterialInterface": {
+            "ObjectName": "Material'M_WallPaint'",
+            "ObjectPath": "EscapeTheBackrooms/Content/ParkingGarage/Materials/M_WallPaint.0"
+          },
+          "MaterialSlotName": "M_WallPaint",
+          "ImportedMaterialSlotName": "M_WallPaint",
+          "UVChannelData": {
+            "bInitialized": true,
+            "bOverrideDensities": false,
+            "LocalUVDensities": 460.63412,
+            "LocalUVDensities[1]": 518.2781,
+            "LocalUVDensities[2]": 0.0,
+            "LocalUVDensities[3]": 0.0
+          }
+        },
+        {
+          "MaterialInterface": {
+            "ObjectName": "MaterialInstanceConstant'MI_WallPaintGrey'",
+            "ObjectPath": "EscapeTheBackrooms/Content/ParkingGarage/Materials/MI_WallPaintGrey.0"
+          },
+          "MaterialSlotName": "MI_WallPaint",
+          "ImportedMaterialSlotName": "MI_WallPaint",
+          "UVChannelData": {
+            "bInitialized": true,
+            "bOverrideDensities": false,
+            "LocalUVDensities": 447.32278,
+            "LocalUVDensities[1]": 518.18585,
+            "LocalUVDensities[2]": 0.0,
+            "LocalUVDensities[3]": 0.0
+          }
+        }
+      ],
+      "LightmapUVDensity": 518.2397,
+      "LightMapResolution": 128,
+      "LightMapCoordinateIndex": 1,
+      "ExtendedBounds": {
+        "Origin": {
+          "X": 0.0,
+          "Y": -125.0,
+          "Z": 190.0
+        },
+        "BoxExtent": {
+          "X": 10.0,
+          "Y": 125.0,
+          "Z": 200.0
+        },
+        "SphereRadius": 236.06143
+      }
+    },
+    "BodySetup": {
+      "ObjectName": "BodySetup'SM_WallInterior_B:BodySetup_0'",
+      "ObjectPath": "EscapeTheBackrooms/Content/ParkingGarage/Meshes/SM_WallInterior_B.0"
+    },
+    "NavCollision": {
+      "ObjectName": "NavCollision'SM_WallInterior_B:NavCollision_0'",
+      "ObjectPath": "EscapeTheBackrooms/Content/ParkingGarage/Meshes/SM_WallInterior_B.1"
+    },
+    "LightingGuid": "15075BDE-4CEE2467-CBF1D29F-16CE12CE",
+    "RenderData": {
+      "LODs": [
+        {
+          "Sections": [
+            {
+              "MaterialIndex": 0,
+              "FirstIndex": 0,
+              "NumTriangles": 10,
+              "MinVertexIndex": 0,
+              "MaxVertexIndex": 19,
+              "bEnableCollision": true,
+              "bCastShadow": true,
+              "bForceOpaque": false,
+              "bVisibleInRayTracing": true
+            },
+            {
+              "MaterialIndex": 1,
+              "FirstIndex": 30,
+              "NumTriangles": 2,
+              "MinVertexIndex": 20,
+              "MaxVertexIndex": 23,
+              "bEnableCollision": true,
+              "bCastShadow": true,
+              "bForceOpaque": false,
+              "bVisibleInRayTracing": true
+            }
+          ],
+          "MaxDeviation": 0.0,
+          "PositionVertexBuffer": {
+            "Stride": 12,
+            "NumVertices": 24
+          },
+          "VertexBuffer": {
+            "NumTexCoords": 2,
+            "NumVertices": 24,
+            "Strides": -1,
+            "UseHighPrecisionTangentBasis": false,
+            "UseFullPrecisionUVs": false
+          },
+          "ColorVertexBuffer": {
+            "Stride": 0,
+            "NumVertices": 0
+          }
+        }
+      ],
+      "Bounds": {
+        "Origin": {
+          "X": 0.0,
+          "Y": -125.0,
+          "Z": 190.0
+        },
+        "BoxExtent": {
+          "X": 10.0,
+          "Y": 125.0,
+          "Z": 200.0
+        },
+        "SphereRadius": 236.06143
+      },
+      "bLODsShareStaticLighting": true,
+      "ScreenSize": [
+        1.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  }
+]
