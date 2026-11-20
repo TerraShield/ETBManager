@@ -10,7 +10,7 @@ POLL_INTERVAL = 0.01       # 100 Hz : lecture rapide des états de chaque lampad
 DISCOVERY_INTERVAL = 1.0   # nouvelle recherche des acteurs toutes les secondes
 BLACKOUT_THRESHOLD = 1.25
 LIGHT_ON_THRESHOLD = 50.0  # Même seuil que BP_Lamp.CheckLight(Value).
-FLICKER_LOCKOUT = 0.75     # Timeline BP_LightManager.Flicker : environ 0,5 s.
+GLOBAL_ON_RATIO = 0.60    # Majorité nette de lampes allumées.\nGLOBAL_OFF_RATIO = 0.40   # Hystérésis autour de 50 %.\nSTATE_CONFIRMATION = 0.05 # Confirmation sur plusieurs échantillons.\nREARM_STABLE = 0.80       # Retour ON stable avant un nouveau cycle.
 RANGES = {"1": (4.25, 7.26), "2": (4.50, 7.50), "3": (5.00, 7.50), "4": (5.00, 7.50), "Inconnu": (4.00, 8.00)}
 
 def estimate_period(times, player_count):
@@ -56,7 +56,7 @@ class LampMemoryScanner:
         with self.lock:
             self.events.clear(); self.period=None; self.quality_score=None; self.last_flicker=None
             self.blackout_started=None; self.relight_time=None; self.dark_since=None; self.last_transition=None
-            self.next_tick=None; self.signal_state=None; self.lamp_states.clear(); self.last_cycle_event=None
+            self.next_tick=None; self.signal_state=None; self.lamp_states.clear(); self.last_cycle_event=None\n            self.global_state=None; self.global_candidate=None; self.global_candidate_since=None\n            self.on_stable_since=None; self.cycle_armed=False
             self.status="Calibration effacée. Les mesures mémoire continuent."
         return {"ok":True}
     def set_players(self,value):
@@ -178,7 +178,6 @@ class LampMemoryScanner:
 
         values=[]
         updates={}
-        falling_edges=[]
         for item in cache:
             raw=mem.read(item["component"]+item["offset"],4)
             if not raw:
@@ -190,12 +189,8 @@ class LampMemoryScanner:
             actor=item["actor"]
             values.append(value)
             updates[actor]=value
-            is_on=value>LIGHT_ON_THRESHOLD
             with self.lock:
-                previous=self.lamp_states.get(actor)
-                self.lamp_states[actor]=is_on
-            if previous is True and not is_on:
-                falling_edges.append((actor,item["name"]))
+                self.lamp_states[actor]=value>LIGHT_ON_THRESHOLD
 
         if not values:
             return
@@ -208,22 +203,68 @@ class LampMemoryScanner:
                     lamp["intensity"]=round(updates[addr],5)
                     lamp["read_status"]="OK"
             self.signal=signal
-            on_count=sum(1 for state in self.lamp_states.values() if state)
-            off_count=sum(1 for state in self.lamp_states.values() if not state)
-            self.signal_state=on_count>=off_count
 
-            # La timeline BP_LightManager.Flicker dure environ 0,5 s et passe
-            # plusieurs fois de part et d'autre de 50 lm. On garde son premier front.
-            if falling_edges and (self.last_cycle_event is None or now-self.last_cycle_event>=FLICKER_LOCKOUT):
+            # On observe l'état collectif, pas les fronts de chaque BP_Lamp.
+            # L'hystérésis évite les bascules dues à une lampe isolée.
+            sampled_actors={item["actor"] for item in cache if item["actor"] in self.lamp_states}
+            states=[self.lamp_states[actor] for actor in sampled_actors]
+            if not states:
+                return
+            on_ratio=sum(states)/len(states)
+            raw_state=True if on_ratio>=GLOBAL_ON_RATIO else False if on_ratio<=GLOBAL_OFF_RATIO else None
+
+            if raw_state is None:
+                self.global_candidate=None
+                self.global_candidate_since=None
+                return
+
+            if raw_state != self.global_candidate:
+                self.global_candidate=raw_state
+                self.global_candidate_since=now
+                return
+
+            if self.global_candidate_since is None or now-self.global_candidate_since<STATE_CONFIRMATION:
+                return
+
+            if self.global_state is None:
+                # Initialisation silencieuse : l'état au démarrage n'est pas un cycle.
+                self.global_state=raw_state
+                self.signal_state=raw_state
+                self.on_stable_since=now if raw_state else None
+                self.cycle_armed=False
+                return
+
+            if raw_state == self.global_state:
+                self.signal_state=self.global_state
+                if raw_state and not self.cycle_armed:
+                    if self.on_stable_since is None:
+                        self.on_stable_since=now
+                    elif now-self.on_stable_since>=REARM_STABLE:
+                        self.cycle_armed=True
+                return
+
+            previous_state=self.global_state
+            self.global_state=raw_state
+            self.signal_state=raw_state
+
+            if raw_state:
+                # Réarmement seulement après 0,8 s de lumière stable.
+                self.on_stable_since=now
+                self.cycle_armed=False
+                return
+
+            self.on_stable_since=None
+            if previous_state and self.cycle_armed:
                 self.last_cycle_event=now
                 self.last_flicker=now
                 self.events.append(now)
                 self.last_transition=now
+                self.cycle_armed=False
                 self._recalculate_locked()
-                log.info("FLICKER_CYCLE_DETECTED time=%.3f lamp=%s simultaneous=%d cycles=%d period=%s score=%s",
-                         now,falling_edges[0][1],len(falling_edges),len(self.events),self.period,self.quality_score)
+                log.info("FLICKER_CYCLE_DETECTED time=%.3f on_ratio=%.2f lamps=%d cycles=%d period=%s score=%s",
+                         now,on_ratio,len(states),len(self.events),self.period,self.quality_score)
 
-    def snapshot(self):
+        def snapshot(self):
         with self.lock:
             now=time.perf_counter()
             remaining=None
