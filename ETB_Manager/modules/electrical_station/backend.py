@@ -191,6 +191,7 @@ class ElectricalStationScanner:
                         outer=self.mem.ptr(outer+0x20)
                     asset_path="/".join(reversed(outer_parts))
                     records.append({"actor":actor_name,"mesh":mesh_name,"asset_path":asset_path,
+                        "local_bounds":{"origin":[ox,oy,oz],"extent":[ex,ey,ez]},
                         "x":cx,"y":cy,"z":cz,"half_x":hx,"half_y":hy,"half_z":hz,"yaw":yaw})
         log.info("AUTO_MAP_MESH_SCAN actors=%s static_mesh_components=%s wall_candidates=%s",actor_total,component_total,len(records))
         return records
@@ -223,11 +224,24 @@ class ElectricalStationScanner:
             "autoMap":{"wallCandidates":len(records),"generatedAt":time.time()}})
         config_path.write_text(json.dumps(config,ensure_ascii=False,indent=2),encoding="utf-8")
         (public/"auto_map_data.json").write_text(json.dumps({"level":level_name,"wallCandidates":records},ensure_ascii=False,indent=2),encoding="utf-8")
+        library_path=getattr(self,"mesh_library_path",public/"mesh_library.json")
+        try: library=json.loads(library_path.read_text(encoding="utf-8")) if library_path.is_file() else {}
+        except Exception: library={}
+        assets=library.get("assets") if isinstance(library.get("assets"),dict) else {}
+        for item in records:
+            asset_key=item.get("asset_path")
+            if asset_key and item.get("local_bounds"):
+                previous=assets.get(asset_key,{})
+                assets[asset_key]={"mesh":item["mesh"],"local_bounds":item["local_bounds"],
+                    "last_seen_level":level_name,"last_seen_at":time.time(),
+                    "seen_count":int(previous.get("seen_count",0))+1}
+        library_path.parent.mkdir(parents=True,exist_ok=True)
+        library_path.write_text(json.dumps({"version":1,"identity":"full_asset_path","assets":assets},ensure_ascii=False,indent=2),encoding="utf-8")
         return len(records)
 
     def _auto_map_needed(self):
         public=self.root/"public"
-        manual=[p for suffix in (".png",".jpg",".jpeg",".webp") for p in public.glob("*"+suffix)]
+        manual=[p for suffix in (".png",".jpg",".jpeg",".webp",".svg") for p in public.glob("*"+suffix) if p.name!="electrical_station_auto_map.svg"]
         generated=public/"electrical_station_auto_map.svg"
         return not manual and not generated.is_file()
 
@@ -335,10 +349,16 @@ class ElectricalStationBackend:
     def __init__(self,context):
         self.root=context.module_dir
         self.scanner=ElectricalStationScanner()
+        self.scanner.mesh_library_path=context.base_dir/"mesh_library"/"static_meshes.json"
         self.scanner.start()
     def snapshot(self,shared_state):
         import json
         data=self.scanner.snapshot()
+        library_path=self.scanner.mesh_library_path
+        try:
+            library=json.loads(library_path.read_text(encoding="utf-8")) if library_path.is_file() else {}
+            data["mesh_library_count"]=len(library.get("assets") or {})
+        except Exception: data["mesh_library_count"]=0
         public=self.root/"public"
         images=sorted([p for suffix in (".png",".jpg",".jpeg",".webp",".svg") for p in public.glob("*"+suffix) if p.name!="electrical_station_auto_map.svg"],key=lambda p:p.name.casefold())
         auto_image=public/"electrical_station_auto_map.svg"
