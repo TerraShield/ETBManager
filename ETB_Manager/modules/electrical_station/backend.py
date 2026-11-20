@@ -318,7 +318,7 @@ class ElectricalStationScanner:
                     force_map=self.map_scan_requested.is_set()
                     if force_map: self.map_scan_requested.clear()
                     if force_map: self.auto_map_attempted_world=None
-                    map_status="Carte déjà disponible" if not self._auto_map_needed() else (self.state.get("map_scan_status") if self.auto_map_attempted_world==world and self.state.get("map_scan_status") else "En attente de génération")
+                    map_status=(self.state.get("map_scan_status") if self.state.get("map_wall_count") else "Carte déjà disponible") if not self._auto_map_needed() else (self.state.get("map_scan_status") if self.auto_map_attempted_world==world and self.state.get("map_scan_status") else "En attente de génération")
                     map_count=0
                     should_scan_map=force_map or (self._auto_map_needed() and self.auto_map_attempted_world!=world)
                     if should_scan_map:
@@ -378,7 +378,13 @@ class ElectricalStationBackend:
         data["map_auto_generated"]=bool(images and images[0].name=="electrical_station_auto_map.svg")
         data["map_url"]=f"/modules/electrical_station/public/{images[0].name}" if images else None
         data["map_filename"]=images[0].name if images else None
-        if data["map_auto_generated"]: data["map_scan_status"]=data.get("map_scan_status") or "Carte générée automatiquement"
+        if data["map_auto_generated"]:
+            try:
+                auto_data=json.loads((public/"auto_map_data.json").read_text(encoding="utf-8"))
+                data["map_wall_count"]=len(auto_data.get("wallCandidates") or [])
+            except Exception: pass
+            if data.get("map_scan_status") in (None,"","En attente"):
+                data["map_scan_status"]=f"Carte générée automatiquement · {data.get('map_wall_count',0)} éléments"
         path=public/"map.config.json"
         try: config=json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
         except Exception as exc:
