@@ -13,3 +13,6 @@
 .lamp-list { display:grid; gap:.35rem; }
 .lamp-row { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:.65rem; padding:.45rem 0; border-bottom:1px solid var(--border-color,rgba(128,128,128,.2)); }
 .lamp-row strong { font-size:.85rem; }
+.lamp-window { display:block; min-height:1.1em; opacity:.7; font-size:.85rem; }
+.lamp-warn { color:#e9b949; font-weight:600; }
+#lampRejectedRow[hidden] { display:none; }
