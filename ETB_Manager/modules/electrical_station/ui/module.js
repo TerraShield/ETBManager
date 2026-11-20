@@ -4,6 +4,14 @@
     const post = action => api.post("action", {action}).catch(api.showError);
     $("esStart")?.addEventListener("click", () => post("start"));
     $("esStop")?.addEventListener("click", () => post("stop"));
+    $("esGenerateMap")?.addEventListener("click", async () => {
+      const button=$("esGenerateMap"); button.disabled=true;
+      try {
+        const result=await api.post("action",{action:"generate_map"});
+        $("esMapScanStatus").textContent=result.message||"Analyse demandée…";
+      } catch(error) { $("esMapScanStatus").textContent="Erreur : "+error.message; }
+      finally { button.disabled=false; }
+    });
     let lastMapUrl = "";
     let currentFuseboxes = [];
     const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -64,16 +72,19 @@
       currentFuseboxes=d.fuseboxes||[];
       renderList(currentFuseboxes);
       $("esLastScan").textContent=d.last_scan?"Mis à jour à "+new Date(d.last_scan*1000).toLocaleTimeString():"Aucun relevé";
+      $("esMapScanStatus").textContent=d.map_scan_status||"La carte sera analysée automatiquement si elle est absente."; 
       if(d.map_available&&d.map_url){
         $("esMapViewport").hidden=false;
-        $("esMapStatus").textContent=d.map_calibrated?"Carte calibrée":"Carte détectée · calibration requise";
-        if(lastMapUrl!==d.map_url){$("esMapImage").src=d.map_url;lastMapUrl=d.map_url;}
-        $("esMapHelp").textContent=d.map_calibrated?"Clique sur un marqueur pour retrouver sa fiche dans la liste.":"Image chargée. Renseigne minX, maxX, minY et maxY dans public/map.config.json.";
+        $("esMapStatus").textContent=d.map_auto_generated?"Carte auto-générée":d.map_calibrated?"Carte calibrée":"Carte détectée · calibration requise";
+        if(lastMapUrl!==d.map_url){$("esMapImage").src=d.map_url+"?v="+encodeURIComponent(d.last_scan||"");lastMapUrl=d.map_url;}
+        $("esMapHelp").textContent=d.map_auto_generated
+          ?"Carte reconstruite depuis les meshes visibles en mémoire. Les volumes sont des approximations à vérifier ; une image manuelle reste prioritaire."
+          :d.map_calibrated?"Clique sur un marqueur pour retrouver sa fiche dans la liste.":"Image chargée. Renseigne minX, maxX, minY et maxY dans public/map.config.json."; 
         renderMarkers(d);
       } else {
         $("esMapViewport").hidden=true;
-        $("esMapStatus").textContent="Carte non installée";
-        $("esMapHelp").textContent="Dépose une image dans modules/electrical_station/public/, puis configure ses limites Unreal dans map.config.json.";
+        $("esMapStatus").textContent="Carte en attente";
+        $("esMapHelp").textContent="Aucune image disponible : le module analyse automatiquement les StaticMeshComponent lorsque ElectricalStation est chargé."; 
       }
     }
     return {update,destroy(){}};
