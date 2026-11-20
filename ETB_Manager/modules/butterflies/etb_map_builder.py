@@ -154,15 +154,19 @@ class Level:
         return self.cache[i]
 
 
-def mesh_name(p):
+def mesh_ref(p):
+    """Retourne (nom court, chemin complet) d'une référence StaticMesh."""
     m = (p.get('StaticMesh') or {}) if isinstance(p, dict) else {}
+    raw = str(m.get('ObjectPath') or m.get('ObjectName') or '')
+    if "'" in raw:
+        raw = raw.split("'", 1)[1].rsplit("'", 1)[0]
+    full = raw.strip()
+    short = full.rsplit('.', 1)[-1].rsplit('/', 1)[-1]
+    return short, full
 
-    s = m.get('ObjectName') or m.get('ObjectPath') or ''
 
-    if "'" in s:
-        s = s.split("'")[1]
-
-    return s.rsplit('.', 1)[-1].rsplit('/', 1)[-1]
+def mesh_name(p):
+    return mesh_ref(p)[0]
 
 
 def collect_placements(lv):
@@ -183,7 +187,7 @@ def collect_placements(lv):
         ):
             continue
 
-        m = mesh_name(p)
+        m, asset_key = mesh_ref(p)
 
         if not m:
             act = lv.obj(lv.idx(o.get('Outer')))
@@ -222,6 +226,7 @@ def collect_placements(lv):
 
                 out.append(dict(
                     mesh=m,
+                    mesh_key=asset_key,
                     pos=pos,
                     ax=[Rw[r][0] for r in range(3)],
                     ay=[Rw[r][1] for r in range(3)],
@@ -231,6 +236,7 @@ def collect_placements(lv):
         elif t == 'StaticMeshComponent':
             out.append(dict(
                 mesh=m,
+                mesh_key=asset_key,
                 pos=L,
                 ax=[R[r][0] for r in range(3)],
                 ay=[R[r][1] for r in range(3)],
@@ -667,7 +673,14 @@ def _read_mesh_export(data, foot):
                 ]
                 polys = [(_hull2d(hull), origin['Z'] - extent['Z'], origin['Z'] + extent['Z'])]
         if polys:
-            foot[mesh['Name']] = polys
+            props = mesh.get('Properties') or {}
+            raw_path = str(mesh.get('ObjectPath') or mesh.get('Package') or '')
+            if not raw_path and isinstance(mesh.get('Outer'), dict):
+                raw_path = str(mesh['Outer'].get('ObjectPath') or mesh['Outer'].get('ObjectName') or '')
+            asset_key = raw_path.strip()
+            if asset_key:
+                foot[asset_key] = polys
+            foot.setdefault(mesh['Name'], polys)
 
 
 def load_footprints(sources, level_path, log):
@@ -1089,8 +1102,10 @@ def build(path, args, log=print):
         placed = False
 
         # Meshes dont on connaît la collision : contour exact
-        if e['mesh'] in foot:
-            polys = footprint_world(e, foot[e['mesh']])
+        mesh_key = e.get('mesh_key') or ''
+        footprint = foot.get(mesh_key) or foot.get(e['mesh'])
+        if footprint:
+            polys = footprint_world(e, footprint)
 
             if polys:
                 if gname in BLOCK_GROUPS:
