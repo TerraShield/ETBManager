@@ -30,7 +30,19 @@ def main():
         assert result.get("ok") is True, result
         assert result.get("map_ready") is True, result
         assert backend.read_map().startswith(b"<!doctype html>")
-        print("OK — import brut et détection du HTML généré par le backend Papillons.")
+
+        walls = Path(temp) / "walls.json"
+        walls.write_text(
+            '[{"Type":"StaticMesh","Name":"SM_Wall_01","ObjectPath":"/Game/Exterior/SM_Wall_01.SM_Wall_01"},'
+            '{"Type":"StaticMesh","Name":"SM_Wall_01","ObjectPath":"/Game/Interior/SM_Wall_01.SM_Wall_01"}]',
+            encoding="utf-8",
+        )
+        imported = backend.upload(walls, "wall__walls.json", {})
+        assert imported.get("ok") is True, imported
+        duplicates = imported["wall_json_files"]["duplicates"]
+        assert len(duplicates) == 1 and len(duplicates[0]["assets"]) == 2, duplicates
+        assert duplicates[0]["assets"][0]["asset_path"] != duplicates[0]["assets"][1]["asset_path"]
+        print("OK — génération de carte et distinction de deux StaticMesh homonymes par chemin d'asset.")
 
 
 if __name__ == "__main__":
