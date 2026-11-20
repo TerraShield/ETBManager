@@ -1,6 +1,7 @@
-"""Tests du prédicteur BottomFloor, sans le jeu : séries d'intensités synthétiques.
+"""Tests synthétiques du prédicteur BottomFloor, sans connexion au jeu.
 
-Lancer : python tests/test_lamp_cycle.py
+Lancer depuis ETB_Manager :
+    python tests/test_lamp_cycle.py
 """
 from __future__ import annotations
 
@@ -13,198 +14,230 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
+
 import modules.garage.lamp_memory as lm  # noqa: E402
 from modules.garage.lamp_memory import LampCycleTracker  # noqa: E402
 
 logging.disable(logging.CRITICAL)
 
-FLICKER = [(0.12, 0.15), (0.10, 0.0)]       # OFF 0.12 s, ON 0.15 s, OFF 0.10 s, puis rallumage
+FLICKERS = ((-2.2, 0.12), (-1.4, 0.10))
 
 
-def build(delays, pulses=FLICKER, blackout=None, start=0.0):
-    """Chronologie des coupures : renvoie (intervalles OFF, [(début, dernier rallumage), ...])."""
-    off, episodes, t = [], [], start
+def build(delays, blackout=2.0, flickers=FLICKERS, start=0.5):
+    """Construit les coupures OFF et les couples (rallumage, extinction)."""
+    off, cycles, relight = [], [], start
     for delay in delays:
-        s = t + delay
-        cur = s
-        for i, (o, on) in enumerate(pulses):
-            off.append((cur, cur + o))
-            cur += o + (on if i < len(pulses) - 1 else 0.0)
-        if blackout:
-            off.append((cur, cur + blackout))
-            cur += blackout
-        episodes.append((s, cur))
-        t = cur
-    return off, episodes
+        extinction = relight + delay
+        for relative, duration in flickers:
+            off.append((extinction + relative, extinction + relative + duration))
+        off.append((extinction, extinction + blackout))
+        cycles.append((relight, extinction))
+        relight = extinction + blackout
+    return off, cycles
 
 
-def run(tracker, off, t_end, dt=0.012, lamps=8, static=0, gaps=(), stagger=0.004, seed=1, t0=0.0, checkpoints=None):
+def run_tracker(tracker, off_intervals, end, dt=0.01, lamps=8, static=0,
+                gaps=(), stagger=0.004, seed=1, start_at=0.0, checkpoints=()):
     rng = random.Random(seed)
-    t, snaps = t0, []
-    pending = sorted(checkpoints or [])
-    while t < t_end:
-        t += dt + rng.uniform(-0.002, 0.002)
+    t = start_at
+    pending = sorted(checkpoints)
+    snapshots = []
+    while t < end:
+        t += dt + rng.uniform(-0.001, 0.001)
         if any(a <= t < b for a, b in gaps):
             continue
         values = {}
         for i in range(lamps):
-            tt = t - i * stagger
-            values[("dyn", i)] = 0.0 if any(a <= tt < b for a, b in off) else 100.0
+            sample_time = t - i * stagger
+            is_off = any(a <= sample_time < b for a, b in off_intervals)
+            values[("dynamic", i)] = 0.0 if is_off else 100.0
         for i in range(static):
             values[("static", i)] = 100.0
         tracker.feed(t, values)
         while pending and t >= pending[0]:
-            snaps.append((pending.pop(0), tracker.snapshot(t), t))
-    return snaps
+            snapshots.append((pending.pop(0), tracker.snapshot(t), t))
+    return snapshots
 
 
-def test_fixed_period():
-    delays = [6.0] * 7
-    off, eps = build(delays, start=1.0)
-    tr = LampCycleTracker("1")
-    # on regarde la prédiction juste après la clôture de chaque épisode
-    checks = [e[1] + 1.2 for e in eps[:-1]]
-    snaps = run(tr, off, eps[-1][1] + 2.0, checkpoints=checks)
-    s = tr.snapshot(eps[-1][1] + 2.0)
-    assert s["event_count"] == len(eps), s["event_count"]
-    assert len(tr.raw_durations) == len(eps) - 1, "le premier épisode n'a pas d'ancrage : aucune durée ne doit être inventée"
-    assert s["prediction_mode"] == "fixed" and abs(s["period"] - 6.0) < 0.05, s
-    for (cp, snap, t), (start, _end) in list(zip(snaps, eps[1:]))[2:]:
-        predicted = t + snap["remaining"]
-        assert abs(predicted - start) < 0.06, (predicted, start)
-    print("OK  période fixe : %d cycles, T=%.3f s, erreur de prédiction < 60 ms" % (s["event_count"], s["period"]))
+def test_flickers_do_not_restart_countdown_or_calibration():
+    off, cycles = build([6.0] * 7)
+    tracker = LampCycleTracker("1")
+    extinction = cycles[4][1]
+    pulse_start = extinction + FLICKERS[0][0]
+    pulse_end = pulse_start + FLICKERS[0][1]
+    snapshots = run_tracker(
+        tracker, off, cycles[-1][1] + 3.0,
+        checkpoints=(pulse_start - 0.2, pulse_end + 0.5),
+    )
+    (_, before, t_before), (_, after, t_after) = snapshots
+    assert before["timer_state"] == after["timer_state"] == "running"
+    drop = before["remaining"] - after["remaining"]
+    assert abs(drop - (t_after - t_before)) < 0.06, (drop, t_after - t_before)
+    assert after["flicker_count"] == 1, after["flicker_count"]
+    assert len(tracker.raw_durations) == len(cycles) - 1
+    assert all(abs(value - 6.0) < 0.06 for value in tracker.raw_durations)
+    estimate = tracker.estimate()
+    assert estimate["mode"] == "fixed" and abs(estimate["period"] - 6.0) < 0.05, estimate
+    print("OK  clignotement : le décompte continue (%.3f s écoulées / %.3f s retirées)" % (t_after - t_before, drop))
 
 
-def test_blackout_episodes_are_calibrated():
-    # la dernière impulsion se fond dans la coupure longue : celle-ci commence à +0,27 s
-    off, eps = build([5.5] * 6, blackout=2.5, start=0.5)
-    tr = LampCycleTracker("1")
-    run(tr, off, eps[-1][1] + 2.0)
-    s = tr.snapshot(eps[-1][1] + 2.0)
-    assert s["event_count"] == len(eps) and s["calibration_samples"] == len(eps) - 1, s
-    assert abs(s["period"] - 5.5) < 0.05 and s["prediction_mode"] == "fixed", s
-    assert s["blackout_lead"] is not None and abs(s["blackout_lead"] - (0.12 + 0.15)) < 0.06, s["blackout_lead"]
-    print("OK  clignotements suivis d'une extinction longue : calibrés (T=%.2f s, coupure complète +%.2f s)" % (s["period"], s["blackout_lead"]))
+def test_prediction_tracks_next_extinction():
+    off, cycles = build([6.0] * 8)
+    tracker = LampCycleTracker("1")
+    checkpoints = [relight + 0.5 for relight, _ in cycles[3:-1]]
+    snapshots = run_tracker(tracker, off, cycles[-1][1] + 3.0, checkpoints=checkpoints)
+    errors = []
+    for (_, snapshot, sampled_at), (_, extinction) in zip(snapshots, cycles[3:-1]):
+        errors.append(abs(sampled_at + snapshot["remaining"] - extinction))
+    assert errors and max(errors) < 0.06, errors
+    print("OK  prédiction de la prochaine extinction : erreur max %.0f ms" % (max(errors) * 1000))
+
+
+def test_cutoff_duration_separates_flicker_from_extinction():
+    off, cycles = build([5.0] * 4, blackout=0.78, flickers=((-1.5, 0.65),))
+    tracker = LampCycleTracker("1")
+    run_tracker(tracker, off, cycles[-1][1] + 3.0)
+    assert len(tracker.events) == len(cycles)
+    assert all(abs(value - 5.0) < 0.06 for value in tracker.raw_durations)
+    kinds = [is_extinction for _, is_extinction in tracker.recent_offs]
+    assert kinds.count(True) == len(cycles) and kinds.count(False) == len(cycles), tracker.recent_offs
+    print("OK  coupure de 0,65 s = clignotement ; 0,78 s = extinction")
+
+
+def test_extinction_without_flicker():
+    off, cycles = build([6.0] * 5, flickers=())
+    tracker = LampCycleTracker("1")
+    run_tracker(tracker, off, cycles[-1][1] + 3.0)
+    snapshot = tracker.snapshot(cycles[-1][1] + 3.0)
+    assert snapshot["event_count"] == len(cycles)
+    assert abs(snapshot["period"] - 6.0) < 0.05
+    assert snapshot["flicker_count"] == 0
+    print("OK  extinction sans clignotement préalable")
 
 
 def test_random_delay_gives_a_window_that_contains_the_truth():
     rng = random.Random(7)
     delays = [rng.uniform(4.25, 7.26) for _ in range(14)]
-    off, eps = build(delays, start=0.5)
-    tr = LampCycleTracker("1")
-    checks = [e[1] + 1.2 for e in eps[:-1]]
-    snaps = run(tr, off, eps[-1][1] + 2.0, checkpoints=checks)
+    off, cycles = build(delays)
+    tracker = LampCycleTracker("1")
+    checkpoints = [relight + 0.5 for relight, _ in cycles[3:-1]]
+    snapshots = run_tracker(tracker, off, cycles[-1][1] + 3.0, checkpoints=checkpoints)
     inside = 0
-    for (cp, snap, t), (start, _e) in zip(snaps, eps[1:]):
-        assert snap["prediction_mode"] in ("window", "fixed")
-        truth = start - t
-        if snap["remaining_min"] - 0.3 <= truth <= snap["remaining_max"] + 0.3:
+    for (_, snapshot, sampled_at), (_, extinction) in zip(snapshots, cycles[3:-1]):
+        truth = extinction - sampled_at
+        if snapshot["remaining_min"] - 0.3 <= truth <= snapshot["remaining_max"] + 0.3:
             inside += 1
-    s = tr.snapshot(eps[-1][1] + 2.0)
-    assert s["prediction_mode"] == "window", s["prediction_mode"]
-    assert inside == len(snaps), "%d/%d fenêtres contiennent le vrai instant" % (inside, len(snaps))
-    print("OK  délai aléatoire : mode fenêtre, %d/%d fenêtres contiennent le vrai instant" % (inside, len(snaps)))
+    assert tracker.snapshot(cycles[-1][1] + 3.0)["prediction_mode"] == "window"
+    assert inside == len(snapshots), "%d/%d fenêtres contiennent le vrai instant" % (inside, len(snapshots))
+    print("OK  délai variable : %d/%d fenêtres contiennent le vrai instant" % (inside, len(snapshots)))
 
 
 def test_measurement_gap_does_not_invent_durations():
-    off, eps = build([6.0] * 6, start=1.0)
-    gap = (eps[1][1] + 2.0, eps[1][1] + 2.9)          # trou de 0,9 s entre deux épisodes
-    tr = LampCycleTracker("1")
-    run(tr, off, eps[-1][1] + 2.0, gaps=[gap])
-    assert all(abs(d - 6.0) < 0.08 for d in tr.raw_durations), list(tr.raw_durations)
-    assert len(tr.raw_durations) >= 3
-    print("OK  trou de mesure : aucune durée faussée (%d mesures saines)" % len(tr.raw_durations))
+    off, cycles = build([6.0] * 6)
+    relight, _ = cycles[2]
+    tracker = LampCycleTracker("1")
+    run_tracker(tracker, off, cycles[-1][1] + 3.0, gaps=((relight + 1.0, relight + 1.9),))
+    assert all(abs(value - 6.0) < 0.08 for value in tracker.raw_durations)
+    assert len(tracker.raw_durations) >= 3
+    print("OK  interruption de mesure : aucune durée faussée")
 
 
-def test_start_during_blackout_has_no_bogus_anchor():
-    off, eps = build([6.0] * 5, blackout=3.0, start=0.0)
-    # le suivi démarre au milieu de la première extinction longue
-    t0 = eps[0][1] - 1.5
-    tr = LampCycleTracker("1")
-    run(tr, off, eps[-1][1] + 2.0, t0=t0)
-    assert all(abs(d - 6.0) < 0.08 for d in tr.raw_durations), list(tr.raw_durations)
-    # l'épisode 0 n'est pas observé (on arrive en pleine coupure) mais son rallumage ancre l'épisode 1 :
-    # les épisodes 1 à 4 fournissent chacun une durée vraie
-    assert len(tr.raw_durations) == len(eps) - 1, (len(tr.raw_durations), len(eps))
-    assert tr.snapshot(0)["event_count"] == len(eps) - 1
-    print("OK  démarrage pendant une coupure : ancrage correct, aucune durée inventée")
+def test_start_during_blackout_waits_for_relight_anchor():
+    off, cycles = build([6.0] * 5, blackout=3.0)
+    tracker = LampCycleTracker("1")
+    run_tracker(tracker, off, cycles[-1][1] + 3.0, start_at=cycles[1][0] - 1.5)
+    assert len(tracker.raw_durations) >= 3
+    assert all(abs(value - 6.0) < 0.08 for value in tracker.raw_durations)
+    print("OK  démarrage pendant une extinction : ancrage au rallumage")
 
 
-def test_static_lamps_do_not_hide_the_blackout():
-    off, eps = build([6.0] * 6, blackout=2.0, start=0.5)
-    tr = LampCycleTracker("1")
-    run(tr, off, eps[-1][1] + 2.0, lamps=6, static=8)
-    s = tr.snapshot(eps[-1][1] + 2.0)
-    assert s["event_count"] >= len(eps) - 1, s["event_count"]
-    assert s["dynamic_lamps"] == 6, s["dynamic_lamps"]
-    print("OK  lampes décoratives toujours allumées : ignorées après le premier basculement (%d/%d cycles)" % (s["event_count"], len(eps)))
+def test_static_lamps_do_not_hide_dynamic_extinctions():
+    off, cycles = build([6.0] * 6)
+    tracker = LampCycleTracker("1")
+    run_tracker(tracker, off, cycles[-1][1] + 3.0, lamps=6, static=8)
+    snapshot = tracker.snapshot(cycles[-1][1] + 3.0)
+    assert snapshot["event_count"] >= len(cycles) - 1
+    assert snapshot["dynamic_lamps"] == 6
+    print("OK  lampes décoratives statiques ignorées")
 
 
 def test_wrong_player_count_is_visible_and_recoverable():
-    off, eps = build([4.4] * 6, start=0.5)
-    tr = LampCycleTracker("3")                          # plage 5.0-7.5 s : les 4,4 s sont hors plage
-    run(tr, off, eps[-1][1] + 2.0)
-    s = tr.snapshot(eps[-1][1] + 2.0)
-    assert s["rejected_count"] == len(eps) - 1 and s["calibration_samples"] == 0, s
-    tr.set_players("1")                                 # plage 4.25-7.26 : le rejet est recalculé rétroactivement
-    s = tr.snapshot(eps[-1][1] + 2.0)
-    assert s["rejected_count"] == 0 and s["prediction_mode"] == "fixed" and abs(s["period"] - 4.4) < 0.05, s
-    print("OK  mauvais nombre de joueurs : mesures hors plage signalées puis récupérées en changeant le réglage")
+    off, cycles = build([4.4] * 6)
+    tracker = LampCycleTracker("3")
+    run_tracker(tracker, off, cycles[-1][1] + 3.0)
+    snapshot = tracker.snapshot(cycles[-1][1] + 3.0)
+    assert snapshot["rejected_count"] == len(cycles) - 1
+    tracker.set_players("1")
+    snapshot = tracker.snapshot(cycles[-1][1] + 3.0)
+    assert snapshot["rejected_count"] == 0
+    assert snapshot["prediction_mode"] == "fixed" and abs(snapshot["period"] - 4.4) < 0.05
+    print("OK  mesures hors plage récupérées après correction du nombre de joueurs")
 
 
-def test_short_pulses_are_seen():
-    pulses = [(0.04, 0.12), (0.04, 0.12), (0.04, 0.0)]
-    off, eps = build([5.0] * 5, pulses=pulses, start=0.5)
-    tr = LampCycleTracker("1")
-    run(tr, off, eps[-1][1] + 2.0, dt=0.010)
-    assert tr.snapshot(0)["event_count"] == len(eps), tr.snapshot(0)["event_count"]
-    print("OK  impulsions de 40 ms détectées")
+def test_short_40ms_pulses_are_detected_and_counted():
+    off, cycles = build([5.0] * 5, flickers=((-3.0, 0.04), (-2.5, 0.04), (-2.0, 0.04)))
+    tracker = LampCycleTracker("1")
+    checkpoint = cycles[-1][1] - 1.0
+    snapshots = run_tracker(tracker, off, cycles[-1][1] + 3.0, dt=0.01, checkpoints=(checkpoint,))
+    assert snapshots[0][1]["flicker_count"] == 3, snapshots[0][1]["flicker_count"]
+    assert all(abs(value - 5.0) < 0.06 for value in tracker.raw_durations)
+    print("OK  impulsions de 40 ms détectées sans relancer le décompte")
 
 
 def test_scanner_sampling_path_with_fake_memory():
     clock = [100.0]
-    lm.time.perf_counter = lambda: clock[0]             # horloge simulée (le module n'utilise que perf_counter ici)
-    off, eps = build([6.0] * 5, start=1.0)
+    lm.time.perf_counter = lambda: clock[0]
+    off, cycles = build([6.0] * 5)
+    
+    def intensity(index, timestamp):
+        return 0.0 if any(a <= timestamp - index * 0.004 < b for a, b in off) else 100.0
 
-    def intensity(i, t):
-        return 0.0 if any(a <= t - i * 0.004 < b for a, b in off) else 100.0
-
-    class FakeMem:
+    class FakeMemory:
         def read(self, address, size):
-            comp = address - 0x10
-            return struct.pack("<f", intensity(comp, clock[0] - 100.0))
+            index = address - 0x10
+            return struct.pack("<f", intensity(index, clock[0] - 100.0))
 
-    sc = lm.LampMemoryScanner()
-    sc.running, sc.in_bottomfloor, sc.world_name = True, True, "BottomFloor"
-    sc.cache = [{"actor": 0x1000 + i, "component": i, "offset": 0x10} for i in range(8)]
-    sc.lamps = {0x1000 + i: {"name": "BP_Lamp_C_%d" % i, "class": "BP_Lamp_C", "actor": "%X" % (0x1000 + i),
-                             "intensity": None, "read_status": "OK"} for i in range(8)}
-    mem = FakeMem()
-    end = eps[-1][1] + 2.0
+    scanner = lm.LampMemoryScanner()
+    scanner.running, scanner.in_bottomfloor, scanner.world_name = True, True, "BottomFloor"
+    scanner.cache = [{"actor": 0x1000 + i, "component": i, "offset": 0x10} for i in range(8)]
+    scanner.lamps = {
+        0x1000 + i: {"name": "BP_Lamp_C_%d" % i, "class": "BP_Lamp_C",
+                     "actor": "%X" % (0x1000 + i), "intensity": None, "read_status": "OK"}
+        for i in range(8)
+    }
+    memory = FakeMemory()
+    end = cycles[-1][1] + 3.0
     while clock[0] - 100.0 < end:
         clock[0] += 0.012
-        sc._sample_cached(mem)
-    snap = sc.snapshot()
-    json.dumps(snap)                                    # doit rester sérialisable pour /api/state
-    for key in ("lamp_state", "lamp_state_key", "timer_state", "remaining", "period_label", "quality", "event_count", "lamps", "stats"):
-        assert key in snap, key
-    assert snap["event_count"] == len(eps) and abs(snap["period"] - 6.0) < 0.06, snap
-    assert snap["lamps"][0]["on"] is True and "hierarchy" not in snap["lamps"][0]
-    sc.in_bottomfloor, sc.world_name = False, "Level0"
-    assert sc.snapshot()["lamp_state"] == "Hors BottomFloor"
-    print("OK  chaîne complète scanner -> tracker -> snapshot (mémoire simulée), snapshot sérialisable")
+        scanner._sample_cached(memory)
+    snapshot = scanner.snapshot()
+    json.dumps(snapshot)
+    for key in ("lamp_state", "lamp_state_key", "timer_state", "remaining", "period_label",
+                "quality", "event_count", "lamps", "stats", "flicker_count", "recent_offs"):
+        assert key in snapshot, key
+    assert snapshot["event_count"] == len(cycles) and abs(snapshot["period"] - 6.0) < 0.06, snapshot
+    assert snapshot["lamps"][0]["on"] is True
+    scanner.in_bottomfloor, scanner.world_name = False, "Level0"
+    assert scanner.snapshot()["lamp_state"] == "Hors BottomFloor"
+    print("OK  scanner -> tracker -> snapshot avec mémoire simulée")
 
 
 def main():
-    test_fixed_period()
-    test_blackout_episodes_are_calibrated()
-    test_random_delay_gives_a_window_that_contains_the_truth()
-    test_measurement_gap_does_not_invent_durations()
-    test_start_during_blackout_has_no_bogus_anchor()
-    test_static_lamps_do_not_hide_the_blackout()
-    test_wrong_player_count_is_visible_and_recoverable()
-    test_short_pulses_are_seen()
-    test_scanner_sampling_path_with_fake_memory()
+    tests = (
+        test_flickers_do_not_restart_countdown_or_calibration,
+        test_prediction_tracks_next_extinction,
+        test_cutoff_duration_separates_flicker_from_extinction,
+        test_extinction_without_flicker,
+        test_random_delay_gives_a_window_that_contains_the_truth,
+        test_measurement_gap_does_not_invent_durations,
+        test_start_during_blackout_waits_for_relight_anchor,
+        test_static_lamps_do_not_hide_dynamic_extinctions,
+        test_wrong_player_count_is_visible_and_recoverable,
+        test_short_40ms_pulses_are_detected_and_counted,
+        test_scanner_sampling_path_with_fake_memory,
+    )
+    for test in tests:
+        test()
     print("Tous les tests du prédicteur de lampes passent.")
 
 
