@@ -29,7 +29,10 @@
       $("lampEvents").textContent = d.event_count ?? 0;
       $("lampStatus").textContent = d.status || "";
       if ($("lampPlayers") && d.player_count) $("lampPlayers").value = d.player_count;
-      if (d.remaining == null) {
+      if (d.timer_state === "off") {
+        countdownDeadline = null;
+        $("lampCountdown").textContent = "En attente du rallumage";
+      } else if (d.remaining == null) {
         countdownDeadline = null;
         $("lampCountdown").textContent = `Détection des cycles (${d.event_count ?? 0}/3)`;
       } else {
