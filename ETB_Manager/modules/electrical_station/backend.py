@@ -1,7 +1,8 @@
 """Détection mémoire des boîtiers à fusibles d'ElectricStation."""
 from __future__ import annotations
-import logging, struct, threading, time
+import hashlib, json, logging, re, shutil, struct, threading, time
 from pathlib import Path
+from .wall_debug import inspect_wall_export, MAX_WALL_JSON
 log = logging.getLogger("ETB.ElectricalStation")
 OFF_WORLD_PERSISTENT_LEVEL=0x30
 OFF_WORLD_LEVELS=0x138
@@ -181,6 +182,9 @@ class ElectricalStationScanner:
 class ElectricalStationBackend:
     def __init__(self,context):
         self.root=context.module_dir
+        self.public=self.root/"public"
+        self.wall_dir=self.public/"wall_json"
+        self.wall_dir.mkdir(parents=True, exist_ok=True)
         self.scanner=ElectricalStationScanner()
         self.scanner.start()
     def snapshot(self,shared_state):
@@ -197,9 +201,49 @@ class ElectricalStationBackend:
             config={}
             data["map_config_error"]=str(exc)
         data["map_config"]=config
+        data["wall_json_files"]=self._wall_catalog()
+        data["wall_json_count"]=len(data["wall_json_files"])
+        names={}
+        for entry in data["wall_json_files"]:
+            names.setdefault(entry["name"].casefold(), []).append(entry)
+        data["duplicate_mesh_names"]=[
+            {"name": group[0]["name"], "paths":[item["object_path"] for item in group]}
+            for group in names.values() if len({item["identity"] for item in group}) > 1
+        ]
         bounds=config.get("worldBounds")
         data["map_calibrated"]=isinstance(bounds,dict) and all(isinstance(bounds.get(k),(int,float)) for k in ("minX","maxX","minY","maxY")) and bounds["maxX"]!=bounds["minX"] and bounds["maxY"]!=bounds["minY"]
         return data
+    def _wall_catalog(self):
+        catalog=[]
+        for path in sorted(self.wall_dir.glob("*.json"), key=lambda p:p.name.casefold()):
+            try:
+                record=inspect_wall_export(path)
+                for asset in record["assets"]:
+                    catalog.append({**asset,"source_file":path.name})
+            except Exception as exc:
+                log.warning("WALL_JSON_READ_FAILED file=%s error=%s",path.name,exc)
+        return catalog
+
+    def upload(self,temp_path:Path,filename:str,shared_state):
+        if Path(filename or "").suffix.casefold()!=".json":
+            raise ValueError("Seuls les exports JSON de meshes FModel sont acceptés.")
+        if not temp_path.is_file() or temp_path.stat().st_size<=0:
+            raise ValueError("Le fichier JSON est vide.")
+        if temp_path.stat().st_size>MAX_WALL_JSON:
+            raise ValueError("Le fichier dépasse la limite de 30 Mo.")
+        record=inspect_wall_export(temp_path)
+        safe=Path(filename).stem.strip()
+        safe=re.sub(r"[^A-Za-z0-9_-]+","_",safe)[:70] or "wall"
+        digest=hashlib.sha256(temp_path.read_bytes()).hexdigest()[:10]
+        destination=self.wall_dir/f"{safe}_{digest}.json"
+        self.wall_dir.mkdir(parents=True,exist_ok=True)
+        shutil.copy2(temp_path,destination)
+        log.info("WALL_JSON_IMPORTED filename=%s assets=%s body_setups=%s sha256=%s",
+                 destination.name,len(record["assets"]),record["body_setup_count"],record["sha256"])
+        return {"ok":True,"message":f"{len(record['assets'])} StaticMesh identifié(s) dans {destination.name}.",
+                "filename":destination.name,"asset_count":len(record["assets"]),
+                "body_setup_count":record["body_setup_count"]}
+
     def action(self,action,payload,shared_state):
         if action=="start": return self.scanner.start()
         if action=="stop": return self.scanner.stop()
