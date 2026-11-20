@@ -18,7 +18,11 @@
   <div class="eyebrow">DEBUG · BIBLIOTHÈQUE DES MURS</div>
   <h3>Exports JSON de StaticMesh</h3>
   <p>Ajoute un ou plusieurs exports JSON de murs FModel. Les fichiers sont conservés localement et utilisés à la prochaine génération de carte.</p>
-  <button id="importcarteAddWalls" type="button">Ajouter des JSON de mur</button>
+  <div class="importcarte-wall-actions">
+    <button id="importcarteAddWalls" type="button">Ajouter des JSON de mur</button>
+    <button id="importcarteResetWalls" type="button" class="importcarte-reset-button">Réinitialiser les imports</button>
+  </div>
+  <small class="importcarte-reset-help">Les anciens JSON seront archivés dans un dossier de sauvegarde. Le catalogue intégré wall_database.json sera conservé.</small>
   <input id="importcarteWallFiles" type="file" accept=".json,application/json" multiple hidden>
   <div id="importcarteWallStatus" role="status"></div>
   <div id="importcarteWallDuplicates"></div>
@@ -29,6 +33,9 @@
     .importcarte-wall-panel h3{margin:6px 0;font-size:16px}
     .importcarte-wall-panel p{color:var(--muted,#91a0b5);font-size:12px}
     .importcarte-wall-panel button{padding:9px 12px;border:1px solid var(--border,#334155);border-radius:8px;background:var(--panel,#182230);color:var(--text,#e8edf5);cursor:pointer}
+    .importcarte-wall-actions{display:flex;gap:8px;flex-wrap:wrap}
+    .importcarte-wall-panel .importcarte-reset-button{border-color:#a65b4b;color:#e6a092}
+    .importcarte-reset-help{display:block;margin-top:7px;color:var(--muted,#91a0b5);font-size:11px}
     #importcarteWallStatus,#importcarteWallDuplicates,#importcarteWallList{margin-top:10px;font-size:12px}
     .importcarte-duplicate{padding:8px;margin-top:6px;border-left:3px solid #e0a458;background:#e0a45812}
     .importcarte-asset{padding:5px 0;border-bottom:1px solid var(--border,#334155);overflow-wrap:anywhere}
