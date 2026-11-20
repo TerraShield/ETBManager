@@ -72,7 +72,7 @@
       currentFuseboxes=d.fuseboxes||[];
       renderList(currentFuseboxes);
       $("esLastScan").textContent=d.last_scan?"Mis à jour à "+new Date(d.last_scan*1000).toLocaleTimeString():"Aucun relevé";
-      $("esMapScanStatus").textContent=d.map_scan_status||"La carte sera analysée automatiquement si elle est absente."; 
+      $("esMapScanStatus").textContent=(d.map_scan_status||"La carte sera analysée automatiquement si elle est absente.")+" · "+(d.mesh_library_count??0)+" assets réutilisables"; 
       if(d.map_available&&d.map_url){
         $("esMapViewport").hidden=false;
         $("esMapStatus").textContent=d.map_auto_generated?"Carte auto-générée":d.map_calibrated?"Carte calibrée":"Carte détectée · calibration requise";
