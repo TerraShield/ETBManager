@@ -22,7 +22,6 @@ import struct
 import threading
 import time
 from collections import Counter, deque
-from dataclasses import dataclass
 from typing import Optional
 
 from memory_reader import (
@@ -43,8 +42,7 @@ GLOBAL_ON_RATIO = 0.60      # part de lampes allumées => état collectif « all
 GLOBAL_OFF_RATIO = 0.40     # part de lampes allumées => état collectif « éteint » (hystérésis entre les deux)
 CONFIRM_SAMPLES = 2         # échantillons consécutifs pour valider un changement d'état
 CONFIRM_TIME = 0.02         # ... et durée minimale (une impulsion de 30 ms doit rester visible)
-FLICKER_MAX_OFF = 0.70      # une coupure plus longue est une extinction, pas une impulsion
-EPISODE_GAP = 1.00          # allumé sans interruption depuis ce délai => l'épisode est terminé
+FLICKER_MAX_OFF = 0.70      # coupure <= : clignotement ; coupure > : extinction
 MAX_SAMPLE_GAP = 0.35       # trou de mesure au-delà duquel les durées ne sont plus fiables
 RANGE_TOLERANCE = 0.25      # marge autour de RANGES pour absorber l'imprécision de mesure
 FIXED_SPREAD_MAX = 0.20     # écart-type sous lequel les délais sont jugés constants
@@ -54,25 +52,18 @@ OVERDUE_MARGIN = 0.60       # retard toléré avant de déclarer l'événement m
 RANGES = {"1": (4.25, 7.26), "2": (4.50, 7.50), "3": (5.00, 7.50), "4": (5.00, 7.50), "Inconnu": (4.00, 8.00)}
 
 
-@dataclass
-class Episode:
-    """Une séquence de clignotement / extinction, du premier OFF au dernier rallumage."""
-    start: float
-    stable_on: Optional[float]      # durée allumée avant le début (None si l'ancrage est inconnu)
-    end: Optional[float] = None     # dernier rallumage
-    pulses: int = 0                 # nombre de coupures
-    max_off: float = 0.0            # plus longue coupure
-    blackout_at: Optional[float] = None  # début de la première coupure > FLICKER_MAX_OFF
-
-
 class LampCycleTracker:
-    """Transforme des échantillons (temps, intensités) en cycles et en prédiction."""
+    """Détecte les extinctions réelles sans confondre celles-ci avec les clignotements.
+
+    Une coupure de <= FLICKER_MAX_OFF est une impulsion : elle est comptée, mais
+    ne modifie jamais l'ancrage du compte à rebours. Une coupure plus longue est
+    une extinction ; le prochain rallumage devient le nouvel ancrage.
+    """
 
     def __init__(self, player_count: str = "1"):
         self.player_count = player_count
         self.reset("init")
 
-    # ------------------------------------------------------------------ état
     def reset(self, reason: str = "reset") -> None:
         self.lamp_on: dict = {}
         self.ever_on: set = set()
@@ -83,14 +74,16 @@ class LampCycleTracker:
         self.candidate_since: Optional[float] = None
         self.candidate_count = 0
         self.off_since: Optional[float] = None
-        self.episode: Optional[Episode] = None
-        self.anchor_start: Optional[float] = None
-        self.anchor_end: Optional[float] = None     # dernier rallumage connu : origine du décompte
-        self.events: deque = deque(maxlen=80)        # début de chaque épisode terminé
-        self.raw_durations: deque = deque(maxlen=60)  # durées allumées mesurées (valides ou non)
-        self.leads: deque = deque(maxlen=20)         # début d'épisode -> début de la coupure longue
+        self.off_initial = False
+        self.in_extinction = False
+        self.anchor_end: Optional[float] = None
+        self.first_pulse_at: Optional[float] = None
+        self.flicker_count = 0
+        self.events: deque = deque(maxlen=80)
+        self.raw_durations: deque = deque(maxlen=60)
+        self.leads: deque = deque(maxlen=20)
+        self.recent_offs: deque = deque(maxlen=10)
         self.last_t: Optional[float] = None
-        self.last_episode: Optional[dict] = None
         self._last_estimate_key = None
         log.info("TRACKER_RESET reason=%s player_count=%s", reason, self.player_count)
 
@@ -103,16 +96,18 @@ class LampCycleTracker:
         self._log_calibration()
 
     def discontinuity(self, t: float, reason: str) -> None:
-        """Mesure interrompue : les durées à cheval sur le trou ne sont plus fiables."""
+        """Une interruption de lecture invalide le cycle en cours."""
         log.warning("MEASUREMENT_DISCONTINUITY t=%.3f reason=%s", t, reason)
         self.candidate = None
         self.candidate_count = 0
-        self.global_state = None        # l'état au retour de la mesure redevient « initial »
+        self.global_state = None
         self.off_since = None
-        self.episode = None
-        self.anchor_start = self.anchor_end = None
+        self.off_initial = False
+        self.in_extinction = False
+        self.anchor_end = None
+        self.first_pulse_at = None
+        self.flicker_count = 0
 
-    # -------------------------------------------------------------- mesures
     def valid_durations(self) -> list:
         low, high = RANGES[self.player_count]
         return [d for d in self.raw_durations if low - RANGE_TOLERANCE <= d <= high + RANGE_TOLERANCE]
@@ -123,12 +118,11 @@ class LampCycleTracker:
         return [d for d in self.raw_durations if not low - RANGE_TOLERANCE <= d <= high + RANGE_TOLERANCE]
 
     def feed(self, t: float, intensities: dict) -> None:
-        """Un échantillon : ``intensities`` = {identifiant de lampe: intensité lue}."""
         if self.last_t is not None and t - self.last_t > MAX_SAMPLE_GAP:
             self.discontinuity(t, "gap=%.2fs" % (t - self.last_t))
         self.last_t = t
         for key in [k for k in self.lamp_on if k not in intensities]:
-            del self.lamp_on[key]        # lampe disparue (streaming de niveau) : on ne la compte plus
+            del self.lamp_on[key]
         for key, value in intensities.items():
             on = value > LIGHT_ON_THRESHOLD
             previous = self.lamp_on.get(key)
@@ -137,16 +131,20 @@ class LampCycleTracker:
             self.lamp_on[key] = on
             if on:
                 self.ever_on.add(key)
-        # Ratio calculé sur les lampes qui ont réellement basculé (les lampes décoratives
-        # toujours allumées ou toujours éteintes ne diluent plus le ratio). Avant le premier
-        # basculement, on prend toutes les lampes déjà vues allumées.
-        pool = [k for k in intensities if self.toggles[k] > 0] or [k for k in intensities if k in self.ever_on]
-        self.on_ratio = (sum(self.lamp_on[k] for k in pool) / len(pool)) if pool else 0.0
+
+        # Les lampes décoratives statiques ne doivent pas diluer le signal collectif.
+        pool = [k for k in intensities if self.toggles[k] > 0]
+        if not pool:
+            pool = [k for k in intensities if k in self.ever_on]
+        self.on_ratio = sum(self.lamp_on[k] for k in pool) / len(pool) if pool else 0.0
         raw = True if self.on_ratio >= GLOBAL_ON_RATIO else False if self.on_ratio <= GLOBAL_OFF_RATIO else None
         self._advance(t, raw)
-        ep = self.episode
-        if ep is not None and ep.end is not None and self.global_state is True and t - ep.end >= EPISODE_GAP:
-            self._close_episode(ep)
+
+        # La coupure n'est qualifiée d'extinction qu'une fois le seuil dépassé.
+        # Son horodatage reste celui du premier échantillon OFF, pas celui de la confirmation.
+        if (self.global_state is False and not self.in_extinction and self.off_since is not None
+                and t - self.off_since > FLICKER_MAX_OFF):
+            self._extinction_confirmed()
 
     def _advance(self, t: float, raw: Optional[bool]) -> None:
         if raw is None or raw == self.global_state:
@@ -157,59 +155,81 @@ class LampCycleTracker:
         else:
             self.candidate_count += 1
         if self.candidate_count >= CONFIRM_SAMPLES and t - self.candidate_since >= CONFIRM_TIME:
-            edge_time = self.candidate_since    # instant du premier échantillon dans le nouvel état
+            edge_time = self.candidate_since
             self.candidate, self.candidate_count = None, 0
             self._edge(edge_time, raw)
 
     def _edge(self, t: float, state: bool) -> None:
         if self.global_state is None:
-            # L'état initial n'est jamais un événement et ne fournit aucun ancrage.
             self.global_state = state
             self.off_since = None if state else t
+            self.off_initial = not state
             log.info("LAMP_INITIAL_STATE state=%s on_ratio=%.3f lamps=%d player_count=%s",
                      "ON" if state else "OFF", self.on_ratio or 0.0, len(self.lamp_on), self.player_count)
             return
+
         self.global_state = state
         log.info("LAMP_STATE_TRANSITION to=%s on_ratio=%.3f lamps=%d timestamp=%.3f",
                  "ON" if state else "OFF", self.on_ratio or 0.0, len(self.lamp_on), t)
-        if not state:                                   # ON -> OFF
-            if self.episode is None:
-                stable = (t - self.anchor_end) if self.anchor_end is not None else None
-                self.episode = Episode(start=t, stable_on=stable)
-            self.episode.pulses += 1
-            self.off_since = t
-            return
-        off = (t - self.off_since) if self.off_since is not None else None   # OFF -> ON
-        ep = self.episode
-        if ep is None:
-            # Démarrage pendant une coupure : ce rallumage sert d'ancrage, ce n'est pas un événement.
-            self.anchor_end, self.anchor_start = t, None
-        else:
-            ep.end = t
-            if off is not None:
-                ep.max_off = max(ep.max_off, off)
-                if off > FLICKER_MAX_OFF and ep.blackout_at is None:
-                    ep.blackout_at = self.off_since
-        self.off_since = None
 
-    def _close_episode(self, ep: Episode) -> None:
-        self.episode = None
-        self.events.append(ep.start)
-        self.anchor_start, self.anchor_end = ep.start, ep.end
-        if ep.blackout_at is not None:
-            self.leads.append(ep.blackout_at - ep.start)
-        if ep.stable_on is not None:
-            self.raw_durations.append(ep.stable_on)
-        self.last_episode = {"start": ep.start, "end": ep.end, "pulses": ep.pulses,
-                             "max_off": ep.max_off, "blackout": ep.blackout_at is not None,
-                             "stable_on": ep.stable_on}
+        if not state:
+            self.off_since = t
+            self.off_initial = False
+            self.in_extinction = False
+            return
+
+        off = t - self.off_since if self.off_since is not None else None
+        if self.in_extinction:
+            # Seul ce rallumage, après une coupure longue, relance le décompte.
+            self.anchor_end = t
+            self.first_pulse_at = None
+            self.flicker_count = 0
+            if off is not None:
+                self.recent_offs.append((off, True))
+            log.info("TIMER_RESTART relight=%.3f off_duration=%s player_count=%s",
+                     t, round(off, 3) if off is not None else None, self.player_count)
+        elif self.off_initial:
+            # On a commencé à observer pendant une coupure : le début est inconnu.
+            # Le premier rallumage ne doit donc pas fabriquer une durée.
+            self.off_initial = False
+            if off is not None:
+                self.recent_offs.append((off, False))
+            log.info("STARTUP_RELIGHT relight=%.3f duration_unknown=true", t)
+        elif off is not None:
+            # Impulsion de clignotement : le compte à rebours continue depuis anchor_end.
+            self.flicker_count += 1
+            if self.first_pulse_at is None:
+                self.first_pulse_at = self.off_since
+            self.recent_offs.append((off, False))
+            log.info("FLICKER_PULSE start=%.3f off_duration=%.3f flickers_this_cycle=%d",
+                     self.off_since, off, self.flicker_count)
+
+        self.off_since = None
+        self.off_initial = False
+        self.in_extinction = False
+
+    def _extinction_confirmed(self) -> None:
+        self.in_extinction = True
+        if self.off_initial:
+            log.info("EXTINCTION_AT_STARTUP start_unknown=true")
+            return
+
+        start = self.off_since
+        if start is None:
+            return
+        self.events.append(start)
+        delay = start - self.anchor_end if self.anchor_end is not None else None
+        if delay is not None:
+            self.raw_durations.append(delay)
+        if self.first_pulse_at is not None:
+            self.leads.append(start - self.first_pulse_at)
+
         low, high = RANGES[self.player_count]
-        in_range = ep.stable_on is not None and low - RANGE_TOLERANCE <= ep.stable_on <= high + RANGE_TOLERANCE
-        log.info("FLICKER_SEQUENCE_CONFIRMED start=%.3f end=%.3f pulses=%d max_off=%.3f blackout=%s "
-                 "preceding_on_duration=%s in_range=%s cycles=%d player_count=%s",
-                 ep.start, ep.end, ep.pulses, ep.max_off, ep.blackout_at is not None,
-                 round(ep.stable_on, 3) if ep.stable_on is not None else None, in_range,
-                 len(self.events), self.player_count)
+        valid = delay is not None and low - RANGE_TOLERANCE <= delay <= high + RANGE_TOLERANCE
+        log.info("EXTINCTION_CONFIRMED start=%.3f delay_since_relight=%s in_range=%s "
+                 "flickers_this_cycle=%d cycles=%d player_count=%s",
+                 start, round(delay, 3) if delay is not None else None, valid,
+                 self.flicker_count, len(self.events), self.player_count)
         self._log_calibration()
 
     def _log_calibration(self) -> None:
@@ -220,35 +240,34 @@ class LampCycleTracker:
             self._last_estimate_key = key
             log.info("CALIBRATION_UPDATED player_count=%s mode=%s samples=%d rejected=%d durations=%s estimate=%s",
                      self.player_count, est["mode"], est["n"], len(self.rejected),
-                     [round(v, 3) for v in self.raw_durations], {k: v for k, v in est.items() if k != "n"})
+                     [round(v, 3) for v in self.raw_durations],
+                     {k: v for k, v in est.items() if k != "n"})
 
-    # ------------------------------------------------------------ estimation
     def estimate(self) -> dict:
-        """Délai allumé -> prochain épisode.
-
-        * ``fixed``  : les mesures sont quasi identiques -> décompte précis.
-        * ``window`` : les mesures varient (délai aléatoire à chaque cycle) -> fenêtre [lo, hi].
-        """
         low, high = RANGES[self.player_count]
         valid = self.valid_durations()[-RECENT_SAMPLES:]
         n = len(valid)
         spread = statistics.pstdev(valid) if n >= 2 else None
         if n >= 2 and spread <= (FIXED_SPREAD_MAX if n >= 3 else FIXED_SPREAD_MAX_2):
             return {"mode": "fixed", "period": statistics.median(valid), "spread": spread, "n": n}
-        # Délai tiré au hasard à chaque cycle : seules les bornes du jeu (RANGES) sont garanties.
-        # On ne resserre pas la fenêtre sur les extrêmes observés : le prochain tirage a une bonne
-        # probabilité de les dépasser (n mesures uniformes => couverture de seulement (n-1)/(n+1)).
         return {"mode": "window", "lo": low, "hi": high, "spread": spread, "n": n}
 
     def snapshot(self, now: float) -> dict:
         est = self.estimate()
         mode, n = est["mode"], est["n"]
-        state_key = "on" if self.global_state is True else "off" if self.global_state is False else "idle"
-        if self.global_state is False:
+        if self.global_state is True:
+            state_key, label = "on", "Allumées"
+        elif self.global_state is False and self.in_extinction:
+            state_key, label = "off", "Éteintes"
+        elif self.global_state is False:
+            state_key, label = "flicker", "Clignotement"
+        else:
+            state_key, label = "idle", "Recherche…"
+
+        if self.in_extinction:
             timer_state = "off"
-        elif self.episode is not None:
-            timer_state = "pending"
-        elif self.anchor_end is not None and self.global_state is True:
+        elif self.anchor_end is not None:
+            # Reste running pendant un clignotement court.
             timer_state = "running"
         else:
             timer_state = "calibrating"
@@ -261,12 +280,13 @@ class LampCycleTracker:
                 margin = max(0.12, 2.0 * (est["spread"] or 0.0))
                 central = est["period"] - elapsed
                 remaining = max(0.0, central)
-                remaining_min, remaining_max = max(0.0, central - margin), max(0.0, central + margin)
+                remaining_min = max(0.0, central - margin)
+                remaining_max = max(0.0, central + margin)
                 overdue = central < -OVERDUE_MARGIN
             else:
                 lo, hi = est["lo"], est["hi"]
                 remaining_min, remaining_max = max(0.0, lo - elapsed), max(0.0, hi - elapsed)
-                remaining = max(0.0, (max(lo, elapsed) + hi) / 2.0 - elapsed)    # espérance si tirage uniforme
+                remaining = max(0.0, (max(lo, elapsed) + hi) / 2.0 - elapsed)
                 overdue = elapsed > hi + OVERDUE_MARGIN
 
         rejected = self.rejected
@@ -276,28 +296,24 @@ class LampCycleTracker:
             quality = ("élevée" if spread < 0.07 else "moyenne" if spread < 0.16 else "faible") + " (écart %.3f s)" % spread
         else:
             period_label = "%.2f – %.2f s" % (est["lo"], est["hi"]) + (" (aléatoire)" if n >= 3 else "")
-            if n >= 3:
-                quality = "délai variable (écart %.2f s) : fenêtre seulement" % (est["spread"] or 0.0)
-            else:
-                quality = "calibration : %d/2 mesure(s) valide(s)" % n
+            quality = ("délai variable (écart %.2f s) : fenêtre seulement" % (est["spread"] or 0.0)
+                       if n >= 3 else "calibration : %d/2 mesure(s) valide(s)" % n)
 
-        if timer_state == "calibrating":
-            progress = "En attente du premier clignotement" if not self.events else "En attente du rallumage"
-        else:
-            progress = None
+        progress = "En attente d'une extinction, puis de son rallumage" if timer_state == "calibrating" else None
         lead = statistics.median(self.leads) if len(self.leads) >= 2 else None
         return {
-            "lamp_state": "Allumées" if state_key == "on" else "Éteintes" if state_key == "off" else "Recherche…",
-            "lamp_state_key": state_key, "timer_state": timer_state,
+            "lamp_state": label, "lamp_state_key": state_key, "timer_state": timer_state,
             "remaining": remaining, "remaining_min": remaining_min, "remaining_max": remaining_max,
             "overdue": overdue, "prediction_mode": mode, "period": est.get("period"),
             "window": [est["lo"], est["hi"]] if mode == "window" else None,
             "period_label": period_label, "quality": quality, "progress_label": progress,
             "calibration_samples": n, "event_count": len(self.events),
             "rejected_count": len(rejected), "last_rejected": rejected[-1] if rejected else None,
-            "blackout_lead": lead, "on_ratio": self.on_ratio,
+            "flicker_active": state_key == "flicker", "flicker_count": self.flicker_count,
+            "flicker_lead": lead,
+            "recent_offs": [[round(d, 2), ext] for d, ext in self.recent_offs],
+            "on_ratio": self.on_ratio,
             "dynamic_lamps": sum(1 for k in self.lamp_on if self.toggles[k] > 0),
-            "last_episode": dict(self.last_episode) if self.last_episode else None,
             "blackout": state_key == "off",
         }
 
