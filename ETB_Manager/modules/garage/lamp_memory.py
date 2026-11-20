@@ -348,7 +348,7 @@ class LampMemoryScanner:
     def snapshot(self):
         with self.lock:
             remaining=None
-            if self.period is not None and self.relight_time is not None and self.signal_state is True:
+            if self.period is not None and self.relight_time is not None and self.signal_state is True and self.pending_flicker_start is None:
                 # Le décompte repart au rallumage et reste masqué pendant l'extinction.
                 deadline=self.relight_time+self.period
                 remaining=max(0.0,deadline-time.perf_counter())
@@ -366,7 +366,7 @@ class LampMemoryScanner:
                 lamp_state, lamp_state_key = "Éteintes", "off"
             else:
                 lamp_state, lamp_state_key = "Recherche…", "idle"
-            timer_state="off" if self.signal_state is False else "running" if remaining is not None else "calibrating"
+            timer_state="off" if self.signal_state is False else "pending" if self.pending_flicker_start is not None else "running" if remaining is not None else "calibrating"
             return {"running":self.running,"status":self.status,"world_name":self.world_name,"last_scan":self.last_scan,
                     "lamps":list(self.lamps),"stats":dict(self.stats),"sample_hz":round(self.sample_hz_actual,1) if self.sample_hz_actual>0 else 1/POLL_INTERVAL,"sample_hz_target":1/POLL_INTERVAL,"signal":self.signal,
                     "player_count":self.player_count,"difficulty":"unknown","calibration_samples":len(self.on_durations),
