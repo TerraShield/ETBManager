@@ -75,7 +75,12 @@ class LampMemoryScanner:
     def set_players(self,value):
         value=str(value)
         if value not in RANGES: raise ValueError("Nombre de joueurs invalide.")
-        with self.lock: self.player_count=value; self._recalculate_locked()
+        with self.lock:
+            previous = self.player_count
+            self.player_count=value
+            self._recalculate_locked()
+            log.info("PREDICTION_CONTEXT_CHANGED player_count=%s previous=%s source=ui difficulty=unknown",
+                     self.player_count, previous)
         return {"ok":True}
     def _recalculate_locked(self):
         previous = self.period
