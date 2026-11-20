@@ -43,6 +43,7 @@ class LampMemoryScanner:
         self.player_count="1"; self.events=deque(maxlen=80); self.on_durations=deque(maxlen=80); self.period=None; self.quality_score=None
         self.last_flicker=None; self.blackout_started=None; self.relight_time=None; self.dark_since=None
         self.last_prediction_log_key=None
+        self.pending_flicker_start=None; self.pending_flicker_relight=None; self.pending_flicker_last=None
         self.signal=None; self.signal_state=None; self.lamp_states={}
         self.global_state=None; self.global_candidate=None; self.global_candidate_since=None
         self.off_started=None
@@ -65,6 +66,7 @@ class LampMemoryScanner:
             self.events.clear(); self.on_durations.clear(); self.period=None; self.quality_score=None; self.last_flicker=None
             self.blackout_started=None; self.relight_time=None; self.dark_since=None; self.last_transition=None
             self.last_prediction_log_key=None
+            self.pending_flicker_start=None; self.pending_flicker_relight=None; self.pending_flicker_last=None
             self.next_tick=None; self.signal_state=None; self.lamp_states.clear(); self.last_cycle_event=None
             self.global_state=None; self.global_candidate=None; self.global_candidate_since=None
             self.off_started=None
@@ -258,6 +260,30 @@ class LampMemoryScanner:
 
             if raw_state == self.global_state:
                 self.signal_state=self.global_state
+                # Plusieurs impulsions OFF/ON peuvent appartenir au même clignotement.
+                # On valide la séquence après 1 s sans nouvelle impulsion.
+                if raw_state and self.pending_flicker_start is not None and self.pending_flicker_last is not None:
+                    if now - self.pending_flicker_last >= FLICKER_SEQUENCE_LOCKOUT:
+                        event_time = self.pending_flicker_start
+                        final_relight = self.pending_flicker_relight
+                        on_duration = (event_time - self.relight_time) if self.relight_time is not None else None
+                        self.events.append(event_time)
+                        if on_duration is not None and RANGES[self.player_count][0] <= on_duration <= RANGES[self.player_count][1]:
+                            self.on_durations.append(on_duration)
+                        self.last_flicker = event_time
+                        self.last_transition = event_time
+                        self.relight_time = final_relight
+                        self.pending_flicker_start = None
+                        self.pending_flicker_relight = None
+                        self.pending_flicker_last = None
+                        self._recalculate_locked()
+                        log.info("FLICKER_SEQUENCE_CONFIRMED start=%.3f final_relight=%.3f preceding_on_duration=%s calibration_samples=%d cycles=%d period=%s residual=%s player_count=%s difficulty=unknown",
+                                 event_time, final_relight,
+                                 round(on_duration, 3) if on_duration is not None else None,
+                                 len(self.on_durations), len(self.events), self.period,
+                                 self.quality_score, self.player_count)
+                        if self.period is not None:
+                            self._log_prediction_locked(final_relight, "flicker_sequence_end")
                 return
 
             previous_state=self.global_state
@@ -278,27 +304,21 @@ class LampMemoryScanner:
                 off_duration=(now-self.off_started) if self.off_started is not None else float("inf")
 
                 if off_duration <= FLICKER_MAX_OFF:
-                    # Une coupure brève suivie d'un rallumage est un clignotement.
-                    # Les autres impulsions de la même séquence sont ignorées.
-                    if self.last_flicker is None or self.off_started-self.last_flicker>=FLICKER_SEQUENCE_LOCKOUT:
-                        event_time=self.off_started if self.off_started is not None else now
-                        on_duration = (self.off_started - self.relight_time) if self.relight_time is not None else None
-                        self.last_flicker=event_time
-                        self.relight_time=now
-                        self.events.append(event_time)
-                        if on_duration is not None and RANGES[self.player_count][0] <= on_duration <= RANGES[self.player_count][1]:
-                            self.on_durations.append(on_duration)
-                        self.last_transition=event_time
-                        self._recalculate_locked()
-                        log.info("FLICKER_CYCLE_DETECTED time=%.3f off_duration=%.3f preceding_on_duration=%s lamps=%d cycles=%d calibration_samples=%d period=%s residual=%s player_count=%s difficulty=unknown",
-                                 event_time, off_duration, round(on_duration, 3) if on_duration is not None else None,
-                                 len(states), len(self.events), len(self.on_durations), self.period,
-                                 self.quality_score, self.player_count)
-                        if self.period is not None:
-                            self._log_prediction_locked(now, "brief_flicker_relight")
+                    # Regroupe les impulsions d'un même clignotement. Le compte à rebours
+                    # repartira après la dernière impulsion, pas au premier rallumage.
+                    event_time = self.off_started if self.off_started is not None else now
+                    if self.pending_flicker_start is None:
+                        self.pending_flicker_start = event_time
+                    self.pending_flicker_relight = now
+                    self.pending_flicker_last = now
+                    log.debug("FLICKER_PULSE_PENDING off_start=%.3f relight=%.3f off_duration=%.3f sequence_start=%.3f",
+                              event_time, now, off_duration, self.pending_flicker_start)
                 else:
                     # Une extinction longue suivie d'un rallumage ne compte pas
                     # comme un clignotement. Elle ne fait que relancer le timer.
+                    self.pending_flicker_start=None
+                    self.pending_flicker_relight=None
+                    self.pending_flicker_last=None
                     self.relight_time=now
                     log.info("LAMPS_RELIT_AFTER_BLACKOUT time=%.3f off_duration=%.3f player_count=%s difficulty=unknown",
                              now, off_duration, self.player_count)
