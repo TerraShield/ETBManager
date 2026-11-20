@@ -266,7 +266,7 @@ class Handler(BaseHTTPRequestHandler):
             self._json(404, {"error": "Module inconnu."})
             return
 
-        if module_id == "butterflies" and relative in {"live_map.html", "map.config.json"}:
+        if module_id == "importcarte" and relative in {"live_map.html", "map.config.json"}:
             backend = self.manager.registry._backends.get(module_id)
             try:
                 if relative == "live_map.html":
