@@ -789,6 +789,28 @@ def build(path, args, log=print):
 
     foot = load_footprints(getattr(args, 'meshes', None), path, log)
 
+    # Diagnostic des noms homonymes : le chemin d'asset permet de les distinguer.
+    paths_by_name = collections.defaultdict(set)
+    for entry in pl:
+        if entry.get('mesh_key'):
+            paths_by_name[entry['mesh']].add(entry['mesh_key'])
+    duplicates = {name: sorted(paths) for name, paths in paths_by_name.items() if len(paths) > 1}
+    for name, paths in sorted(duplicates.items()):
+        log(f"  [MESH-HOMONYM] {name}: " + " | ".join(paths))
+
+    exact_hits = sum(1 for entry in pl if entry.get('mesh_key') in foot)
+    short_hits = sum(1 for entry in pl if entry.get('mesh_key') not in foot and entry['mesh'] in foot)
+    log(f"Correspondances collision : {exact_hits} par chemin complet, {short_hits} par nom court (compatibilité).")
+    missing_walls = sorted({
+        entry['mesh'] for entry in pl
+        if group_of(entry['mesh']) is not None
+        and GROUPS[group_of(entry['mesh'])][0] in BLOCK_GROUPS
+        and entry.get('mesh_key') not in foot
+        and entry['mesh'] not in foot
+    })
+    if missing_walls:
+        log("  [MESH-NO-COLLISION] " + ", ".join(missing_walls[:80]))
+
     over = {}
 
     for s in args.len or []:
