@@ -269,7 +269,7 @@ class LampMemoryScanner:
                 log.info("FLICKER_CYCLE_DETECTED time=%.3f on_ratio=%.2f lamps=%d cycles=%d period=%s score=%s",
                          now,on_ratio,len(states),len(self.events),self.period,self.quality_score)
 
-        def snapshot(self):
+    def snapshot(self):
         with self.lock:
             now=time.perf_counter()
             remaining=None
