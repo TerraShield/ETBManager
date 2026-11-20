@@ -1,6 +1,6 @@
 <div class="butterflies-module-intro panel-card">
   <div class="eyebrow">CARTOGRAPHIE · MOTHS</div><h2>Labyrinthe des papillons</h2>
-  <p>La carte interactive est générée à partir d’un export JSON de FModel. Choisis le dossier de sortie, puis importe ton export.</p>
+  <p>Génération et diagnostic des cartes à partir des exports JSON FModel. Les exports de murs sont ajoutés séparément pour enrichir les collisions.</p>
   <label class="butterflies-output-label" for="butterfliesOutputDir">Dossier de destination</label>
   <div class="butterflies-output-row"><input id="butterfliesOutputDir" class="butterflies-output-input" type="text" spellcheck="false" placeholder="Dossier de destination…"><button id="butterfliesBrowseOutput" type="button">Parcourir…</button></div>
   <small class="butterflies-output-help">Choisis un dossier sur le PC ou saisis directement son chemin. Le dossier est créé automatiquement.</small>
@@ -12,6 +12,27 @@
     #butterfliesBrowseOutput{flex:none;padding:9px 12px;border:1px solid var(--border,#334155);border-radius:8px;background:var(--panel,#182230);color:var(--text,#e8edf5);cursor:pointer}
   </style>
   <div class="butterflies-status" id="butterfliesStatus">Vérification de la carte…</div><div class="butterflies-error" id="butterfliesError" hidden></div>
+</div>
+
+<div class="panel-card importcarte-wall-panel">
+  <div class="eyebrow">DEBUG · BIBLIOTHÈQUE DES MURS</div>
+  <h3>Exports JSON de StaticMesh</h3>
+  <p>Ajoute un ou plusieurs exports JSON de murs FModel. Les fichiers sont conservés localement et utilisés à la prochaine génération de carte.</p>
+  <button id="importcarteAddWalls" type="button">Ajouter des JSON de mur</button>
+  <input id="importcarteWallFiles" type="file" accept=".json,application/json" multiple hidden>
+  <div id="importcarteWallStatus" role="status"></div>
+  <div id="importcarteWallDuplicates"></div>
+  <div id="importcarteWallList"></div>
+  <style>
+    .importcarte-wall-panel{margin-top:14px;padding:16px;border:1px solid var(--border,#334155);border-radius:12px;background:var(--panel,#182230);color:var(--text,#e8edf5)}
+    .importcarte-wall-panel h3{margin:6px 0;font-size:16px}
+    .importcarte-wall-panel p{color:var(--muted,#91a0b5);font-size:12px}
+    .importcarte-wall-panel button{padding:9px 12px;border:1px solid var(--border,#334155);border-radius:8px;background:var(--panel,#182230);color:var(--text,#e8edf5);cursor:pointer}
+    #importcarteWallStatus,#importcarteWallDuplicates,#importcarteWallList{margin-top:10px;font-size:12px}
+    .importcarte-duplicate{padding:8px;margin-top:6px;border-left:3px solid #e0a458;background:#e0a45812}
+    .importcarte-asset{padding:5px 0;border-bottom:1px solid var(--border,#334155);overflow-wrap:anywhere}
+    .importcarte-asset code{color:var(--muted,#91a0b5);font-size:11px}
+  </style>
 </div>
 <div class="butterflies-map-card" id="butterfliesMapCard" hidden>
   <div class="butterflies-map-heading"><div><div class="eyebrow">CARTE INTERACTIVE</div><strong>Position et tracés</strong></div><span class="map-live-chip"><i></i> SYNCHRONISATION LOCALE</span></div>
