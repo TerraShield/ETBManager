@@ -207,7 +207,11 @@ class LampMemoryScanner:
     def snapshot(self):
         with self.lock:
             remaining=None
-            if self.next_tick is not None: remaining=max(0.0,self.next_tick-time.perf_counter())
+            if self.next_tick is not None:
+                now=time.perf_counter()
+                if self.period is not None and self.next_tick<=now:
+                    self.next_tick += (math.floor((now-self.next_tick)/self.period)+1)*self.period
+                remaining=max(0.0,self.next_tick-now)
             if self.period is None:
                 period_label="Calibration en cours" if self.events else "En attente de détection"
                 quality="Collecte de plusieurs clignotements"
