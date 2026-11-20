@@ -353,8 +353,8 @@ class LampMemoryScanner:
                 deadline=self.relight_time+self.period
                 remaining=max(0.0,deadline-time.perf_counter())
             if self.period is None:
-                period_label=f"Détection : {len(self.events)}/3 cycles" if self.events else "En attente de détection"
-                quality="Première estimation après 3 cycles détectés"
+                period_label=f"Intervalles allumés : {len(self.on_durations)}/2" if self.events else "En attente de détection"
+                quality="Première estimation après 2 intervalles allumés valides"
             else:
                 period_label=f"{self.period:.2f} s"; score=self.quality_score or 0.0
                 quality=("élevée" if score<0.07 else "moyenne" if score<0.16 else "faible")+f" (écart {score:.3f} s)"
