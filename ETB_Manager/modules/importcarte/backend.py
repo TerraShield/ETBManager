@@ -138,9 +138,31 @@ class ButterfliesBackend:
         )
         return {"ok": True, "message": f"Dossier de sortie : {destination}", "output_dir": str(destination)}
 
+    def _reset_imported_walls(self):
+        """Archive les imports JSON avant de repartir avec une bibliothèque vide."""
+        self.mesh_dir.parent.mkdir(parents=True, exist_ok=True)
+        imported_files = list(self.mesh_dir.glob("*.json")) if self.mesh_dir.exists() else []
+        backup_dir = None
+        if imported_files:
+            stamp = time.strftime("%Y%m%d_%H%M%S")
+            backup_dir = self.mesh_dir.parent / f"imported_backup_{stamp}_{time.time_ns() % 1000000:06d}"
+            shutil.move(str(self.mesh_dir), str(backup_dir))
+        self.mesh_dir.mkdir(parents=True, exist_ok=True)
+        return {
+            "ok": True,
+            "message": (
+                f"{len(imported_files)} export(s) mis de côté. "
+                + (f"Sauvegarde : {backup_dir}" if backup_dir else "Aucun ancien export à sauvegarder.")
+            ),
+            "backup_dir": str(backup_dir) if backup_dir else None,
+            "archived_count": len(imported_files),
+            "wall_json_files": self._wall_json_catalog(),
+        }
+
     def action(self, action, payload, shared_state):
-        if action == "set_output_dir":
-            raw = str(payload.get("output_dir") or "").strip()
+        if action == "reset_imported_walls":
+            return self._reset_imported_walls()
+        if action == "set_output_dir":            raw = str(payload.get("output_dir") or "").strip()
             if not raw:
                 raise ValueError("Indique un dossier de destination.")
             destination = Path(raw).expanduser()
