@@ -293,7 +293,7 @@ class ElectricalStationScanner:
                     force_map=self.map_scan_requested.is_set()
                     if force_map: self.map_scan_requested.clear()
                     if force_map: self.auto_map_attempted_world=None
-                    map_status="Carte déjà disponible" if not self._auto_map_needed() else "En attente de génération"
+                    map_status="Carte déjà disponible" if not self._auto_map_needed() else (self.state.get("map_scan_status") if self.auto_map_attempted_world==world and self.state.get("map_scan_status") else "En attente de génération")
                     map_count=0
                     should_scan_map=force_map or (self._auto_map_needed() and self.auto_map_attempted_world!=world)
                     if should_scan_map:
@@ -362,6 +362,7 @@ class ElectricalStationBackend:
         if action=="stop": return self.scanner.stop()
         if action=="rescan": return {"ok":True,"message":"Le prochain relevé sera effectué automatiquement."}
         if action=="generate_map":
+            self.scanner.start()
             self.scanner.map_scan_requested.set()
             return {"ok":True,"message":"Analyse des meshes demandée. Le résultat apparaîtra automatiquement."}
         raise ValueError(f"Action ElectricalStation inconnue : {action}")
