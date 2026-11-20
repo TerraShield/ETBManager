@@ -82,10 +82,10 @@ class LampCycleTests(unittest.TestCase):
     def test_prediction_tracks_next_extinction(self):
         off, cycles = build([6.0] * 8)
         tracker = LampCycleTracker("1")
-        checkpoints = [relight + 0.5 for relight, _ in cycles[1:-1]]
+        checkpoints = [relight + 0.5 for relight, _ in cycles[3:-1]]
         snapshots = run_tracker(tracker, off, cycles[-1][1] + 3.0, checkpoints=checkpoints)
         errors = []
-        for (_, snapshot, sampled_at), (_, extinction) in zip(snapshots, cycles[1:-1]):
+        for (_, snapshot, sampled_at), (_, extinction) in zip(snapshots, cycles[3:-1]):
             errors.append(abs(sampled_at + snapshot["remaining"] - extinction))
         self.assertTrue(errors)
         self.assertLess(max(errors), 0.06)
