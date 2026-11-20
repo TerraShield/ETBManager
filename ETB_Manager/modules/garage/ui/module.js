@@ -8,7 +8,7 @@
     let countdownDeadline = null;
     const timer = setInterval(() => {
       const now = Date.now();
-      $("lampCountdown").textContent = countdownDeadline == null ? "—" : formatTime(Math.max(0, (countdownDeadline - now) / 1000));
+      if (countdownDeadline != null) $("lampCountdown").textContent = formatTime(Math.max(0, (countdownDeadline - now) / 1000));
     }, 100);
 
     const formatTime = seconds => {
@@ -29,8 +29,13 @@
       $("lampEvents").textContent = d.event_count ?? 0;
       $("lampStatus").textContent = d.status || "";
       if ($("lampPlayers") && d.player_count) $("lampPlayers").value = d.player_count;
-      countdownDeadline = d.remaining == null ? null : Date.now() + d.remaining * 1000;
-      $("lampCountdown").textContent = d.remaining == null ? "En attente de calibration" : formatTime(d.remaining);
+      if (d.remaining == null) {
+        countdownDeadline = null;
+        $("lampCountdown").textContent = `Détection des cycles (${d.event_count ?? 0}/3)`;
+      } else {
+        countdownDeadline = Date.now() + d.remaining * 1000;
+        $("lampCountdown").textContent = formatTime(d.remaining);
+      }
 
       const lamps = d.lamps || [];
       $("lampRows").innerHTML = lamps.length ? lamps.map(lamp => {
