@@ -78,6 +78,8 @@
         if (desired !== mapUrl) { $("butterfliesMapFrame").src = desired; mapUrl = desired; }
       }
       renderWallCatalog(data.wall_json_files);
+      const debugLog = $("importcarteDebugLog");
+      if (debugLog && data.debug_log !== undefined) debugLog.textContent = data.debug_log || "Aucune génération enregistrée.";
     }
     return {update,destroy(){}};
   }
