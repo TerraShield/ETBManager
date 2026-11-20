@@ -371,6 +371,7 @@ class ElectricalStationBackend:
     def __init__(self,context):
         self.root=context.module_dir
         self.scanner=ElectricalStationScanner()
+        self.scanner.root=self.root
         self.scanner.mesh_library_path=context.base_dir/"mesh_library"/"static_meshes.json"
         self.scanner.start()
     def snapshot(self,shared_state):
