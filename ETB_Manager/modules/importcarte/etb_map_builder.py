@@ -162,6 +162,8 @@ def mesh_ref(p):
         raw = raw.split("'", 1)[1].rsplit("'", 1)[0]
     full = raw.strip()
     short = full.rsplit('.', 1)[-1].rsplit('/', 1)[-1]
+    if '/' in full and '.' not in full.rsplit('/', 1)[-1]:
+        full = full + '.' + short
     return short, full
 
 
@@ -678,6 +680,8 @@ def _read_mesh_export(data, foot):
             if not raw_path and isinstance(mesh.get('Outer'), dict):
                 raw_path = str(mesh['Outer'].get('ObjectPath') or mesh['Outer'].get('ObjectName') or '')
             asset_key = raw_path.strip()
+            if asset_key and '/' in asset_key and '.' not in asset_key.rsplit('/', 1)[-1]:
+                asset_key = asset_key + '.' + str(mesh.get('Name') or '')
             if asset_key:
                 foot[asset_key] = polys
             foot.setdefault(mesh['Name'], polys)
