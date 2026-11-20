@@ -2,16 +2,12 @@
   function mount(root, api) {
     const $ = id => root.querySelector("#" + id);
     const post = (action, payload = {}) => api.post("action", { action, ...payload }).catch(api.showError);
-    $("lampStart")?.addEventListener("click", () => post("start"));
-    $("lampStop")?.addEventListener("click", () => post("stop"));
     $("lampClear")?.addEventListener("click", () => post("clear"));
     $("lampPlayers")?.addEventListener("change", event => post("players", { value: event.target.value }));
 
-    let elapsedSince = null;
     let countdownDeadline = null;
     const timer = setInterval(() => {
       const now = Date.now();
-      $("lampElapsed").textContent = elapsedSince == null ? "—" : formatTime((now - elapsedSince) / 1000);
       $("lampCountdown").textContent = countdownDeadline == null ? "—" : formatTime(Math.max(0, (countdownDeadline - now) / 1000));
     }, 100);
 
@@ -24,19 +20,17 @@
     function update(state) {
       const d = state.module_state?.garage || {};
       const stats = d.stats || {};
-      const stateLabel = d.lamp_state || (d.running ? "Recherche des lampes" : "Arrêté");
+      const stateLabel = d.lamp_state || (d.running ? "Recherche des lampes" : "Connexion…");
       $("lampState").textContent = stateLabel;
       $("lampStateDot").dataset.state = d.lamp_state_key || "idle";
-      $("lampStart").disabled = !!d.running;
-      $("lampStop").disabled = !d.running;
       $("lampCount").textContent = stats.readable ?? stats.lamp_actors ?? 0;
       $("lampPeriod").textContent = d.period_label || "Calibration…";
       $("lampQuality").textContent = d.quality || "—";
       $("lampEvents").textContent = d.event_count ?? 0;
       $("lampStatus").textContent = d.status || "";
       if ($("lampPlayers") && d.player_count) $("lampPlayers").value = d.player_count;
-      elapsedSince = d.elapsed_since_relight == null ? null : Date.now() - d.elapsed_since_relight * 1000;
       countdownDeadline = d.remaining == null ? null : Date.now() + d.remaining * 1000;
+      $("lampCountdown").textContent = d.remaining == null ? "En attente de calibration" : formatTime(d.remaining);
 
       const lamps = d.lamps || [];
       $("lampRows").innerHTML = lamps.length ? lamps.map(lamp => {
