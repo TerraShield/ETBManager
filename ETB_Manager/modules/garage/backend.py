@@ -12,7 +12,8 @@ class GarageBackend:
         from .lamp_memory import LampMemoryScanner
         log.info("BACKEND_SCANNER_IMPORT_OK class_module=%s", LampMemoryScanner.__module__)
         self.scanner = LampMemoryScanner()
-        log.info("BACKEND_INIT_OK scanner=%s", type(self.scanner).__name__)
+        self.scanner.start()  # Le suivi mémoire démarre dès le chargement du module.
+        log.info("BACKEND_INIT_OK scanner=%s auto_started=True", type(self.scanner).__name__)
 
     def snapshot(self, shared_state):
         try:
