@@ -42,7 +42,15 @@ def main():
         duplicates = imported["wall_json_files"]["duplicates"]
         assert len(duplicates) == 1 and len(duplicates[0]["assets"]) == 2, duplicates
         assert duplicates[0]["assets"][0]["asset_path"] != duplicates[0]["assets"][1]["asset_path"]
-        print("OK — génération de carte et distinction de deux StaticMesh homonymes par chemin d'asset.")
+
+        reset = backend.action("reset_imported_walls", {}, {})
+        assert reset.get("ok") is True, reset
+        assert reset.get("archived_count") == 1, reset
+        backup = Path(reset["backup_dir"])
+        assert (backup / imported["wall_json_files"]["files"][0]["file"]).is_file()
+        assert backend._wall_json_catalog()["files"] == []
+        assert (module_dir / "mesh" / "imported").is_dir()
+        print("OK — génération, meshes homonymes et réinitialisation avec sauvegarde des imports.")
 
 
 if __name__ == "__main__":
