@@ -144,8 +144,8 @@ class LampCycleTracker:
 
         # La coupure n'est qualifiée d'extinction qu'une fois le seuil dépassé.
         # Son horodatage reste celui du premier échantillon OFF, pas celui de la confirmation.
-        if (self.global_state is False and not self.in_extinction and self.off_since is not None
-                and t - self.off_since > FLICKER_MAX_OFF):
+        if (raw is False and self.global_state is False and not self.in_extinction
+                and self.off_since is not None and t - self.off_since > FLICKER_MAX_OFF):
             self._extinction_confirmed()
 
     def _advance(self, t: float, raw: Optional[bool]) -> None:
