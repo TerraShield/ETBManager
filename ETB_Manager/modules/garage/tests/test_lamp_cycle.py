@@ -12,7 +12,7 @@ import unittest
 from pathlib import Path
 
 # Le fichier est dans ETB_Manager/modules/garage/tests : on ajoute ETB_Manager au PYTHONPATH.
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT))
 
 from modules.garage.lamp_memory import LampCycleTracker  # noqa: E402
