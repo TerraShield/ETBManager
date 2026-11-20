@@ -207,11 +207,14 @@ class ElectricalStationScanner:
         log.info("AUTO_MAP_MESH_SCAN actors=%s static_mesh_components=%s wall_candidates=%s",actor_total,component_total,len(records))
         return records
 
-    def _write_auto_map(self, records, level_name):
+    def _write_auto_map(self, records, level_name, fuseboxes=None):
         if not records:
             raise RuntimeError("Aucun mesh vertical exploitable n'a été trouvé dans ce niveau.")
         min_x=min(r["x"]-r["half_x"] for r in records); max_x=max(r["x"]+r["half_x"] for r in records)
         min_y=min(r["y"]-r["half_y"] for r in records); max_y=max(r["y"]+r["half_y"] for r in records)
+        for fusebox in (fuseboxes or []):
+            min_x=min(min_x,float(fusebox["x"])); max_x=max(max_x,float(fusebox["x"]))
+            min_y=min(min_y,float(fusebox["y"])); max_y=max(max_y,float(fusebox["y"]))
         margin=max(150.0,(max(max_x-min_x,max_y-min_y))*0.025)
         min_x-=margin; max_x+=margin; min_y-=margin; max_y+=margin
         width=max(1.0,max_x-min_x); height=max(1.0,max_y-min_y)
@@ -250,11 +253,13 @@ class ElectricalStationScanner:
         library_path.write_text(json.dumps({"version":1,"identity":"full_asset_path","assets":assets},ensure_ascii=False,indent=2),encoding="utf-8")
         return len(records)
 
-    def _auto_map_needed(self):
+    def _manual_map_exists(self):
         public=self.root/"public"
-        manual=[p for suffix in (".png",".jpg",".jpeg",".webp",".svg") for p in public.glob("*"+suffix) if p.name!="electrical_station_auto_map.svg"]
-        generated=public/"electrical_station_auto_map.svg"
-        return not manual and not generated.is_file()
+        return any(p.is_file() for suffix in (".png",".jpg",".jpeg",".webp",".svg") for p in public.glob("*"+suffix) if p.name!="electrical_station_auto_map.svg")
+
+    def _auto_map_needed(self):
+        generated=self.root/"public"/"electrical_station_auto_map.svg"
+        return not self._manual_map_exists() and not generated.is_file()
 
     def _scan_world(self,world):
         if not self.resolver: return [],{},"GNames indisponible : les classes Unreal ne peuvent pas être identifiées."
@@ -326,7 +331,7 @@ class ElectricalStationScanner:
                         with self.lock: self.state["map_scan_status"]="Analyse des meshes du niveau…"
                         try:
                             mesh_records=self._scan_static_meshes(world)
-                            map_count=self._write_auto_map(mesh_records,world_name)
+                            map_count=self._write_auto_map(mesh_records,world_name,fuseboxes)
                             map_status=f"Carte générée : {map_count} éléments verticaux"
                             log.info("AUTO_MAP_GENERATED level=%s candidates=%s",world_name,map_count)
                         except Exception as map_exc:
@@ -399,6 +404,8 @@ class ElectricalStationBackend:
         if action=="stop": return self.scanner.stop()
         if action=="rescan": return {"ok":True,"message":"Le prochain relevé sera effectué automatiquement."}
         if action=="generate_map":
+            if self.scanner._manual_map_exists():
+                return {"ok":False,"message":"Une carte manuelle est présente et reste prioritaire. Retire-la de public/ pour utiliser la carte auto-générée."}
             self.scanner.start()
             self.scanner.map_scan_requested.set()
             return {"ok":True,"message":"Analyse des meshes demandée. Le résultat apparaîtra automatiquement."}
