@@ -10,7 +10,10 @@ POLL_INTERVAL = 0.01       # 100 Hz : lecture rapide des états de chaque lampad
 DISCOVERY_INTERVAL = 1.0   # nouvelle recherche des acteurs toutes les secondes
 BLACKOUT_THRESHOLD = 1.25
 LIGHT_ON_THRESHOLD = 50.0  # Même seuil que BP_Lamp.CheckLight(Value).
-GLOBAL_ON_RATIO = 0.60    # Majorité nette de lampes allumées.\nGLOBAL_OFF_RATIO = 0.40   # Hystérésis autour de 50 %.\nSTATE_CONFIRMATION = 0.05 # Confirmation sur plusieurs échantillons.\nREARM_STABLE = 0.80       # Retour ON stable avant un nouveau cycle.
+GLOBAL_ON_RATIO = 0.60    # Majorité nette de lampes allumées.
+GLOBAL_OFF_RATIO = 0.40   # Hystérésis autour de 50 %.
+STATE_CONFIRMATION = 0.05 # Confirmation sur plusieurs échantillons.
+REARM_STABLE = 0.80       # Retour ON stable avant un nouveau cycle.
 RANGES = {"1": (4.25, 7.26), "2": (4.50, 7.50), "3": (5.00, 7.50), "4": (5.00, 7.50), "Inconnu": (4.00, 8.00)}
 
 def estimate_period(times, player_count):
@@ -38,6 +41,8 @@ class LampMemoryScanner:
         self.player_count="1"; self.events=deque(maxlen=80); self.period=None; self.quality_score=None
         self.last_flicker=None; self.blackout_started=None; self.relight_time=None; self.dark_since=None
         self.signal=None; self.signal_state=None; self.lamp_states={}
+        self.global_state=None; self.global_candidate=None; self.global_candidate_since=None
+        self.on_stable_since=None; self.cycle_armed=False
         self.next_tick=None; self.last_transition=None; self.last_cycle_event=None
         self.last_sample_at=None; self.sample_hz_actual=0.0
         log.info("SCANNER_INIT_OK")
