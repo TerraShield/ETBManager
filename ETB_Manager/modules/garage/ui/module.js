@@ -32,6 +32,9 @@
       if (d.timer_state === "off") {
         countdownDeadline = null;
         $("lampCountdown").textContent = "En attente du rallumage";
+      } else if (d.timer_state === "pending") {
+        countdownDeadline = null;
+        $("lampCountdown").textContent = "Fin du clignotement…";
       } else if (d.remaining == null) {
         countdownDeadline = null;
         $("lampCountdown").textContent = `Détection des cycles (${d.event_count ?? 0}/3)`;
