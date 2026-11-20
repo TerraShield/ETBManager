@@ -1,43 +1,93 @@
 (() => {
   function mount(root, api) {
-    const $ = (id) => root.querySelector(`#${id}`);
-    const controls = [
-      ["startStopButton", () => api.post("action", { action: api.getState()?.module_state?.garage?.running ? "stop" : "start" })],
-      ["chooseRegionButton", () => api.post("action", { action: "choose_region" })],
-      ["resetButton", () => api.post("action", { action: "reset" })],
-      ["flickerButton", () => api.post("action", { action: "flicker" })],
-      ["relightButton", () => api.post("action", { action: "relight" })],
-    ];
-    controls.forEach(([id, callback]) => $(id)?.addEventListener("click", () => callback().catch(api.showError)));
-    $("playersSelect")?.addEventListener("change", (event) =>
-      api.post("action", { action: "players", value: event.target.value }).catch(api.showError));
+    const $ = id => root.querySelector("#" + id);
+    const post = (action, payload = {}) => api.post("action", { action, ...payload }).catch(api.showError);
+    $("lampClear")?.addEventListener("click", () => post("clear"));
+    $("lampPlayers")?.addEventListener("change", event => post("players", { value: event.target.value }));
 
-    function update(state) {
-      const garage = state.module_state?.garage || {};
-      $("garageStatus").textContent = garage.status || "—";
-      $("detectChip").textContent = garage.running ? "DÉTECTION ACTIVE" : "À L'ARRÊT";
-      $("detectChip").classList.toggle("is-running", !!garage.running);
-      $("startStopButton").textContent = garage.running ? "Arrêter la détection" : "Démarrer la détection";
-      $("periodValue").textContent = garage.period_label || "En attente";
-      $("eventsValue").textContent = String(garage.event_count ?? 0);
-      $("qualityValue").textContent = garage.quality || "—";
-      $("lumaValue").textContent = garage.luma == null ? "—" : `${Number(garage.luma).toFixed(1)} / 255`;
-      $("hotkeysValue").textContent = garage.hotkeys_available ? "F8 / F9 actifs" : "Boutons navigateur";
-      $("regionInfo").textContent = garage.region
-        ? `Zone : ${garage.region.width} × ${garage.region.height} px · position ${garage.region.left}, ${garage.region.top}`
-        : "Aucune zone sélectionnée";
-      if (garage.player_count && $("playersSelect").value !== garage.player_count) $("playersSelect").value = garage.player_count;
-      const remaining = garage.remaining;
-      const countdown = $("countdown");
-      if (remaining == null) {
-        countdown.innerHTML = "--.--<small> s</small>";
-        countdown.classList.remove("expired");
+    const formatTime = seconds => Number.isFinite(seconds) ? Math.max(0, seconds).toFixed(2) + " s" : "—";
+    const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+    const setText = (id, text) => { const el = $(id); if (el && el.textContent !== text) el.textContent = text; };
+
+    // Décompte entre deux sondages : le backend envoie des durées restantes, on les convertit en échéances locales.
+    let countdown = null;
+    function renderCountdown() {
+      if (!countdown) return;
+      const now = Date.now();
+      const left = ms => Math.max(0, (ms - now) / 1000);
+      if (countdown.overdue) {
+        setText("lampCountdown", "Dépassé");
+        setText("lampWindow", "Clignotement manqué ou délai modifié : la mesure repart au prochain rallumage.");
+        return;
+      }
+      if (countdown.mode === "window") {
+        setText("lampCountdown", "≈ " + formatTime(left(countdown.central)));
+        setText("lampWindow", `Entre ${formatTime(left(countdown.min))} et ${formatTime(left(countdown.max))} (délai aléatoire à chaque cycle)`);
       } else {
-        countdown.innerHTML = `${Number(remaining).toFixed(2)}<small> s</small>`;
-        countdown.classList.toggle("expired", Number(remaining) <= 0.02);
+        setText("lampCountdown", formatTime(left(countdown.central)));
+        setText("lampWindow", "± " + ((countdown.max - countdown.min) / 2000).toFixed(2) + " s");
       }
     }
-    return { update, destroy() {} };
+    const timer = setInterval(renderCountdown, 100);
+
+    // Les coupures courtes sont informatives, mais ne relancent pas le compte à rebours.
+    function flickerLine(d) {
+      if (d.flicker_active) return "Clignotement en cours : le décompte continue";
+      const parts = [];
+      if (d.flicker_count > 0) parts.push(`${d.flicker_count} clignotement(s) depuis le rallumage`);
+      if (d.flicker_lead != null) parts.push(`le premier précède l'extinction d'≈ ${d.flicker_lead.toFixed(1)} s`);
+      return parts.join(" · ");
+    }
+    const offsLabel = offs => (offs || []).slice(-6)
+      .map(([seconds, extinction]) => seconds.toFixed(2) + " s" + (extinction ? " ★" : ""))
+      .join(" · ") || "—";
+
+    function update(state) {
+      const d = state.module_state?.garage || {};
+      const stats = d.stats || {};
+      setText("lampState", d.lamp_state || (d.running ? "Recherche des lampes" : "Connexion…"));
+      $("lampStateDot").dataset.state = d.lamp_state_key || "idle";
+      setText("lampCount", String(stats.readable ?? stats.lamp_actors ?? 0));
+      setText("lampPeriod", d.period_label || "Calibration…");
+      setText("lampQuality", d.quality || "—");
+      setText("lampEvents", String(d.event_count ?? 0));
+      setText("lampOffs", offsLabel(d.recent_offs));
+      setText("lampStatus", d.status || "");
+      const player = $("lampPlayers");
+      if (player && d.player_count && document.activeElement !== player) player.value = d.player_count;
+
+      const rejectedRow = $("lampRejectedRow");
+      if (rejectedRow) {
+        rejectedRow.hidden = !(d.rejected_count > 0);
+        if (d.rejected_count > 0) setText("lampRejected", `${d.rejected_count} (dernière : ${Number(d.last_rejected).toFixed(2)} s) · vérifie le nombre de joueurs`);
+      }
+
+      if (d.timer_state === "running" && d.remaining != null) {
+        const now = Date.now();
+        countdown = {
+          mode: d.prediction_mode, overdue: !!d.overdue,
+          central: now + d.remaining * 1000, min: now + (d.remaining_min ?? d.remaining) * 1000, max: now + (d.remaining_max ?? d.remaining) * 1000,
+        };
+        setText("lampLead", flickerLine(d));
+        renderCountdown();
+      } else {
+        countdown = null;
+        setText("lampWindow", "");
+        setText("lampLead", d.timer_state === "off" ? "Extinction détectée : le décompte repart au rallumage" : "");
+        setText("lampCountdown",
+          d.timer_state === "off" ? "En attente du rallumage"
+          : (d.progress_label || "Détection des cycles…"));
+      }
+
+      const lamps = d.lamps || [];
+      $("lampRows").innerHTML = lamps.length ? lamps.map(lamp => {
+        const label = lamp.on == null ? "Inconnue" : (lamp.on ? "Allumée" : "Éteinte");
+        const value = lamp.intensity == null ? "" : ` · ${Math.round(lamp.intensity)}`;
+        return '<div class="lamp-row"><span class="lamp-mini-dot ' + (lamp.on ? "on" : "off") + '"></span><span>' + esc(lamp.name) + '</span><strong>' + label + value + '</strong></div>';
+      }).join("") : '<span class="muted">Aucun lampadaire détecté.</span>';
+    }
+
+    return { update, destroy() { clearInterval(timer); } };
   }
   window.ETBModulePlugins = window.ETBModulePlugins || {};
   window.ETBModulePlugins.garage = { mount };

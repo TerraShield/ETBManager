@@ -1,35 +1,34 @@
-<div class="garage-layout">
-            <div class="timer-card">
-              <div class="timer-topline"><span class="live-indicator"></span> PRÉDICTION EN DIRECT <span class="timer-chip" id="detectChip">À L'ARRÊT</span></div>
-              <div class="countdown" id="countdown">--.--<small> s</small></div>
-              <div class="timer-caption">PROCHAIN CLIGNOTEMENT ESTIMÉ</div>
-              <div class="timer-divider"></div>
-              <div class="timer-status" id="garageStatus">Sélectionne une zone autour d'une lampe pour commencer.</div>
-              <div class="timer-actions">
-                <button class="primary-button" id="startStopButton">Démarrer la détection</button>
-                <button class="secondary-button" id="chooseRegionButton">Choisir la zone</button>
-              </div>
-            </div>
-            <div class="side-stack">
-              <div class="panel-card">
-                <div class="panel-heading"><div><div class="eyebrow">CONFIGURATION</div><h3>Partie</h3></div><span class="panel-icon">⚙</span></div>
-                <label class="field-label" for="playersSelect">Joueurs au démarrage</label>
-                <select id="playersSelect"><option value="1">1 joueur</option><option value="2">2 joueurs</option><option value="3">3 joueurs</option><option value="4">4 joueurs</option><option value="Inconnu">Inconnu</option></select>
-                <div class="region-info" id="regionInfo">Aucune zone sélectionnée</div>
-              </div>
-              <div class="panel-card calibration-card">
-                <div class="panel-heading"><div><div class="eyebrow">CALIBRATION AUTOMATIQUE</div><h3>Mesures</h3></div><span class="panel-icon">◷</span></div>
-                <div class="metric-row"><span>Luminosité actuelle</span><strong id="lumaValue">—</strong></div>
-                <div class="metric-row"><span>Période estimée</span><strong id="periodValue">En attente</strong></div>
-                <div class="metric-row"><span>Clignotements détectés</span><strong id="eventsValue">0</strong></div>
-                <div class="metric-row"><span>Fiabilité</span><strong id="qualityValue">—</strong></div>
-                <div class="metric-row"><span>Raccourcis globaux</span><strong id="hotkeysValue">—</strong></div>
-                <button class="text-button" id="resetButton">↺ Réinitialiser la calibration</button>
-              </div>
-            </div>
-          </div>
-          <div class="manual-panel">
-            <div><div class="eyebrow">CORRECTION MANUELLE</div><h3>Les raccourcis restent disponibles</h3><p>Utilise les touches du clavier ou ces boutons si une détection est manquée.</p></div>
-            <div class="manual-buttons"><button class="secondary-button" id="flickerButton"><kbd>F8</kbd> Marquer un clignotement</button><button class="secondary-button" id="relightButton"><kbd>F9</kbd> Marquer le rallumage</button></div>
-          </div>
-          <div class="footnote">La capture analyse une petite zone de l'écran à environ 15 images/s. Évite le HUD, le viseur et les éléments mobiles dans la zone choisie.</div>
+<div class="lamp-panel">
+  <section class="panel-card">
+    <div class="eyebrow">BOTTOMFLOOR · LAMPADAIRES</div>
+    <div class="lamp-state-line">
+      <span class="lamp-state-dot" id="lampStateDot"></span>
+      <strong id="lampState">En attente</strong>
+    </div>
+    <div class="lamp-next">
+      <span>Prochaine extinction</span>
+      <strong id="lampCountdown">—</strong>
+      <small class="lamp-window" id="lampWindow"></small>
+      <small class="lamp-window" id="lampLead"></small>
+    </div>
+    <div class="timer-actions">
+      <button class="secondary-button" id="lampClear">Réinitialiser la calibration</button>
+    </div>
+  </section>
+  <section class="panel-card lamp-details">
+    <div class="metric-row"><span>Lampadaires détectés</span><strong id="lampCount">0</strong></div>
+    <div class="metric-row"><span>Délai allumé estimé</span><strong id="lampPeriod">—</strong></div>
+    <div class="metric-row"><span>Fiabilité</span><strong id="lampQuality">—</strong></div>
+    <div class="metric-row"><span>Extinctions détectées</span><strong id="lampEvents">0</strong></div>
+    <div class="metric-row"><span>Dernières coupures (★ = extinction)</span><strong id="lampOffs">—</strong></div>
+    <div class="metric-row" id="lampRejectedRow" hidden><span>Mesures hors plage</span><strong class="lamp-warn" id="lampRejected">0</strong></div>
+    <label class="player-setting">Joueurs
+      <select id="lampPlayers"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="Inconnu">Inconnu (4–8 s)</option></select>
+    </label>
+    <p class="lamp-message" id="lampStatus">Suivi mémoire automatique au chargement du module.</p>
+  </section>
+  <section class="panel-card">
+    <div class="eyebrow">ÉTAT INDIVIDUEL</div>
+    <div class="lamp-list" id="lampRows"><span class="muted">Aucun lampadaire détecté.</span></div>
+  </section>
+</div>

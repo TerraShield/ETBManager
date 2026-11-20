@@ -9,6 +9,7 @@ import importlib
 import json
 import logging
 import re
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -70,19 +71,27 @@ class ModuleRegistry:
                 if backend_name != "backend.py":
                     raise ValueError("Pour cette version, le backend doit être nommé backend.py")
                 backend_path = definition["path"] / backend_name
+                logger = logging.getLogger("ETB.Modules")
+                logger.info("BACKEND_LOAD_BEGIN id=%s folder=%s backend=%s exists=%s package=%s sys_path=%s", module_id, definition["path"], backend_path, backend_path.is_file(), f"modules.{module_id}.backend", sys.path[:5])
                 if not backend_path.is_file():
-                    raise FileNotFoundError(f"{backend_name} introuvable")
-                imported = importlib.import_module(f"modules.{module_id}.backend")
+                    raise FileNotFoundError(f"{backend_name} introuvable : {backend_path}")
+                package_name = f"modules.{module_id}"
+                package = importlib.import_module(package_name)
+                logger.info("BACKEND_PACKAGE_OK id=%s package_file=%s package_path=%s", module_id, getattr(package, "__file__", None), list(getattr(package, "__path__", [])))
+                imported = importlib.import_module(f"{package_name}.backend")
+                logger.info("BACKEND_IMPORT_OK id=%s module_file=%s loader=%s", module_id, getattr(imported, "__file__", None), type(getattr(imported, "__loader__", None)).__name__)
                 importlib.reload(imported)
                 factory = getattr(imported, "create_module", None)
                 if not callable(factory):
                     raise TypeError("backend.py doit exposer create_module(context)")
                 context = ModuleContext(module_id, definition["path"], self.base_dir, self.port)
-                self._backends[module_id] = factory(context)
-                logging.getLogger("ETB.Modules").info("Module %s chargé (backend actif=True)", module_id)
+                backend = factory(context)
+                self._backends[module_id] = backend
+                logger.info("BACKEND_FACTORY_OK id=%s instance=%s snapshot=%s action=%s", module_id, type(backend).__name__, callable(getattr(backend, "snapshot", None)), callable(getattr(backend, "action", None)))
+                logger.info("Module %s chargé (backend actif=True)", module_id)
             except Exception as exc:
-                self._errors[module_id] = f"Backend non chargé : {exc}"
-                logging.getLogger("ETB.Modules").exception("Backend du module %s non chargé", module_id)
+                self._errors[module_id] = f"Backend non chargé : {type(exc).__name__}: {exc}"
+                logging.getLogger("ETB.Modules").exception("BACKEND_LOAD_FAILED id=%s folder=%s backend=%s exception=%s", module_id, definition.get("path"), manifest.get("backend"), type(exc).__name__)
 
     @staticmethod
     def _validate_manifest(folder: Path, manifest: Any) -> None:
@@ -157,6 +166,7 @@ class ModuleRegistry:
                         state.update(value)
                 except Exception as exc:
                     state["error"] = str(exc)
+                    logging.getLogger("ETB.Modules").exception("BACKEND_SNAPSHOT_FAILED id=%s backend=%s exception=%s", module_id, type(backend).__name__, type(exc).__name__)
             entry_error = self._errors.get(module_id)
             if entry_error:
                 state["backend_error"] = entry_error
@@ -169,6 +179,7 @@ class ModuleRegistry:
         backend = self._backends.get(module_id)
         if backend is None:
             raise RuntimeError(f"Le module '{module_id}' ne possède pas de backend actif.")
+        logging.getLogger("ETB.Modules").info("BACKEND_ACTION id=%s action=%s backend=%s", module_id, action, type(backend).__name__)
         handler = getattr(backend, "action", None)
         if not callable(handler):
             raise RuntimeError(f"Le backend '{module_id}' ne gère pas les actions.")

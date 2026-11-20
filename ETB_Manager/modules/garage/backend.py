@@ -1,45 +1,54 @@
-"""Adaptateur ETB Manager pour le moteur du prédicteur de garage existant."""
+"""Backend du module BottomFloor : diagnostic mémoire des lampadaires."""
 from __future__ import annotations
+import logging
 
-from .module import GarageModule
+log = logging.getLogger("ETB.BottomFloor.Backend")
 
 
 class GarageBackend:
     def __init__(self, context):
-        self.engine = GarageModule(context.port)
+        log.info("BACKEND_INIT_BEGIN module_id=%s module_dir=%s base_dir=%s port=%s",
+                 context.module_id, context.module_dir, context.base_dir, context.port)
+        from .lamp_memory import LampMemoryScanner
+        log.info("BACKEND_SCANNER_IMPORT_OK class_module=%s", LampMemoryScanner.__module__)
+        self.scanner = LampMemoryScanner()
+        self.scanner.start()  # Le suivi mémoire démarre dès le chargement du module.
+        log.info("BACKEND_INIT_OK scanner=%s auto_started=True", type(self.scanner).__name__)
 
     def snapshot(self, shared_state):
-        return self.engine.snapshot()
+        try:
+            return self.scanner.snapshot()
+        except Exception:
+            log.exception("BACKEND_SNAPSHOT_ERROR")
+            raise
 
     def action(self, action, payload, shared_state):
-        if action == "choose_region":
-            return self.engine.choose_region()
-        if action == "start":
-            ok, message = self.engine.start()
-            return {"ok": ok, "message": message}
-        if action == "stop":
-            ok, message = self.engine.stop()
-            return {"ok": ok, "message": message}
-        if action == "reset":
-            self.engine.reset()
-            return {"ok": True, "message": "Calibration réinitialisée."}
-        if action == "flicker":
-            self.engine.manual_flicker()
-            return {"ok": True}
-        if action == "relight":
-            self.engine.manual_relight()
-            return {"ok": True}
-        if action == "players":
-            self.engine.set_players(str(payload.get("value", "1")))
-            return {"ok": True}
-        if action == "set_region":
-            self.engine.set_region(payload)
-            return {"ok": True, "message": "Zone enregistrée."}
-        raise ValueError(f"Action garage inconnue : {action}")
+        log.info("BACKEND_ACTION_BEGIN action=%s payload_keys=%s",
+                 action, sorted(payload.keys()) if isinstance(payload, dict) else type(payload).__name__)
+        try:
+            if action == "start":
+                result = self.scanner.start()
+            elif action == "stop":
+                result = self.scanner.stop()
+            elif action == "clear":
+                result = self.scanner.clear()
+            elif action == "players":
+                result = self.scanner.set_players(payload.get("value", "1"))
+            else:
+                raise ValueError(f"Action BottomFloor inconnue : {action}")
+            log.info("BACKEND_ACTION_OK action=%s result=%s", action, result)
+            return result
+        except Exception:
+            log.exception("BACKEND_ACTION_FAILED action=%s", action)
+            raise
 
     def shutdown(self):
-        self.engine.shutdown()
+        log.info("BACKEND_SHUTDOWN")
+        self.scanner.stop()
 
 
 def create_module(context):
-    return GarageBackend(context)
+    log.info("BACKEND_FACTORY_BEGIN module_id=%s", context.module_id)
+    instance = GarageBackend(context)
+    log.info("BACKEND_FACTORY_OK instance=%s", type(instance).__name__)
+    return instance
