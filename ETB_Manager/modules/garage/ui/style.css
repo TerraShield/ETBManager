@@ -1,0 +1,15 @@
+.lamp-panel { display: grid; gap: 1rem; }
+.lamp-state-line { display:flex; align-items:center; gap:.65rem; font-size:1.35rem; margin:.6rem 0 1rem; }
+.lamp-state-dot,.lamp-mini-dot { width:.7rem; height:.7rem; border-radius:50%; display:inline-block; background:#888; flex:none; }
+#lampStateDot[data-state="on"],.lamp-mini-dot.on { background:#36c275; box-shadow:0 0 12px #36c27566; }
+#lampStateDot[data-state="off"],.lamp-mini-dot.off { background:#e05c5c; }
+#lampStateDot[data-state="flicker"] { background:#e9b949; box-shadow:0 0 12px #e9b94988; }
+.lamp-timer,.lamp-next { display:flex; flex-direction:column; gap:.25rem; padding:.75rem 0; }
+.lamp-timer strong { font-size:2.3rem; font-variant-numeric:tabular-nums; }
+.lamp-next strong { font-size:1.45rem; font-variant-numeric:tabular-nums; }
+.lamp-details { display:grid; gap:.5rem; }
+.player-setting { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-top:.5rem; }
+.lamp-message,.muted { opacity:.7; font-size:.9rem; }
+.lamp-list { display:grid; gap:.35rem; }
+.lamp-row { display:grid; grid-template-columns:auto minmax(0,1fr) auto; align-items:center; gap:.65rem; padding:.45rem 0; border-bottom:1px solid var(--border-color,rgba(128,128,128,.2)); }
+.lamp-row strong { font-size:.85rem; }
