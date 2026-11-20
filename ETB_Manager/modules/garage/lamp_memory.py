@@ -6,12 +6,11 @@ from memory_reader import (PROCESS_NAME, ProcessMemory, find_process_id, find_mo
 
 log = logging.getLogger("ETB.BottomFloor.Lamps")
 MAX_LEVELS, MAX_ACTORS = 256, 250000
-POLL_INTERVAL = 0.02       # 50 Hz : lecture des intensités toutes les 20 ms
+POLL_INTERVAL = 0.01       # 100 Hz : lecture rapide des états de chaque lampadaire
 DISCOVERY_INTERVAL = 1.0   # nouvelle recherche des acteurs toutes les secondes
 BLACKOUT_THRESHOLD = 1.25
-STATE_CONFIRM_SECONDS = 0.08  # Confirme une transition sur plusieurs échantillons (50 Hz).
-ON_THRESHOLD = 55.0
-OFF_THRESHOLD = 45.0
+LIGHT_ON_THRESHOLD = 50.0  # Même seuil que BP_Lamp.CheckLight(Value).
+FLICKER_LOCKOUT = 0.75     # Timeline BP_LightManager.Flicker : environ 0,5 s.
 RANGES = {"1": (4.25, 7.26), "2": (4.50, 7.50), "3": (5.00, 7.50), "4": (5.00, 7.50), "Inconnu": (4.00, 8.00)}
 
 def estimate_period(times, player_count):
@@ -26,7 +25,7 @@ def estimate_period(times, player_count):
             multiple=max(1,round(interval/candidate)); residuals.append(abs(interval-multiple*candidate))
         rms=math.sqrt(sum(x*x for x in residuals)/len(residuals)); max_res=max(residuals)
         if (rms,max_res)<(best_score,best_max): best_t,best_score,best_max=candidate,rms,max_res
-    if best_score>0.30 or best_max>0.60: return None,best_score
+    # Première estimation dès trois cycles; elle s’affine à chaque nouveau cycle.
     return best_t,best_score
 
 class LampMemoryScanner:
@@ -38,8 +37,8 @@ class LampMemoryScanner:
         self.stats={"actors_seen":0,"lamp_actors":0,"readable":0,"unreadable":0}
         self.player_count="1"; self.events=deque(maxlen=80); self.period=None; self.quality_score=None
         self.last_flicker=None; self.blackout_started=None; self.relight_time=None; self.dark_since=None
-        self.signal=None; self.signal_state=None; self.signal_candidate=None; self.signal_candidate_since=None
-        self.next_tick=None; self.last_transition=None; self.flicker_until=0.0
+        self.signal=None; self.signal_state=None; self.lamp_states={}
+        self.next_tick=None; self.last_transition=None; self.last_cycle_event=None
         self.last_sample_at=None; self.sample_hz_actual=0.0
         log.info("SCANNER_INIT_OK")
     def start(self):
@@ -57,7 +56,7 @@ class LampMemoryScanner:
         with self.lock:
             self.events.clear(); self.period=None; self.quality_score=None; self.last_flicker=None
             self.blackout_started=None; self.relight_time=None; self.dark_since=None; self.last_transition=None
-            self.next_tick=None; self.signal_state=None; self.signal_candidate=None; self.signal_candidate_since=None; self.flicker_until=0.0
+            self.next_tick=None; self.signal_state=None; self.lamp_states.clear(); self.last_cycle_event=None
             self.status="Calibration effacée. Les mesures mémoire continuent."
         return {"ok":True}
     def set_players(self,value):
@@ -176,74 +175,54 @@ class LampMemoryScanner:
                     measured=1.0/dt
                     self.sample_hz_actual=measured if self.sample_hz_actual<=0 else 0.8*self.sample_hz_actual+0.2*measured
             self.last_sample_at=now
-        values=[]; updates={}
+
+        values=[]
+        updates={}
+        falling_edges=[]
         for item in cache:
             raw=mem.read(item["component"]+item["offset"],4)
-            if not raw: continue
+            if not raw:
+                continue
             value=struct.unpack("<f",raw)[0]
-            if math.isfinite(value) and -1.0<=value<=100000.0:
-                value=max(0.0,value); values.append(value); updates[item["actor"]]=value
-        if not values: return
-        # Signal collectif : moyenne des intensités normalisées, robuste aux lampes isolées.
+            if not math.isfinite(value) or not -1.0<=value<=100000.0:
+                continue
+            value=max(0.0,value)
+            actor=item["actor"]
+            values.append(value)
+            updates[actor]=value
+            is_on=value>LIGHT_ON_THRESHOLD
+            with self.lock:
+                previous=self.lamp_states.get(actor)
+                self.lamp_states[actor]=is_on
+            if previous is True and not is_on:
+                falling_edges.append((actor,item["name"]))
+
+        if not values:
+            return
+
         signal=sum(min(v,100.0) for v in values)/len(values)
         with self.lock:
             for lamp in self.lamps:
                 addr=int(lamp["actor"],16)
-                if addr in updates: lamp["intensity"]=round(updates[addr],5); lamp["read_status"]="OK"
+                if addr in updates:
+                    lamp["intensity"]=round(updates[addr],5)
+                    lamp["read_status"]="OK"
             self.signal=signal
-            self._process_signal_locked(now,signal)
-    def _process_signal_locked(self,now,value):
-        # Hystérésis + confirmation temporelle : les variations brèves du signal
-        # collectif ne doivent pas créer plusieurs faux clignotements.
-        if self.signal_state is None:
-            self.signal_state = value >= 50.0
-            if not self.signal_state:
-                self.dark_since = now
-            return
+            on_count=sum(1 for state in self.lamp_states.values() if state)
+            off_count=sum(1 for state in self.lamp_states.values() if not state)
+            self.signal_state=on_count>=off_count
 
-        if self.signal_state:
-            candidate = False if value <= OFF_THRESHOLD else None
-        else:
-            candidate = True if value >= ON_THRESHOLD else None
+            # La timeline BP_LightManager.Flicker dure environ 0,5 s et passe
+            # plusieurs fois de part et d'autre de 50 lm. On garde son premier front.
+            if falling_edges and (self.last_cycle_event is None or now-self.last_cycle_event>=FLICKER_LOCKOUT):
+                self.last_cycle_event=now
+                self.last_flicker=now
+                self.events.append(now)
+                self.last_transition=now
+                self._recalculate_locked()
+                log.info("FLICKER_CYCLE_DETECTED time=%.3f lamp=%s simultaneous=%d cycles=%d period=%s score=%s",
+                         now,falling_edges[0][1],len(falling_edges),len(self.events),self.period,self.quality_score)
 
-        if candidate is None:
-            self.signal_candidate = None
-            self.signal_candidate_since = None
-        elif candidate != self.signal_candidate:
-            self.signal_candidate = candidate
-            self.signal_candidate_since = now
-        elif self.signal_candidate_since is not None and now - self.signal_candidate_since >= STATE_CONFIRM_SECONDS:
-            transition_at = self.signal_candidate_since
-            previous_state = self.signal_state
-            self.signal_state = candidate
-            self.signal_candidate = None
-            self.signal_candidate_since = None
-
-            if previous_state and not candidate:
-                self.dark_since = transition_at
-                self.flicker_until = now + 0.65
-            elif not previous_state and candidate:
-                dark_duration = transition_at - self.dark_since if self.dark_since is not None else 0.0
-                if self.blackout_started is not None and dark_duration >= BLACKOUT_THRESHOLD:
-                    self.relight_time = transition_at
-                    self.status = "Rallumage détecté : prédiction du prochain clignotement."
-                    log.info("RALLUMAGE après %.3f s d'extinction.", dark_duration)
-                elif self.dark_since is not None and STATE_CONFIRM_SECONDS <= dark_duration < BLACKOUT_THRESHOLD:
-                    # Un clignotement = une extinction confirmée puis un rallumage confirmé.
-                    self.events.append(self.dark_since)
-                    self.last_flicker = self.dark_since
-                    self.last_transition = transition_at
-                    self._recalculate_locked()
-                    log.info("CLIGNOTEMENT validé à %.3f s (durée sombre %.3f s, signal %.2f lm, total=%d)",
-                             self.dark_since, dark_duration, value, len(self.events))
-                self.dark_since = None
-                self.blackout_started = None
-                self.flicker_until = now + 0.65
-
-        if not self.signal_state and self.dark_since is not None and now - self.dark_since >= BLACKOUT_THRESHOLD and self.blackout_started is None:
-            self.blackout_started = self.dark_since
-            self.relight_time = None
-            self.status = "Extinction prolongée détectée : attente du rallumage."
     def snapshot(self):
         with self.lock:
             now=time.perf_counter()
@@ -255,18 +234,14 @@ class LampMemoryScanner:
                 self.next_tick=self.last_flicker+steps*self.period
                 remaining=max(0.0,self.next_tick-now)
             if self.period is None:
-                period_label="Calibration en cours" if self.events else "En attente de détection"
-                quality="Collecte de plusieurs clignotements"
+                period_label=f"Détection : {len(self.events)}/3 cycles" if self.events else "En attente de détection"
+                quality="Première estimation après 3 cycles détectés"
             else:
                 period_label=f"{self.period:.2f} s"; score=self.quality_score or 0.0
                 quality=("élevée" if score<0.07 else "moyenne" if score<0.16 else "faible")+f" (écart {score:.3f} s)"
             now=time.perf_counter()
             if not self.running:
                 lamp_state, lamp_state_key = "Arrêté", "idle"
-            elif self.blackout_started is not None:
-                lamp_state, lamp_state_key = "Éteintes", "off"
-            elif now < self.flicker_until:
-                lamp_state, lamp_state_key = "Clignotement", "flicker"
             elif self.signal_state is True:
                 lamp_state, lamp_state_key = "Allumées", "on"
             elif self.signal_state is False:
@@ -276,5 +251,5 @@ class LampMemoryScanner:
             return {"running":self.running,"status":self.status,"world_name":self.world_name,"last_scan":self.last_scan,
                     "lamps":list(self.lamps),"stats":dict(self.stats),"sample_hz":round(self.sample_hz_actual,1) if self.sample_hz_actual>0 else 1/POLL_INTERVAL,"sample_hz_target":1/POLL_INTERVAL,"signal":self.signal,
                     "player_count":self.player_count,"event_count":len(self.events),"period":self.period,"period_label":period_label,
-                    "quality":quality,"remaining":remaining,"blackout":self.blackout_started is not None,
+                    "quality":quality,"remaining":remaining,"blackout":False,
                     "lamp_state":lamp_state,"lamp_state_key":lamp_state_key}
