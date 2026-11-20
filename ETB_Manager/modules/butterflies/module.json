@@ -1,13 +1,11 @@
 {
-  "id": "butterflies",
-  "name": "Labyrinthe des papillons",
-  "short_name": "Labyrinthe",
-  "description": "Carte 2D interactive et position du joueur en direct.",
+  "id": "importcarte",
+  "name": "ImportCarte",
+  "short_name": "ImportCarte",
+  "description": "Import et inspection des exports FModel pour générer et déboguer les cartes.",
   "icon": "✣",
   "order": 40,
-  "levels": [
-    "Moths"
-  ],
+  "levels": [],
   "ui": {
     "entry": "ui/index.html",
     "script": "ui/module.js",
