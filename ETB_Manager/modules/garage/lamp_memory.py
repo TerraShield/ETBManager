@@ -6,7 +6,7 @@ from memory_reader import (PROCESS_NAME, ProcessMemory, find_process_id, find_mo
 
 log = logging.getLogger("ETB.BottomFloor.Lamps")
 MAX_LEVELS, MAX_ACTORS = 256, 250000
-POLL_INTERVAL = 0.05       # 20 Hz : lecture des intensités toutes les 50 ms
+POLL_INTERVAL = 0.02       # 50 Hz : lecture des intensités toutes les 20 ms
 DISCOVERY_INTERVAL = 1.0   # nouvelle recherche des acteurs toutes les secondes
 BLACKOUT_THRESHOLD = 1.25
 RANGES = {"1": (4.25, 7.26), "2": (4.50, 7.50), "3": (5.00, 7.50), "4": (5.00, 7.50), "Inconnu": (4.00, 8.00)}
@@ -34,7 +34,7 @@ class LampMemoryScanner:
         self.stats={"actors_seen":0,"lamp_actors":0,"readable":0,"unreadable":0}
         self.player_count="1"; self.events=deque(maxlen=80); self.period=None; self.quality_score=None
         self.last_flicker=None; self.blackout_started=None; self.relight_time=None; self.dark_since=None
-        self.signal=None; self.next_tick=None; self.last_transition=None
+        self.signal=None; self.signal_state=None; self.next_tick=None; self.last_transition=None
     def start(self):
         with self.lock:
             if self.running: return {"ok":True,"message":"Prédicteur déjà actif."}
@@ -163,23 +163,33 @@ class LampMemoryScanner:
             self.signal=signal
             self._process_signal_locked(now,signal)
     def _process_signal_locked(self,now,value):
-        # Les états sont déterminés à partir des lumens réels, pas de l'affichage.
+        # Un état initial ne constitue pas un clignotement : on attend une vraie transition.
         is_on=value>=50.0
-        if self.dark_since is None and not is_on:
+        if self.signal_state is None:
+            self.signal_state=is_on
+            if not is_on: self.dark_since=now
+            return
+        if self.signal_state and not is_on:
             self.dark_since=now
-            if self.last_transition is None or now-self.last_transition>0.12:
-                self.events.append(now); self.last_flicker=now; self.last_transition=now
-                self._recalculate_locked()
-                log.info("CLIGNOTEMENT détecté à %.3f s (signal moyen %.2f lm)",now,value)
-        elif self.dark_since is not None and is_on:
-            dark_duration=now-self.dark_since
-            if self.blackout_started is not None and dark_duration>BLACKOUT_THRESHOLD:
+        elif not self.signal_state and is_on:
+            dark_duration=now-self.dark_since if self.dark_since is not None else 0.0
+            if self.blackout_started is not None and dark_duration>=BLACKOUT_THRESHOLD:
                 self.relight_time=now
                 self.status="Rallumage détecté : chronomètre prédictif actif."
                 log.info("RALLUMAGE après %.3f s d'extinction.",dark_duration)
-            self.dark_since=None; self.blackout_started=None
-        if self.dark_since is not None and now-self.dark_since>=BLACKOUT_THRESHOLD and self.blackout_started is None:
-            self.blackout_started=self.dark_since; self.relight_time=None
+            elif self.dark_since is not None and dark_duration>0.04:
+                # On horodate le début de la baisse, comme dans l'ancien prédicteur.
+                self.events.append(self.dark_since)
+                self.last_flicker=self.dark_since
+                self.last_transition=now
+                self._recalculate_locked()
+                log.info("CLIGNOTEMENT détecté à %.3f s (durée sombre %.3f s, signal %.2f lm)",self.dark_since,dark_duration,value)
+            self.dark_since=None
+            self.blackout_started=None
+        self.signal_state=is_on
+        if not is_on and self.dark_since is not None and now-self.dark_since>=BLACKOUT_THRESHOLD and self.blackout_started is None:
+            self.blackout_started=self.dark_since
+            self.relight_time=None
             self.status="Extinction prolongée détectée : attente du rallumage."
         if self.period is not None and self.relight_time is not None and self.last_flicker is not None:
             elapsed=self.relight_time-self.last_flicker
