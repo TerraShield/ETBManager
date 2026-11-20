@@ -66,8 +66,16 @@ class ButterfliesBackend:
             "source_available": self.source.is_file(),
             "building": self.lock.locked(),
             "wall_json_files": self._wall_json_catalog(),
+            "debug_log": self._read_debug_log(),
         }
 
+
+    def _read_debug_log(self):
+        log_path = self.output_dir / "map_reader_debug.log"
+        try:
+            return log_path.read_text(encoding="utf-8", errors="replace")[-12000:]
+        except OSError:
+            return ""
 
     def _wall_json_catalog(self):
         files = []
@@ -211,6 +219,8 @@ class ButterfliesBackend:
                 self.status, self.error = "Échec de génération de la carte.", message
                 return {"ok": False, "error": message}
 
+            debug_log = (completed.stdout or "") + ("\n" + completed.stderr if completed.stderr else "")
+            (self.output_dir / "map_reader_debug.log").write_text(debug_log[-50000:], encoding="utf-8")
             if completed.returncode != 0:
                 detail = (completed.stderr or completed.stdout or "Aucun détail fourni par le générateur.").strip()[-5000:]
                 message = f"Échec de génération (code {completed.returncode}).\n{detail}"
