@@ -51,7 +51,7 @@ class LampMemoryScanner:
         with self.lock:
             self.events.clear(); self.period=None; self.quality_score=None; self.last_flicker=None
             self.blackout_started=None; self.relight_time=None; self.dark_since=None; self.last_transition=None
-            self.next_tick=None; self.signal_state=None
+            self.next_tick=None; self.signal_state=None; self.flicker_until=0.0
             self.status="Calibration effacée. Les mesures mémoire continuent."
         return {"ok":True}
     def set_players(self,value):
@@ -180,6 +180,7 @@ class LampMemoryScanner:
             return
         if self.signal_state and not is_on:
             self.dark_since=now
+            self.flicker_until=now+0.65
         elif not self.signal_state and is_on:
             dark_duration=now-self.dark_since if self.dark_since is not None else 0.0
             if self.blackout_started is not None and dark_duration>=BLACKOUT_THRESHOLD:
@@ -195,6 +196,7 @@ class LampMemoryScanner:
                 log.info("CLIGNOTEMENT détecté à %.3f s (durée sombre %.3f s, signal %.2f lm)",self.dark_since,dark_duration,value)
             self.dark_since=None
             self.blackout_started=None
+            self.flicker_until=now+0.65
         self.signal_state=is_on
         if not is_on and self.dark_since is not None and now-self.dark_since>=BLACKOUT_THRESHOLD and self.blackout_started is None:
             self.blackout_started=self.dark_since
@@ -218,7 +220,22 @@ class LampMemoryScanner:
             else:
                 period_label=f"{self.period:.2f} s"; score=self.quality_score or 0.0
                 quality=("élevée" if score<0.07 else "moyenne" if score<0.16 else "faible")+f" (écart {score:.3f} s)"
+            now=time.perf_counter()
+            if not self.running:
+                lamp_state, lamp_state_key = "Arrêté", "idle"
+            elif self.blackout_started is not None:
+                lamp_state, lamp_state_key = "Éteintes", "off"
+            elif now < self.flicker_until:
+                lamp_state, lamp_state_key = "Clignotement", "flicker"
+            elif self.signal_state is True:
+                lamp_state, lamp_state_key = "Allumées", "on"
+            elif self.signal_state is False:
+                lamp_state, lamp_state_key = "Éteintes", "off"
+            else:
+                lamp_state, lamp_state_key = "Recherche…", "idle"
+            elapsed = None if self.relight_time is None else max(0.0, now-self.relight_time)
             return {"running":self.running,"status":self.status,"world_name":self.world_name,"last_scan":self.last_scan,
                     "lamps":list(self.lamps),"stats":dict(self.stats),"sample_hz":round(self.sample_hz_actual,1) if self.sample_hz_actual>0 else 1/POLL_INTERVAL,"sample_hz_target":1/POLL_INTERVAL,"signal":self.signal,
                     "player_count":self.player_count,"event_count":len(self.events),"period":self.period,"period_label":period_label,
-                    "quality":quality,"remaining":remaining,"blackout":self.blackout_started is not None,"relight_time":self.relight_time}
+                    "quality":quality,"remaining":remaining,"blackout":self.blackout_started is not None,"relight_time":self.relight_time,
+                    "lamp_state":lamp_state,"lamp_state_key":lamp_state_key,"elapsed_since_relight":elapsed}
