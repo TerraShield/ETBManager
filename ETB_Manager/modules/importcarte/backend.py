@@ -85,6 +85,8 @@ class ButterfliesBackend:
                     raw_path = str(obj.get("ObjectPath") or obj.get("Package") or "")
                     if not raw_path and isinstance(obj.get("Outer"), dict):
                         raw_path = str(obj["Outer"].get("ObjectPath") or obj["Outer"].get("ObjectName") or "")
+                    if raw_path and "/" in raw_path and "." not in raw_path.rsplit("/", 1)[-1]:
+                        raw_path = raw_path + "." + name
                     files.append({"name": name, "asset_path": raw_path or name, "file": path.name})
             except Exception as exc:
                 files.append({"name": path.name, "asset_path": "", "file": path.name, "error": str(exc)})
