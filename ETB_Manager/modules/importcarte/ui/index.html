@@ -23,6 +23,7 @@
   <div id="importcarteWallStatus" role="status"></div>
   <div id="importcarteWallDuplicates"></div>
   <div id="importcarteWallList"></div>
+  <details class="importcarte-debug-details"><summary>Journal détaillé de lecture de carte</summary><pre id="importcarteDebugLog">Aucune génération enregistrée.</pre></details>
   <style>
     .importcarte-wall-panel{margin-top:14px;padding:16px;border:1px solid var(--border,#334155);border-radius:12px;background:var(--panel,#182230);color:var(--text,#e8edf5)}
     .importcarte-wall-panel h3{margin:6px 0;font-size:16px}
@@ -32,6 +33,8 @@
     .importcarte-duplicate{padding:8px;margin-top:6px;border-left:3px solid #e0a458;background:#e0a45812}
     .importcarte-asset{padding:5px 0;border-bottom:1px solid var(--border,#334155);overflow-wrap:anywhere}
     .importcarte-asset code{color:var(--muted,#91a0b5);font-size:11px}
+    .importcarte-debug-details{margin-top:12px;color:var(--muted,#91a0b5)}
+    .importcarte-debug-details pre{max-height:280px;overflow:auto;padding:10px;background:#080d14;border-radius:8px;color:#c7d5e5;white-space:pre-wrap;font-size:11px}
   </style>
 </div>
 <div class="butterflies-map-card" id="butterfliesMapCard" hidden>
