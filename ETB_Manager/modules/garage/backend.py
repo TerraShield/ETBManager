@@ -9,6 +9,7 @@ class GarageBackend:
         if action == "start": return self.scanner.start()
         if action == "stop": return self.scanner.stop()
         if action == "clear": return self.scanner.clear()
+        if action == "players": return self.scanner.set_players(payload.get("value", "1"))
         raise ValueError(f"Action BottomFloor inconnue : {action}")
     def shutdown(self): self.scanner.stop()
 
