@@ -162,7 +162,8 @@ class ButterfliesBackend:
     def action(self, action, payload, shared_state):
         if action == "reset_imported_walls":
             return self._reset_imported_walls()
-        if action == "set_output_dir":            raw = str(payload.get("output_dir") or "").strip()
+        if action == "set_output_dir":
+            raw = str(payload.get("output_dir") or "").strip()
             if not raw:
                 raise ValueError("Indique un dossier de destination.")
             destination = Path(raw).expanduser()
