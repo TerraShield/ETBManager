@@ -141,57 +141,57 @@ class ElectricalStationScanner:
                     chain=self._class_chain(component_class)
                     if not any("staticmeshcomponent" in name.casefold() for _,name in chain): continue
                     component_total+=1
-                if component_class not in component_offsets:
-                    component_offsets[component_class]=_find_unreal_property_offset(self.mem,self.resolver,component_class,"StaticMesh")
-                mesh_offset=component_offsets[component_class]
-                if mesh_offset is None: continue
-                mesh=self.mem.ptr(component+mesh_offset)
-                if not mesh: continue
-                mesh_class=self.mem.ptr(mesh+OFF_UOBJECT_CLASS)
-                if not mesh_class: continue
-                if mesh_class not in bounds_offsets:
-                    bounds_offsets[mesh_class]=_find_unreal_property_offset(self.mem,self.resolver,mesh_class,"ExtendedBounds")
-                bounds_offset=bounds_offsets[mesh_class]
-                if bounds_offset is None: continue
-                raw=self.mem.read(mesh+bounds_offset,28)
-                if not raw: continue
-                values=struct.unpack("<7f",raw)
-                if not all(math.isfinite(v) for v in values): continue
-                ox,oy,oz,ex,ey,ez,_radius=values
-                if min(ex,ey,ez)<0 or max(ex,ey,ez)>100000: continue
-                transform=self.mem.read(component+0x1C0,40)
-                yaw=0.0; sx=sy=sz=1.0
-                if transform:
-                    tv=struct.unpack("<10f",transform)
-                    qx,qy,qz,qw=tv[:4]
-                    if all(math.isfinite(v) for v in tv) and 0.5 < sum(v*v for v in (qx,qy,qz,qw)) < 1.5:
-                        yaw=math.degrees(math.atan2(2*(qw*qz+qx*qy),1-2*(qy*qy+qz*qz)))
-                        sx,sy,sz=tv[7:10]
-                        if max(abs(sx),abs(sy),abs(sz))>100 or min(abs(sx),abs(sy),abs(sz))<0.001:
-                            sx=sy=sz=1.0
-                position=self.mem.vec3(root+OFF_SCENE_COMPONENT_TO_WORLD_TRANSLATION)
-                if position is None: continue
-                angle=math.radians(yaw)
-                local_x,local_y=ox*sx,oy*sy
-                cx=position[0]+local_x*math.cos(angle)-local_y*math.sin(angle)
-                cy=position[1]+local_x*math.sin(angle)+local_y*math.cos(angle)
-                cz=position[2]+oz*sz
-                hx=abs(ex*sx*math.cos(angle))+abs(ey*sy*math.sin(angle))
-                hy=abs(ex*sx*math.sin(angle))+abs(ey*sy*math.cos(angle))
-                hz=abs(ez*sz)
-                # On retient les volumes verticaux plausibles (murs, portes, piliers), pas les sols plats.
-                if hz<60 or max(hx,hy)<35: continue
-                mesh_name=self.resolver.object_name(mesh)
-                actor_name=self.resolver.object_name(actor)
-                outer_parts=[]; outer=mesh
-                for _ in range(8):
-                    if not outer: break
-                    part=self.resolver.object_name(outer)
-                    if part and part!="?": outer_parts.append(part)
-                    outer=self.mem.ptr(outer+0x20)
-                asset_path="/".join(reversed(outer_parts))
-                records.append({"actor":actor_name,"mesh":mesh_name,"asset_path":asset_path,
-                    "x":cx,"y":cy,"z":cz,"half_x":hx,"half_y":hy,"half_z":hz,"yaw":yaw})
+                    if component_class not in component_offsets:
+                        component_offsets[component_class]=_find_unreal_property_offset(self.mem,self.resolver,component_class,"StaticMesh")
+                    mesh_offset=component_offsets[component_class]
+                    if mesh_offset is None: continue
+                    mesh=self.mem.ptr(component+mesh_offset)
+                    if not mesh: continue
+                    mesh_class=self.mem.ptr(mesh+OFF_UOBJECT_CLASS)
+                    if not mesh_class: continue
+                    if mesh_class not in bounds_offsets:
+                        bounds_offsets[mesh_class]=_find_unreal_property_offset(self.mem,self.resolver,mesh_class,"ExtendedBounds")
+                    bounds_offset=bounds_offsets[mesh_class]
+                    if bounds_offset is None: continue
+                    raw=self.mem.read(mesh+bounds_offset,28)
+                    if not raw: continue
+                    values=struct.unpack("<7f",raw)
+                    if not all(math.isfinite(v) for v in values): continue
+                    ox,oy,oz,ex,ey,ez,_radius=values
+                    if min(ex,ey,ez)<0 or max(ex,ey,ez)>100000: continue
+                    transform=self.mem.read(component+0x1C0,40)
+                    yaw=0.0; sx=sy=sz=1.0
+                    if transform:
+                        tv=struct.unpack("<10f",transform)
+                        qx,qy,qz,qw=tv[:4]
+                        if all(math.isfinite(v) for v in tv) and 0.5 < sum(v*v for v in (qx,qy,qz,qw)) < 1.5:
+                            yaw=math.degrees(math.atan2(2*(qw*qz+qx*qy),1-2*(qy*qy+qz*qz)))
+                            sx,sy,sz=tv[7:10]
+                            if max(abs(sx),abs(sy),abs(sz))>100 or min(abs(sx),abs(sy),abs(sz))<0.001:
+                                sx=sy=sz=1.0
+                    position=self.mem.vec3(component+OFF_SCENE_COMPONENT_TO_WORLD_TRANSLATION)
+                    if position is None: continue
+                    angle=math.radians(yaw)
+                    local_x,local_y=ox*sx,oy*sy
+                    cx=position[0]+local_x*math.cos(angle)-local_y*math.sin(angle)
+                    cy=position[1]+local_x*math.sin(angle)+local_y*math.cos(angle)
+                    cz=position[2]+oz*sz
+                    hx=abs(ex*sx*math.cos(angle))+abs(ey*sy*math.sin(angle))
+                    hy=abs(ex*sx*math.sin(angle))+abs(ey*sy*math.cos(angle))
+                    hz=abs(ez*sz)
+                    # On retient les volumes verticaux plausibles (murs, portes, piliers), pas les sols plats.
+                    if hz<60 or max(hx,hy)<35: continue
+                    mesh_name=self.resolver.object_name(mesh)
+                    actor_name=self.resolver.object_name(actor)
+                    outer_parts=[]; outer=mesh
+                    for _ in range(8):
+                        if not outer: break
+                        part=self.resolver.object_name(outer)
+                        if part and part!="?": outer_parts.append(part)
+                        outer=self.mem.ptr(outer+0x20)
+                    asset_path="/".join(reversed(outer_parts))
+                    records.append({"actor":actor_name,"mesh":mesh_name,"asset_path":asset_path,
+                        "x":cx,"y":cy,"z":cz,"half_x":hx,"half_y":hy,"half_z":hz,"yaw":yaw})
         log.info("AUTO_MAP_MESH_SCAN actors=%s static_mesh_components=%s wall_candidates=%s",actor_total,component_total,len(records))
         return records
 
