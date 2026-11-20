@@ -224,13 +224,14 @@ class ElectricalStationScanner:
         margin=max(150.0,(max(max_x-min_x,max_y-min_y))*0.025)
         min_x-=margin; max_x+=margin; min_y-=margin; max_y+=margin
         width=max(1.0,max_x-min_x); height=max(1.0,max_y-min_y)
+        svg_height=1400.0*height/width
         shapes=[]
         for item in records:
             x=item["x"]-item["half_x"]; y=item["y"]-item["half_y"]
             title=html.escape(f"{item['actor']} · {item['mesh']} · {item['asset_path']}",quote=True)
             shapes.append(f'<rect x="{x:.2f}" y="{y:.2f}" width="{2*item["half_x"]:.2f}" height="{2*item["half_y"]:.2f}" rx="8" fill="#8da2b8" fill-opacity="0.62" stroke="#d6e0ea" stroke-width="12"><title>{title}</title></rect>')
         svg=('<?xml version="1.0" encoding="UTF-8"?>'
-             f'<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="{min_x:.2f} {-max_y:.2f} {width:.2f} {height:.2f}">'
+             f'<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="{svg_height:.2f}" viewBox="{min_x:.2f} {-max_y:.2f} {width:.2f} {height:.2f}">'
              '<rect x="-1000000" y="-1000000" width="2000000" height="2000000" fill="#17212d"/>'
              '<g transform="scale(1,-1)">'+'<g>'+''.join(shapes)+'</g></g>'
              '</svg>')
