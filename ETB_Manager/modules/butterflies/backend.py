@@ -1,7 +1,9 @@
 """Backend autonome du module de cartographie du labyrinthe des papillons."""
 from __future__ import annotations
 
+import hashlib
 import json
+import re
 import shutil
 import subprocess
 import sys
@@ -12,11 +14,14 @@ from pathlib import Path
 
 class ButterfliesBackend:
     MAX_UPLOAD = 512 * 1024 * 1024
+    MAX_MESH_JSON = 30 * 1024 * 1024
 
     def __init__(self, context):
         self.root = context.module_dir
         self.builder = self.root / "etb_map_builder.py"
         self.source = self.root / "fmodel_export.json"
+        self.mesh_dir = self.root / "mesh" / "imported"
+        self.mesh_dir.mkdir(parents=True, exist_ok=True)
         self.output_settings = self.root / ".map_output.json"
         self.output_dir = self.root / "public"
         try:
@@ -52,7 +57,7 @@ class ButterfliesBackend:
         return {
             "map_ready": bool(self.map_path and self.map_path.is_file()),
             "map_name": self.map_path.name if self.map_path and self.map_path.is_file() else None,
-            "map_url": "/modules/butterflies/live_map.html" if self.map_path and self.map_path.is_file() else None,
+            "map_url": "/modules/importcarte/live_map.html" if self.map_path and self.map_path.is_file() else None,
             "output_dir": str(self.output_dir),
             "map_version": self.map_path.stat().st_mtime_ns if self.map_path and self.map_path.is_file() else None,
             "status": self.status,
@@ -60,7 +65,57 @@ class ButterfliesBackend:
             "builder_available": self.builder.is_file(),
             "source_available": self.source.is_file(),
             "building": self.lock.locked(),
+            "wall_json_files": self._wall_json_catalog(),
         }
+
+
+    def _wall_json_catalog(self):
+        files = []
+        for path in sorted(self.mesh_dir.glob("*.json"), key=lambda item: item.name.casefold()):
+            try:
+                data = json.loads(path.read_text(encoding="utf-8-sig"))
+                if isinstance(data, list):
+                    exports = data
+                else:
+                    exports = next((data.get(key) for key in ("Exports", "exports", "objects", "Objects") if isinstance(data, dict) and isinstance(data.get(key), list)), [])
+                for obj in exports:
+                    if not isinstance(obj, dict) or obj.get("Type") != "StaticMesh":
+                        continue
+                    name = str(obj.get("Name") or "StaticMesh")
+                    raw_path = str(obj.get("ObjectPath") or obj.get("Package") or "")
+                    if not raw_path and isinstance(obj.get("Outer"), dict):
+                        raw_path = str(obj["Outer"].get("ObjectPath") or obj["Outer"].get("ObjectName") or "")
+                    files.append({"name": name, "asset_path": raw_path or name, "file": path.name})
+            except Exception as exc:
+                files.append({"name": path.name, "asset_path": "", "file": path.name, "error": str(exc)})
+        by_name = {}
+        for asset in files:
+            by_name.setdefault(asset["name"].casefold(), []).append(asset)
+        duplicates = [{"name": group[0]["name"], "assets": group} for group in by_name.values() if len({item["asset_path"].casefold() for item in group}) > 1]
+        return {"files": files, "duplicates": duplicates}
+
+    def _import_wall_json(self, temp_path, filename):
+        if Path(filename or "").suffix.casefold() != ".json":
+            raise ValueError("Le fichier doit être un export JSON FModel.")
+        if not temp_path.is_file() or temp_path.stat().st_size <= 0:
+            raise ValueError("Le fichier JSON est vide.")
+        if temp_path.stat().st_size > self.MAX_MESH_JSON:
+            raise ValueError("Un export de mesh ne peut pas dépasser 30 Mo.")
+        data = json.loads(temp_path.read_text(encoding="utf-8-sig"))
+        if isinstance(data, dict):
+            exports = next((data.get(key) for key in ("Exports", "exports", "objects", "Objects") if isinstance(data.get(key), list)), None)
+        else:
+            exports = data
+        if not isinstance(exports, list) or not any(isinstance(obj, dict) and obj.get("Type") == "StaticMesh" for obj in exports):
+            raise ValueError("Aucun StaticMesh trouvé dans cet export JSON.")
+        self.mesh_dir.mkdir(parents=True, exist_ok=True)
+        digest = hashlib.sha256(temp_path.read_bytes()).hexdigest()[:12]
+        stem = re.sub(r"[^A-Za-z0-9_-]+", "_", Path(filename).stem)[:60] or "wall"
+        destination = self.mesh_dir / (stem + "_" + digest + ".json")
+        shutil.copy2(temp_path, destination)
+        catalog = self._wall_json_catalog()
+        count = sum(1 for asset in catalog["files"] if asset["file"] == destination.name)
+        return {"ok": True, "message": "Export ajouté : " + destination.name + " (" + str(count) + " mesh).", "wall_json_files": catalog, "asset_count": count}
 
     def _save_output_dir(self, destination):
         destination = Path(destination).expanduser().resolve()
@@ -113,6 +168,8 @@ class ButterfliesBackend:
         return config.read_bytes()
 
     def upload(self, temp_path: Path, filename: str, shared_state):
+        if str(filename or "").startswith("wall__"):
+            return self._import_wall_json(temp_path, str(filename)[6:])
         if not self.lock.acquire(blocking=False):
             return {"ok": False, "error": "Une génération de carte est déjà en cours."}
         try:
@@ -140,6 +197,8 @@ class ButterfliesBackend:
                 "--config-out", str(self.output_dir / "map.config.json"),
                 "--no-open",
             ]
+            for mesh_file in sorted(self.mesh_dir.glob("*.json")):
+                command.extend(["--meshes", str(mesh_file)])
             try:
                 completed = subprocess.run(
                     command, cwd=str(self.root), capture_output=True, text=True,
