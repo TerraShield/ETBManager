@@ -292,9 +292,12 @@ class ElectricalStationScanner:
                     fuseboxes,manager,error=self._scan_world(world)
                     force_map=self.map_scan_requested.is_set()
                     if force_map: self.map_scan_requested.clear()
+                    if force_map: self.auto_map_attempted_world=None
                     map_status="Carte déjà disponible" if not self._auto_map_needed() else "En attente de génération"
                     map_count=0
-                    if force_map or self._auto_map_needed():
+                    should_scan_map=force_map or (self._auto_map_needed() and self.auto_map_attempted_world!=world)
+                    if should_scan_map:
+                        self.auto_map_attempted_world=world
                         with self.lock: self.state["map_scan_status"]="Analyse des meshes du niveau…"
                         try:
                             mesh_records=self._scan_static_meshes(world)
