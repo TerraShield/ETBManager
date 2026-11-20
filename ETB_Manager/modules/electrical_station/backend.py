@@ -117,6 +117,7 @@ class ElectricalStationScanner:
         component_offsets={}
         bounds_offsets={}
         actor_component_offsets={}
+        attach_offsets={}
         seen_components=set()
         actor_total=0
         component_total=0
@@ -142,6 +143,11 @@ class ElectricalStationScanner:
                     seen_components.add(component)
                     component_class=self.mem.ptr(component+OFF_UOBJECT_CLASS)
                     if not component_class: continue
+                    if component_class not in attach_offsets:
+                        attach_offsets[component_class]=_find_unreal_property_offset(self.mem,self.resolver,component_class,"AttachChildren")
+                    child_offset=attach_offsets[component_class]
+                    if child_offset is not None:
+                        components.extend(_read_unreal_tarray_pointers(self.mem,component+child_offset,2048))
                     chain=self._class_chain(component_class)
                     if not any("staticmeshcomponent" in name.casefold() for _,name in chain): continue
                     component_total+=1
