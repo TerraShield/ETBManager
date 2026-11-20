@@ -35,6 +35,7 @@ class LampMemoryScanner:
         self.player_count="1"; self.events=deque(maxlen=80); self.period=None; self.quality_score=None
         self.last_flicker=None; self.blackout_started=None; self.relight_time=None; self.dark_since=None
         self.signal=None; self.signal_state=None; self.next_tick=None; self.last_transition=None
+        self.last_sample_at=None; self.sample_hz_actual=0.0
     def start(self):
         with self.lock:
             if self.running: return {"ok":True,"message":"Prédicteur déjà actif."}
@@ -146,7 +147,14 @@ class LampMemoryScanner:
         status=("%d lampadaire(s), %d intensité(s) lisible(s). Échantillonnage à %.0f Hz."%(len(lamps),readable,1/POLL_INTERVAL)) if lamps else "Aucun lampadaire trouvé dans les niveaux chargés.")
         return {"lamps":lamps,"cache":cache,"stats":{"actors_seen":len(seen),"lamp_actors":len(lamps),"readable":readable,"unreadable":len(lamps)-readable},"status":status}
     def _sample_cached(self,mem,now):
-        with self.lock: cache=list(self.cache)
+        with self.lock:
+            cache=list(self.cache)
+            if self.last_sample_at is not None:
+                dt=now-self.last_sample_at
+                if dt>0:
+                    measured=1.0/dt
+                    self.sample_hz_actual=measured if self.sample_hz_actual<=0 else 0.8*self.sample_hz_actual+0.2*measured
+            self.last_sample_at=now
         values=[]; updates={}
         for item in cache:
             raw=mem.read(item["component"]+item["offset"],4)
@@ -207,6 +215,6 @@ class LampMemoryScanner:
                 period_label=f"{self.period:.2f} s"; score=self.quality_score or 0.0
                 quality=("élevée" if score<0.07 else "moyenne" if score<0.16 else "faible")+f" (écart {score:.3f} s)"
             return {"running":self.running,"status":self.status,"world_name":self.world_name,"last_scan":self.last_scan,
-                    "lamps":list(self.lamps),"stats":dict(self.stats),"sample_hz":1/POLL_INTERVAL,"signal":self.signal,
+                    "lamps":list(self.lamps),"stats":dict(self.stats),"sample_hz":round(self.sample_hz_actual,1) if self.sample_hz_actual>0 else 1/POLL_INTERVAL,"sample_hz_target":1/POLL_INTERVAL,"signal":self.signal,
                     "player_count":self.player_count,"event_count":len(self.events),"period":self.period,"period_label":period_label,
                     "quality":quality,"remaining":remaining,"blackout":self.blackout_started is not None,"relight_time":self.relight_time}
