@@ -1,18 +1,14 @@
-# Module Papillons
+# Module ImportCarte
 
-L'interface et le backend de ce module sont indépendants du cœur ETB Manager.
+Module de génération et de diagnostic des cartes 2D depuis les exports FModel.
 
-## Génération des cartes
+## Utilisation
+1. Choisir le dossier de sortie.
+2. Importer l'export JSON du niveau avec **Importer une carte**.
+3. Ajouter les exports JSON de StaticMesh muraux avec **Ajouter des JSON de mur**.
+4. Relancer l'import de la carte pour recalculer les collisions avec les meshes ajoutés.
 
-Le script `etb_map_builder.py` génère une carte statique et une carte live depuis un export JSON de FModel.
+Les exports de murs sont conservés dans `mesh/imported/` en local. Ils sont passés au générateur via `--meshes` à chaque génération.
 
-Depuis l'interface du module :
-1. Choisir le dossier de destination avec **Parcourir…** (ou saisir un chemin).
-2. Importer l'export JSON.
-3. Le générateur crée automatiquement les fichiers HTML et `map.config.json` dans le dossier choisi.
-
-Le chemin de destination est mémorisé entre les lancements d'ETB Manager. Les fichiers de carte et la configuration restent associés dans le même dossier. L'application sert la carte et sa configuration depuis ce dossier, même si celui-ci est extérieur au répertoire du projet.
-
-Le catalogue des collisions de murs reste chargé depuis `wall_database.json`. Les exports complémentaires peuvent être importés ponctuellement avec `--meshes`, sans scan automatique du dossier d'exports.
-
-Les exports FModel et les cartes générées restent locaux. Ils ne sont pas publiés sur Internet.
+## Identité des meshes
+Le nom court (ex. `SM_Wall_01`) ne suffit pas à identifier un asset. Le générateur privilégie désormais le chemin complet de l'asset FModel quand il est disponible et ne retombe sur le nom court qu'en compatibilité avec l'ancien catalogue. L'interface liste les chemins et signale les noms dupliqués.
