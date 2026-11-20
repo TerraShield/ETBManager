@@ -158,7 +158,10 @@ class LampMemoryScanner:
                 if class_name not in logged:
                     logged.add(class_name); log.info("LAMP_CLASS class=%s hierarchy=%s",class_name,item["hierarchy"])
         readable=sum(x["intensity"] is not None for x in lamps)
-        status=("%d lampadaire(s), %d intensité(s) lisible(s). Échantillonnage à %.0f Hz."%(len(lamps),readable,1/POLL_INTERVAL)) if lamps else "Aucun lampadaire trouvé dans les niveaux chargés.")
+        if lamps:
+            status = f"{len(lamps)} lampadaire(s), {readable} intensité(s) lisible(s). Échantillonnage à {1/POLL_INTERVAL:.0f} Hz."
+        else:
+            status = "Aucun lampadaire trouvé dans les niveaux chargés."
         return {"lamps":lamps,"cache":cache,"stats":{"actors_seen":len(seen),"lamp_actors":len(lamps),"readable":readable,"unreadable":len(lamps)-readable},"status":status}
     def _sample_cached(self,mem,now):
         with self.lock:
