@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "worldBounds": null,
+  "notes": "Après ajout de la carte, renseigner minX, maxX, minY et maxY avec les coordonnées Unreal correspondant aux bords de l'image."
+}
